@@ -1,9 +1,22 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+  import {RouterView, RouterLink} from 'vue-router';
+  import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <HelloWorld msg="Vite + Vue" />
+  <div>
+    <div>
+      <RouterLink to="/">Home</RouterLink>
+      &nbsp;
+      <RouterLink to="/about">About</RouterLink>
+      &nbsp;
+      <RouterLink to="/contact">Home</RouterLink>
+    </div>
+    <div>
+<!--       <HelloWorld msg="Vite + Vue" /> -->
+      <RouterView />
+    </div>
+  </div>
 </template>
 
 <style scoped>
