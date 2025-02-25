@@ -6,11 +6,11 @@
 <template>
   <div>
     <div>
-      <RouterLink to="/">Home</RouterLink>
+      <RouterLink :to="{ name: 'home' }">Home</RouterLink>
       &nbsp;
-      <RouterLink to="/about">About</RouterLink>
+      <RouterLink :to="{ name: 'about'}">About</RouterLink>
       &nbsp;
-      <RouterLink to="/contact">Home</RouterLink>
+      <RouterLink :to="{ name: 'contact' }">Contact</RouterLink>
     </div>
     <div>
 <!--       <HelloWorld msg="Vite + Vue" /> -->

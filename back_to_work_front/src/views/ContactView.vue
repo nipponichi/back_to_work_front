@@ -1,3 +1,11 @@
+
+<script setup>
+    import ContactComponent from '../components/ContactComponent.vue'; ''
+</script>
+
 <template>
-    <h1 class="bg-green-500">CONTACT</h1>
+    <div>
+        <h1 class="bg-green-500">CONTACT</h1>
+        <ContactComponent />
+    </div>
 </template>
