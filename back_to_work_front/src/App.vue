@@ -1,18 +1,15 @@
-<script setup>
-  import {RouterView, RouterLink} from 'vue-router';
-  import Navy from './components/Navy.vue'
-  import Footer from './components/Footer.vue'
-</script>
-
 <template>
-  <div>
+  <div class="flex flex-col min-h-screen">
     <Navy />
-    <div>
+    <main class="flex-grow">
       <RouterView />
-    </div>
+    </main>
     <Footer />
   </div>
 </template>
 
-<style scoped>
-</style>
+<script setup>
+import { RouterView } from 'vue-router'
+import Navy from './components/Navy.vue'
+import Footer from './components/Footer.vue'
+</script>
