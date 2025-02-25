@@ -1,4 +1,4 @@
-import { createRouter, createMemoryHistory } from "vue-router";
+import { createRouter, createMemoryHistory, createWebHistory } from "vue-router";
 
 import HomeView from "../views/HomeView.vue";
 import AboutView from "../views/AboutView.vue";
@@ -12,7 +12,7 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createMemoryHistory(),
+    history: createWebHistory(import.meta.env.BASE_URL),
     routes
 })
 
