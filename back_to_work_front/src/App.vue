@@ -1,21 +1,16 @@
 <script setup>
   import {RouterView, RouterLink} from 'vue-router';
-  import HelloWorld from './components/HelloWorld.vue'
+  import Navy from './components/Navy.vue'
+  import Footer from './components/Footer.vue'
 </script>
 
 <template>
   <div>
+    <Navy />
     <div>
-      <RouterLink :to="{ name: 'home' }">Home</RouterLink>
-      &nbsp;
-      <RouterLink :to="{ name: 'about'}">About</RouterLink>
-      &nbsp;
-      <RouterLink :to="{ name: 'contact' }">Contact</RouterLink>
-    </div>
-    <div>
-<!--       <HelloWorld msg="Vite + Vue" /> -->
       <RouterView />
     </div>
+    <Footer />
   </div>
 </template>
 
