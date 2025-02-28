@@ -7,9 +7,8 @@
     <Footer />
   </div>
 </template>
-
 <script setup>
-import { RouterView } from 'vue-router'
-import Navy from './components/Navy.vue'
-import Footer from './components/Footer.vue'
+  import { RouterView } from 'vue-router'
+  import Navy from './components/Navy.vue'
+  import Footer from './components/Footer.vue'
 </script>

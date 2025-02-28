@@ -12,7 +12,7 @@
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/services" class="text-white">
+          <RouterLink to="/service" class="text-white">
             🛠️ Servicios
           </RouterLink>
         </li>
@@ -26,12 +26,5 @@
   </template>
   
   <script>
-  export default {
-    name: 'Navbar',
-  };
   </script>
-  
-  <style>
-  /* Puedes agregar estilos adicionales aquí si lo deseas */
-  </style>
   

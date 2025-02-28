@@ -1,7 +1,6 @@
 <script setup>
     import { listaContact } from '../services/contactServices';
 </script>
-
 <template>
     <div>
         <h3>Mensajes de contactos:</h3>
