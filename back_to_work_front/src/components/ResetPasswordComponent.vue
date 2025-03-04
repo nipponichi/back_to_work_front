@@ -15,7 +15,7 @@
           </div>
   
           <button 
-            type="submit" 
+            @click="handleResetPassword" 
             class="w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
           >
             Recuperar contraseña
@@ -30,6 +30,22 @@
   </template>
 
   <script setup>
-    const  errorMessage =  '';
+  import { ref } from "vue";
+  import axios from "axios";
 
+  const email = ref("");
+  const errorMessage = ref("");
+  
+  const handleResetPassword = async () => {
+    try {
+      const response = await axios.post("http://localhost:8000/api/reset-password", { 
+        email: email.value 
+      });
+      console.log("Respuesta del servidor:", response.data);
+      alert("Solicitud enviada con éxito");
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      errorMessage.value = "Hubo un error al procesar la solicitud.";
+    }
+  };
   </script>

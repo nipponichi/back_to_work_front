@@ -42,24 +42,35 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 const email = ref('');
 const password = ref('');
 const errorMessage = ref('');
 const router = useRouter();
-const handleLogin = () => {
-  if (!email.value || !password.value) {
-    errorMessage.value = 'Por favor, completa todos los campos';
-    return;
-  }
 
-  if (email.value === "admin@correo.com" && password.value === "1234") {
-    errorMessage.value = '';
-    console.log('Inicio de sesión exitoso');
-    
-    router.push('/');
-  } else {
-    errorMessage.value = 'Credenciales incorrectas';
-  }
+const handleLogin = async () => {
+    try {
+      const response = await axios.post("http://127.0.0.1:8001/api/login", { 
+        email: email.value,
+        password: password.value 
+      });
+      console.log("Respuesta del servidor:", response.data);
+      if (response.data.succes) {
+        const expiration = Date.now() + 2 * 3600 * 1000;
+        localStorage.setItem("tokenExpiration", expiration);
+        localStorage.setItem("token", response.data.result.token.accessToken);
+        localStorage.setItem("user", response.data.result.user.name);
+        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+        localStorage.removeItem("redirectAfterLogin");
+
+        router.push(redirectPath);
+      } else {
+        errorMessage.value = response.data.message;
+      } 
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      errorMessage.value = "Hubo un error al procesar la solicitud.";
+    }
 };
 </script>

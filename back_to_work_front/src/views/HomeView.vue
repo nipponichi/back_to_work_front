@@ -28,15 +28,22 @@
         <p class="text-lg text-gray-600 mt-4">
           Seccion test 2
         </p>
+
+        <button @click="isModalOpen = true" class="cursor-pointer bg-gray-300 px-3 py-2 rounded-lg hover:bg-gray-400">Modal</button>
       </div>
     </section>
-    
-    <footer class="bg-gray-800 text-white text-center py-10">
-      <p>&copy; 2025 - Todos los derechos reservados</p>
-    </footer>
+    <Dialog v-if="isModalOpen" @close="isModalOpen = false">
+      <AdverFilters />
+      <button @click="isModalOpen = false" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg">Cerrar</button>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
-import ContactFormComponent from '../components/ContactFormComponent.vue';
+  import { ref } from 'vue';
+  import ContactFormComponent from '../components/ContactFormComponent.vue';
+  import AdverFilters from '../modals/AdverFilters.vue';
+
+  const isModalOpen = ref(false);
+
 </script>

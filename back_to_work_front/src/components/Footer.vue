@@ -1,5 +1,5 @@
 <template>
-    <nav class="bg-gray-800 p-4">
+    <nav class="bg-gray-800 p-4 min-h-54 flex items-center">
       <ul class="flex space-x-4">
         <li>
           <RouterLink to="/" class="text-white flex items-center space-x-2">
@@ -21,9 +21,9 @@
         </li>
       </ul>
     </nav>
-  </template>
+</template>
   
-  <script setup>
+<script setup>
   import { RouterLink } from 'vue-router';
-  </script>
+</script>
   
