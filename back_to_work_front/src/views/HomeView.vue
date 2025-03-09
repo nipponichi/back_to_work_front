@@ -31,19 +31,12 @@
 
         <button @click="isModalOpen = true" class="cursor-pointer bg-gray-300 px-3 py-2 rounded-lg hover:bg-gray-400">Modal</button>
       </div>
-    </section>
-    <Dialog v-if="isModalOpen" @close="isModalOpen = false">
+    </section> 
       <AdverFilters />
-      <button @click="isModalOpen = false" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg">Cerrar</button>
-    </Dialog>
   </div>
 </template>
 
 <script setup>
   import { ref } from 'vue';
   import ContactFormComponent from '../components/ContactFormComponent.vue';
-  import AdverFilters from '../modals/AdverFilters.vue';
-
-  const isModalOpen = ref(false);
-
 </script>

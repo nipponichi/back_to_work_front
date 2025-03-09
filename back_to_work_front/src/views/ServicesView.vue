@@ -1,3 +1,8 @@
 <template>
-    <h1 class="bg-red-500">SERVICES</h1>
+    <div class="flex items-center justify-center mt-20">        
+        <ServicesListComponent />
+    </div>
 </template>
+<script setup>
+import ServicesListComponent from '../components/ServicesListComponent.vue';
+</script>
