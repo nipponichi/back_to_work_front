@@ -27,7 +27,7 @@
       
       <div ref="dropdownMenu" class="relative ml-auto">
         <div @click="toggleDropdown" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
-          {{ accessToken ? `👤 ${userName || "Usuario"}` : "📝 Cuenta" }}
+          {{ accessToken ? `👤 ${user.name || "Usuario"}` : "📝 Cuenta" }}
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
@@ -61,7 +61,7 @@ import axios from "axios";
 
 const isOpen = ref(false);
 const accessToken = ref(null);
-const userName = ref("");
+let user = ref("");
 const router = useRouter();
 const dropdownMenu = ref(null);
 
@@ -89,14 +89,15 @@ const logout = async () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
   accessToken.value = null;
-  userName.value = "";
+  user = "";
   router.push("/login");
 };
 
 onMounted(() => {
   accessToken.value = localStorage.getItem("token");
-  userName.value = localStorage.getItem("user");
-
+  let userStr = localStorage.getItem("user");
+  user = JSON.parse(userStr)
+  
   document.addEventListener("click", handleClickOutside);
 });
 
@@ -106,11 +107,14 @@ onUnmounted(() => {
 
 watch(() => router.currentRoute.value, () => {
   accessToken.value = localStorage.getItem("token");
-  userName.value = localStorage.getItem("user");
+  let userStr = localStorage.getItem("user");
+  user = JSON.parse(userStr)
+
 });
 
 watchEffect(() => {
   accessToken.value = localStorage.getItem("token");
-  userName.value = localStorage.getItem("user");
+  let userStr = localStorage.getItem("user");
+  user = JSON.parse(userStr)
 });
 </script>
