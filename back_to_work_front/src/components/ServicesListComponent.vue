@@ -1,102 +1,119 @@
 <template>
-  <div class="flex flex-col">
-      <div class="max-w-lg mx-auto p-12 bg-white shadow-lg rounded-lg mt-10">
-          <AdverFilters />
-          <InputText type="text" v-model="searchQuery" placeholder="Buscar..." />
-      </div>
-
-      <div class="card">
+    <div class="flex flex-col">
+        <div class="max-w-lg mx-auto p-12 bg-white shadow-lg rounded-lg mt-10">
+            <AdverFilters />
+            <InputText type="text" v-model="searchQuery" placeholder="Buscar..." />
+            <button class="p-4" @click="printMessage">Advert</button>
+        </div>
+  
+        <div class="card">
           <DataTable 
-              :value="filteredCustomers" 
-              paginator :rows="10" 
-              dataKey="id" 
-              :loading="loading"
-              :sortField="sortField" 
-              :sortOrder="sortOrder"
-              @sort="onSort"
+            :value="filteredAds" 
+            paginator 
+            :rows="10" 
+            dataKey="id" 
+            :sortField="sortField" 
+            :sortOrder="sortOrder"
+            @sort="onSort"
           >
-              <template #empty> No customers found. </template>
-              <template #loading> Loading customers data. Please wait. </template>
-
-              <Column field="name" header="Name" sortable>
-                  <template #body="{ data }">
-                      {{ data.name }}
-                  </template>
-              </Column>
-
-              <Column field="country.name" header="Country" sortable>
-                  <template #body="{ data }">
-                      <div class="flex items-center gap-2">
-                          <img :src="data.country.flag" alt="flag" style="width: 24px" />
-                          <span>{{ data.country.name }}</span>
-                      </div>
-                  </template>
-              </Column>
-
-              <Column field="representative.name" header="Agent" sortable>
-                  <template #body="{ data }">
-                      <div class="flex items-center gap-2">
-                          <img :alt="data.representative.name" :src="data.representative.image" style="width: 32px" />
-                          <span>{{ data.representative.name }}</span>
-                      </div>
-                  </template>
-              </Column>
-
-              <Column field="status" header="Status" sortable>
-                  <template #body="{ data }">
-                      <Tag :value="data.status" />
-                  </template>
-              </Column>
-
-              <Column field="verified" header="Verified" sortable>
-                  <template #body="{ data }">
-                      <i class="pi" :class="{ 'pi-check-circle text-green-500': data.verified, 'pi-times-circle text-red-400': !data.verified }"></i>
-                  </template>
-              </Column>
+            <template #empty> No ads found. </template>
+            <template #loading> Loading ads data. Please wait. </template>
+        
+            <Column field="id" header="ID" sortable></Column>
+            
+            <Column field="name" header="Name" sortable>
+                <template #body="{ data }">
+                    {{ data.name }}
+                </template>
+            </Column>
+            
+            <Column field="description" header="Description">
+                <template #body="{ data }">
+                    {{ data.description }}
+                </template>
+            </Column>
+            
+            <Column field="location" header="Location" sortable></Column>
+            
+            <Column field="due_date" header="Due Date" sortable>
+                <template #body="{ data }">
+                    {{ formatDate(data.due_date) }}
+                </template>
+            </Column>
+            
+            <Column field="is_done" header="Status">
+                <template #body="{ data }">
+                    <Tag :value="data.is_done ? 'Completed' : 'Pending'" 
+                        :severity="data.is_done ? 'success' : 'warning'" />
+                </template>
+            </Column>
           </DataTable>
-      </div>
-  </div>
-</template>
+        </div>
+    </div>
+  </template>
+  
+  <script setup>
+  import { ref, computed, onMounted } from 'vue';
+  import AdverFilters from '../modals/AdverFilters.vue';
+  import InputText from 'primevue/inputtext';
+  import DataTable from 'primevue/datatable';
+  import Column from 'primevue/column';
+  import Tag from 'primevue/tag';
+  import axios from "axios";
+  
+  const searchQuery = ref('');
+  const loading = ref(true);
+  const sortField = ref(null);
+  const sortOrder = ref(null);
+  const ads = ref([]); // Cambiado a ref para reactividad
+  
+  const formatDate = (dateString) => {
+      if (!dateString) return '';
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+  
 
-<script setup>
-import { ref, computed, onMounted } from 'vue';
-import AdverFilters from '../modals/AdverFilters.vue';
-import InputText from 'primevue/inputtext';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Tag from 'primevue/tag';
-
-const searchQuery = ref('');
-const loading = ref(true);
-const sortField = ref(null);
-const sortOrder = ref(null);
-
-const customers = ref([]);
-
-onMounted(() => {
-  setTimeout(() => {
-      customers.value = [
-          { id: 1, name: "John Doe", country: { name: "USA", flag: "https://primefaces.org/cdn/primevue/images/flag/united_states.png" }, representative: { name: "Amy Elsner", image: "https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png" }, status: "new", verified: true },
-          { id: 2, name: "Jane Smith", country: { name: "Germany", flag: "https://primefaces.org/cdn/primevue/images/flag/germany.png" }, representative: { name: "Anna Fali", image: "https://primefaces.org/cdn/primevue/images/avatar/annafali.png" }, status: "qualified", verified: false },
-          { id: 3, name: "Carlos López", country: { name: "Spain", flag: "https://primefaces.org/cdn/primevue/images/flag/spain.png" }, representative: { name: "Ivan Magalhaes", image: "https://primefaces.org/cdn/primevue/images/avatar/ivanmagalhaes.png" }, status: "proposal", verified: true },
-      ];
-      loading.value = false;
-  }, 1500);
-});
-
-const filteredCustomers = computed(() => {
-  let filtered = [...customers.value];
-
-  if (searchQuery.value) {
-      filtered = filtered.filter(customer =>
-          customer.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          customer.country.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          customer.representative.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          customer.status.toLowerCase().includes(searchQuery.value.toLowerCase())
+  onMounted(async () => {
+      try {
+          const response = await axios.get("http://127.0.0.1:8001/api/ads");
+          
+          if (response.data.success) {
+              ads.value = response.data.data; // Asignación correcta a .value
+              console.log(ads.value);
+          }
+          loading.value = false;
+      } catch (error) {
+          console.error("Error fetching ads:", error);
+          loading.value = false;
+      }
+  });
+  
+  const filteredAds = computed(() => {
+      if (!searchQuery.value) return ads.value;
+      
+      return ads.value.filter(ad =>
+          ad.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          ad.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+          ad.location.toLowerCase().includes(searchQuery.value.toLowerCase())
       );
+  });
+  
+  const onSort = (event) => {
+      sortField.value = event.sortField;
+      sortOrder.value = event.sortOrder;
+  };
+  </script>
+<script>
+export default {
+  data() {
+    return {
+    }
+  },
+  methods: {
+    printMessage() {
+        console.log("hola")
+    }
   }
-
-  return filtered;
-});
-
+}
 </script>

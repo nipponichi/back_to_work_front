@@ -4,12 +4,16 @@
 
       <img class="absolute top-0 left-0 w-full h-full object-cover" src="https://appwebel.com/assets/es/img/backgrounds/landing/landing.webp" alt="Fondo">
 
-      <h1 class="absolute z-50 text-white text-4xl font-bold top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-50 px-6 py-2 rounded-lg">
+      <h1 class="absolute z-50 text-white text-4xl font-bold top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 bg-opacity-50 px-6 py-2 rounded-lg">
         HOME
       </h1>
 
+
       <div class="absolute text-white z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-black bg-opacity-50 px-6 py-4 rounded-lg">
         <ContactFormComponent />
+        <Button class="block w-full bg-green-500 p-4 text-left px-4 py-2 text-gray-700 hover:bg-green-200">
+          🚪 Cerrar Sesión
+        </Button>
       </div>
     </div>
 
