@@ -54,6 +54,7 @@
   </template>
   
   <script>
+   import axios from "axios";
   export default {
     data() {
       return {
@@ -72,7 +73,30 @@
         validExtensions: ['image/jpeg', 'image/jpg', 'image/png', 'video/mp4']
       }
     },
+    async mounted(){
+     //await fetchAdsCategories();
+     await this.fetchAdsCategories();
+
+    },
     methods: {
+      async fetchAdsCategories(){
+        try {
+          const response = await axios.get("http://127.0.0.1:8000/api/categories");
+        
+          console.log(response.data.data);
+          /*
+          if (response.data.success) {
+              categories.value = response.data.data; 
+              console.log(ads.value);
+          }
+          loading.value = false;
+          */
+      } catch (error) {
+          console.error("Error fetching categories:", error);
+          //loading.value = false;
+      }
+
+      },
       handleFileUpload(event) {
         this.formData.archivo = event.target.files[0];
       },

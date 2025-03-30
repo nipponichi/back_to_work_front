@@ -81,7 +81,7 @@ const closeDropdown = () => {
 };
 
 const logout = async () => {
-  const response = await axios.post("http://127.0.0.1:8001/api/logout", {}, {
+  const response = await axios.post("http://127.0.0.1:8000/api/logout", {}, {
     headers: {
       Authorization: `Bearer ${accessToken.value}`
     }

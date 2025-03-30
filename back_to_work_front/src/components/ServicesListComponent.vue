@@ -77,10 +77,10 @@
 
   onMounted(async () => {
       try {
-          const response = await axios.get("http://127.0.0.1:8001/api/ads");
+          const response = await axios.get("http://127.0.0.1:8000/api/ads");
           
           if (response.data.success) {
-              ads.value = response.data.data; // Asignación correcta a .value
+              ads.value = response.data.data; 
               console.log(ads.value);
           }
           loading.value = false;
