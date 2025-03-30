@@ -60,7 +60,9 @@ const handleLogin = async () => {
         const expiration = Date.now() + 2 * 3600 * 1000;
         localStorage.setItem("tokenExpiration", expiration);
         localStorage.setItem("token", response.data.result.token.accessToken);
+        console.log("Token guardado en localStorage:", response.data.result.token.accessToken);
         localStorage.setItem("user", response.data.result.user.name);
+        localStorage.setItem("fullUser", JSON.stringify(response.data.result.user));
         const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
         localStorage.removeItem("redirectAfterLogin");
 

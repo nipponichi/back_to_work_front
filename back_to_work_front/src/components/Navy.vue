@@ -25,7 +25,6 @@
         </li>
       </ul>
       
-
       <div ref="dropdownMenu" class="relative ml-auto">
         <div @click="toggleDropdown" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
           {{ accessToken ? `👤 ${userName || "Usuario"}` : "📝 Cuenta" }}
@@ -58,6 +57,7 @@
 <script setup>
 import { ref, onMounted, watch, watchEffect, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
 
 const isOpen = ref(false);
 const accessToken = ref(null);
@@ -80,7 +80,12 @@ const closeDropdown = () => {
   isOpen.value = false;
 };
 
-const logout = () => {
+const logout = async () => {
+  const response = await axios.post("http://127.0.0.1:8001/api/logout", {}, {
+    headers: {
+      Authorization: `Bearer ${accessToken.value}`
+    }
+  });
   localStorage.removeItem("token");
   localStorage.removeItem("user");
   accessToken.value = null;
