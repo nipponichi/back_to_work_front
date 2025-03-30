@@ -5,7 +5,7 @@
             <InputText type="text" v-model="searchQuery" placeholder="Buscar..." />
             <button class="p-4" @click="printMessage">Advert</button>
         </div>
-  
+        <AdsFormComponent />
         <div class="card">
           <DataTable 
             :value="filteredAds" 
@@ -55,6 +55,7 @@
   <script setup>
   import { ref, computed, onMounted } from 'vue';
   import AdverFilters from '../modals/AdverFilters.vue';
+  import AdsFormComponent from './AdsFormComponent.vue';
   import InputText from 'primevue/inputtext';
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
