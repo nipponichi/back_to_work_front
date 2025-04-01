@@ -11,9 +11,6 @@
 
       <div class="absolute text-white z-50 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-black bg-opacity-50 px-6 py-4 rounded-lg">
         <ContactFormComponent />
-        <Button class="block w-full bg-green-500 p-4 text-left px-4 py-2 text-gray-700 hover:bg-green-200">
-          🚪 Cerrar Sesión
-        </Button>
       </div>
     </div>
 
