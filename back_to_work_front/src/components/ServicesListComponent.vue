@@ -55,15 +55,16 @@
             </Column>
           </DataTable>
         </div>
+        <div class="custom-dialog-red">
+
         <Dialog
-        v-model:visible="openCreateAdModal"
-        header="Gestionar correos con adjuntos"
-        headerClass="bg-green-200 rounded-t-lg p-4"
-        class="w-3/4 bg-green-200 rounded-lg"  
-        :modal="true"
-      >
+            v-model:visible="openCreateAdModal"
+            header="Gestionar correos con adjuntos"
+            :modal="true"
+        >
             <CreateAdFormModal />
         </Dialog>
+    </div>
     </div>
 </template>
 

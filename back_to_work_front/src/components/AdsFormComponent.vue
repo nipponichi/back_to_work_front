@@ -13,6 +13,18 @@
       <p v-if="errors.nombre">{{ errors.nombre }}</p>
     </div>
 
+    <div>
+      <label>Location:</label>
+      <input 
+        type="text" 
+        v-model="formData.location" 
+        required 
+        minlength="3" 
+        maxlength="50"
+      >
+      <p v-if="errors.location">{{ errors.location }}</p>
+    </div>
+
     <!-- Campo Categoría -->
     <div>
       <label>Categoría:</label>
@@ -42,13 +54,14 @@
     </div>
 
     <!-- Campo Archivo -->
-    <div>
+    <div class="bg-yellow-500 cursor-pointer">
       <label>Subir foto (JPEG, JPG, PNG) o video (MP4):</label>
       <input 
         type="file" 
         @change="handleFileUpload" 
         accept=".jpg,.jpeg,.png,.mp4" 
         required
+        multiple
       >
       <p v-if="errors.archivo">{{ errors.archivo }}</p>
     </div>

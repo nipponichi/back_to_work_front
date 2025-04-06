@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+.p-dialog .p-dialog-header {
+    background: white;
+    color: Black;
+    font-weight: semi-bold;
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+    padding: 0px 7px;
+}
+
+.p-dialog-mask {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
