@@ -72,7 +72,8 @@ const handleLogin = async () => {
       console.log(user.name);
 
       const userId = response.data.data.user.id;
-      EventBus.userId = userId; // Guardamos el user.id en el bus de eventos
+       // Guardamos el user.id en el bus de eventos
+      EventBus.userId = userId;
       console.log(user.id);
 
       // Redirigir después del login
