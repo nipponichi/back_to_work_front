@@ -3,12 +3,13 @@
 .p-dialog .p-dialog-header {
     background: white;
     color: Black;
-    font-weight: semi-bold;
+    font-weight: bold;
+    font-size: 22px;
     border-top-left-radius: 0.5rem !important;
     border-top-right-radius: 0.5rem !important;
-    padding: 0px 7px;
+    padding: 10px 10px;
 }
 
 .p-dialog-mask {
     background-color: rgba(0, 0, 0, 0.5) !important;
-  }
+}

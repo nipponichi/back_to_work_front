@@ -1,16 +1,45 @@
 <template>
-    <div class="flex flex-col">
-        <div class="max-w-lg mx-auto p-12 bg-white shadow-lg rounded-lg mt-10">
-            <AdverFilters />
-            <InputText type="text" v-model="searchQuery" placeholder="Buscar..." />
+    <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <!-- Header and Search Section -->
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">Advertisement Management</h1>
+          
+          <div class="flex flex-col sm:flex-row gap-4 mb-6">
+            <div class="flex-grow">
+              <AdverFilters 
+                class="filter-container" 
+                :categories="categories"
+                @filter-change="handleFilterChange"
+              />
+            </div>
+            <div class="relative flex-grow">
+              <InputText 
+                type="text" 
+                v-model="searchQuery" 
+                placeholder="Search ads..."
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all duration-200 shadow-sm hover:border-gray-400"
+              />
+              <svg class="absolute right-3 top-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
             <button 
-            @click="openCreateAdModal = true" 
-            class="py-2 px-4 bg-amber-500 rounded text-white cursor-pointer hover:bg-amber-600 transition-colors"
-          >
-            Advert
-          </button>
+              @click="openCreateAdModal = true" 
+              class="flex items-center justify-center px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              New Ad
+            </button>
+          </div>
         </div>
-        <div class="card">
+      </div>
+  
+      <!-- Data Table Section -->
+      <div class="max-w-6xl mx-auto mt-8">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
             <DataTable
             ref="dt"
             :value="filteredAds"
@@ -18,127 +47,217 @@
             :paginator="true"
             :rows="10"
             :filters="filters"
+            :loading="loading"
+            :sortField="sortField"
+            :sortOrder="sortOrder"
+            @sort="onSort"
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rowsPerPageOptions="[5, 10, 25]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
-            >
-            <template #empty> No ads found. </template>
-            <template #loading> Loading ads data. Please wait. </template>
-        
-            <Column field="id" header="ID" sortable></Column>
-            
-            <Column field="name" header="Name" sortable>
-                <template #body="{ data }">
-                    {{ data.name }}
-                </template>
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} ads"
+            class="p-datatable-lg"
+          >
+            <template #empty> 
+              <div class="p-6 text-center text-gray-500 text-lg">
+                No ads found. Create your first ad!
+              </div>
+            </template>
+            <template #loading> 
+              <div class="p-6 text-center text-gray-500 text-lg">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-amber-500 mb-3"></div>
+                <p class="text-lg">Loading ads data...</p>
+              </div>
+            </template>
+          
+            <Column field="id" header="ID" sortable 
+              headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
+              bodyClass="p-4 text-gray-700 text-lg">
             </Column>
             
-            <Column field="description" header="Description">
-                <template #body="{ data }">
-                    {{ data.description }}
-                </template>
+            <Column field="name" header="Name" sortable 
+              headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
+              bodyClass="p-4">
+              <template #body="{ data }">
+                <span class="font-semibold text-gray-800 text-lg">{{ data.name }}</span>
+              </template>
             </Column>
             
-            <Column field="location" header="Location" sortable></Column>
-            
-            <Column field="due_date" header="Due Date" sortable>
-                <template #body="{ data }">
-                    {{ formatDate(data.due_date) }}
-                </template>
+            <Column field="description" header="Description" 
+              headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
+              bodyClass="p-4">
+              <template #body="{ data }">
+                <p class="text-gray-700 line-clamp-2 text-lg">{{ data.description }}</p>
+              </template>
+            </Column>
+
+            <Column field="category" header="Category" 
+              headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
+              bodyClass="p-4">
+              <template #body="{ data }">
+                <span class="text-lg">{{ getCategoryName(data.category_id) }}</span>
+              </template>
             </Column>
             
-            <Column field="is_done" header="Status">
-                <template #body="{ data }">
-                    <Tag :value="data.is_done ? 'Completed' : 'Pending'" 
-                        :severity="data.is_done ? 'success' : 'warning'" />
-                </template>
+            <Column field="location" header="Location" sortable 
+              headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
+              bodyClass="p-4">
+              <template #body="{ data }">
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  <span class="text-lg">{{ data.location }}</span>
+                </div>
+              </template>
+            </Column>
+            
+            <Column field="due_date" header="Due Date" sortable 
+              headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
+              bodyClass="p-4">
+              <template #body="{ data }">
+                <span class="whitespace-nowrap text-lg">{{ formatDate(data.due_date) }}</span>
+              </template>
+            </Column>
+            
+            <Column field="is_done" header="Status" 
+              headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
+              bodyClass="p-4">
+              <template #body="{ data }">
+                <Tag 
+                  :value="data.is_done ? 'Completed' : 'Pending'" 
+                  :severity="data.is_done ? 'success' : 'warning'" 
+                  class="px-4 py-2 rounded-full text-base font-semibold"
+                />
+              </template>
             </Column>
           </DataTable>
         </div>
-        <div class="custom-dialog-red">
+      </div>
+  
+      <!-- Create Ad Modal -->
+      <Dialog
+        v-model:visible="openCreateAdModal"
+        header="Create New Advertisement"
+        :modal="true"
+        :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
+        headerClass="border-b border-gray-200 p-4 font-semibold text-lg"
+        contentClass="p-4"
+      >
+        <CreateAdFormModal :categories="categories" />
 
-        <Dialog
-            v-model:visible="openCreateAdModal"
-            header="Gestionar correos con adjuntos"
-            :modal="true"
-        >
-            <CreateAdFormModal />
-        </Dialog>
+      </Dialog>
     </div>
-    </div>
-</template>
-
-<script setup>
-import { ref, computed, onMounted } from 'vue';
-import AdverFilters from '../modals/AdverFilters.vue';
-import CreateAdFormModal from './CreateAdFormModal.vue';
-import InputText from 'primevue/inputtext';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Tag from 'primevue/tag';
-import Dialog from 'primevue/dialog';
-import axios from "axios";
-import { watch } from 'vue';
-
-const searchQuery = ref('');
-const loading = ref(true);
-const sortField = ref(null);
-const sortOrder = ref(null);
-const ads = ref([]);
-const categories = ref([]);
-const openCreateAdModal = ref(false); 
-
-const formatDate = (dateString) => {
+  </template>
+  
+  <script setup>
+  import { ref, computed, onMounted } from 'vue';
+  import AdverFilters from '../modals/AdverFilters.vue';
+  import CreateAdFormModal from './CreateAdFormModal.vue';
+  import InputText from 'primevue/inputtext';
+  import DataTable from 'primevue/datatable';
+  import Column from 'primevue/column';
+  import Tag from 'primevue/tag';
+  import Dialog from 'primevue/dialog';
+  import axios from "axios";
+  import { watch } from 'vue';
+  
+  const searchQuery = ref('');
+  const loading = ref(true);
+  const sortField = ref(null);
+  const sortOrder = ref(null);
+  const ads = ref([]);
+  const categories = ref([]);
+  const openCreateAdModal = ref(false);
+  const selectedCategory = ref(null);
+  const statusFilter = ref(null);
+  
+  const formatDate = (dateString) => {
     if (!dateString) return '';
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+  
+  const getCategoryName = (categoryId) => {
+    const category = categories.value.find(cat => cat.id === categoryId);
+    return category ? category.name : 'Uncategorized';
+  };
+  
+  const handleFilterChange = (filters) => {
+    selectedCategory.value = filters.category;
+    statusFilter.value = filters.status;
+  };
+  
+  onMounted(async () => {
+    await fetchCategories();
+    try {
+      const response = await axios.get("http://127.0.0.1:8001/api/ads");
+      
+      if (response.data.success) {
+        ads.value = response.data.data;
+        console.log(ads.value);
+      }
+      loading.value = false;
+    } catch (error) {
+      console.error("Error fetching ads:", error);
+      loading.value = false;
+    }
+  });
+  
+  const fetchCategories = async () => {
+  try {
+    const response = await axios.get("http://127.0.0.1:8001/api/categories");
+    if (response.data.success) {
+      // Transform the data if needed
+      categories.value = response.data.data.map(category => ({
+        id: category.id,
+        name: category.name,
+        // Add any other required properties
+      }));
+      console.log("Transformed Categories:", categories.value);
+    }
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
 };
-
-watch(openCreateAdModal, (newValue) => {
-  console.log("Estado del modal:", newValue);
-});
-
-onMounted(async () => {
-    await fetchCategories()
-    try {
-        const response = await axios.get("http://127.0.0.1:8001/api/ads");
-        
-        if (response.data.success) {
-            ads.value = response.data.data;
-            console.log(ads.value);
-        }
-        loading.value = false;
-    } catch (error) {
-        console.error("Error fetching ads:", error);
-        loading.value = false;
-    }
-});
-
-const fetchCategories = async () => {
-    try {
-        const response = await axios.get("http://127.0.0.1:8001/api/categories");
-        if (response.data.success) {
-            // Assuming you have a categories ref to store the data
-            categories.value = response.data.data;
-            console.log(categories.value);
-        }
-    } catch (error) {
-        console.error("Error fetching categories:", error);
-    }
-}
-
-const filteredAds = computed(() => {
-    if (!searchQuery.value) return ads.value;
-    
-    return ads.value.filter(ad =>
-        ad.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        ad.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        ad.location.toLowerCase().includes(searchQuery.value.toLowerCase())
+  
+  const filteredAds = computed(() => {
+  let filtered = ads.value;
+  
+  // Apply search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(ad => 
+      ad.name.toLowerCase().includes(query) ||
+      ad.description.toLowerCase().includes(query) ||
+      ad.location.toLowerCase().includes(query)
     );
+  }
+  
+  // Apply category filter
+  if (selectedCategory.value) {
+    filtered = filtered.filter(ad => 
+      ad.category_id === selectedCategory.value
+    );
+  }
+  
+  // Apply status filter
+  if (statusFilter.value !== null) {
+    filtered = filtered.filter(ad => 
+      ad.is_done === statusFilter.value
+    );
+  }
+  
+  return filtered;
 });
-
-const onSort = (event) => {
+  
+  const onSort = (event) => {
     sortField.value = event.sortField;
     sortOrder.value = event.sortOrder;
-};
-</script>
+  };
+  
+  const submitAdForm = () => {
+    // Add your form submission logic here
+    console.log("Submitting ad form...");
+    openCreateAdModal.value = false;
+  };
+  </script>
