@@ -101,7 +101,7 @@ watch(openCreateAdModal, (newValue) => {
 onMounted(async () => {
     await fetchCategories()
     try {
-        const response = await axios.get("http://127.0.0.1:8001/api/ads");
+        const response = await axios.get("http://127.0.0.1:8000/api/ads");
         
         if (response.data.success) {
             ads.value = response.data.data;
@@ -116,7 +116,7 @@ onMounted(async () => {
 
 const fetchCategories = async () => {
     try {
-        const response = await axios.get("http://127.0.0.1:8001/api/categories");
+        const response = await axios.get("http://127.0.0.1:8000/api/categories");
         if (response.data.success) {
             // Assuming you have a categories ref to store the data
             categories.value = response.data.data;
