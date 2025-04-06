@@ -39,10 +39,12 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { EventBus } from './event-bus.js';
 
 const email = ref('');
 const password = ref('');
@@ -50,43 +52,39 @@ const errorMessage = ref('');
 const router = useRouter();
 
 const handleLogin = async () => {
-    try {
-      const response = await axios.post("http://127.0.0.1:8000/api/login", { 
-        email: email.value,
-        password: password.value 
-      });
-      console.log("Respuesta del servidor:", response.data);
+  try {
+    const response = await axios.post("http://127.0.0.1:8000/api/login", { 
+      email: email.value,
+      password: password.value 
+    });
+    console.log("Respuesta del servidor:", response.data);
 
-      if (response.data.success) {
-        const expiration = Date.now() + 2 * 3600 * 1000;
-   
+    if (response.data.success) {
+      const expiration = Date.now() + 2 * 3600 * 1000;
 
-        localStorage.setItem("token", response.data.data.accessToken)
-        let accessToken = localStorage.getItem("token")
-        console.log("token 2", accessToken)
+      localStorage.setItem("token", response.data.data.accessToken);
+      let accessToken = localStorage.getItem("token");
+      console.log("token 2", accessToken);
 
-        localStorage.setItem("user", JSON.stringify(response.data.data.user));
-        let userStr = localStorage.getItem("user")
-        let user = JSON.parse(userStr)
-        console.log(user.name);
+      localStorage.setItem("user", JSON.stringify(response.data.data.user));
+      let userStr = localStorage.getItem("user");
+      let user = JSON.parse(userStr);
+      console.log(user.name);
 
-/*         localStorage.setItem("tokenExpiration", expiration);
-        localStorage.setItem("token", response.data.result.accessToken);
-        console.log("Token guardado en localStorage:", response.data.result.token.accessToken);
-        localStorage.setItem("user", response.data.result.user.name);
-        localStorage.setItem("fullUser", JSON.stringify(response.data.result.user));
-        
-        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
-        localStorage.removeItem("redirectAfterLogin");
+      const userId = response.data.data.user.id;
+      EventBus.userId = userId; // Guardamos el user.id en el bus de eventos
+      console.log(user.id);
 
-        router.push(redirectPath); */
-
-      } else {
-        errorMessage.value = response.data.message;
-      } 
-    } catch (error) {
-      console.error("Error al enviar la solicitud:", error);
-      errorMessage.value = "Hubo un error al procesar la solicitud.";
-    }
+      // Redirigir después del login
+      const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+      localStorage.removeItem("redirectAfterLogin");
+      router.push(redirectPath);
+    } else {
+      errorMessage.value = response.data.message;
+    } 
+  } catch (error) {
+    console.error("Error al enviar la solicitud:", error);
+    errorMessage.value = "Hubo un error al procesar la solicitud.";
+  }
 };
 </script>

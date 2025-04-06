@@ -73,6 +73,7 @@
 
 <script>
 import axios from 'axios';
+import { EventBus } from './event-bus.js';
 
 export default {
   data() {
@@ -170,10 +171,10 @@ export default {
         formDataToSend.append('category_id', this.formData.category_id);
         formDataToSend.append('location', this.formData.location);
         formDataToSend.append('is_done', '0');
-        formDataToSend.append('user_id', '2');
+        formDataToSend.append('user_id', EventBus.userId);
 
         if (this.formData.archivo) {
-          formDataToSend.append('archivo', this.formData.archivo);
+        formDataToSend.append('media', this.formData.archivo);
         }
 
         // Debug: mostrar contenido del FormData
