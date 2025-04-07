@@ -5,13 +5,13 @@
       <label class="block text-gray-700 font-medium mb-2">Nombre:</label>
       <input
         type="text"
-        v-model="formData.nombre"
+        v-model="formData.name"
         required
         minlength="3"
         maxlength="50"
         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
-      <p v-if="errors.nombre" class="mt-1 text-sm text-red-600">{{ errors.nombre }}</p>
+      <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
     </div>
 
     <!-- Campo Location -->
@@ -32,7 +32,7 @@
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Categoría:</label>
       <select 
-        v-model="formData.categoria" 
+        v-model="formData.category_id" 
         required
         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
@@ -45,21 +45,21 @@
           {{ category.category }}
         </option>
       </select>
-      <p v-if="errors.categoria" class="mt-1 text-sm text-red-600">{{ errors.categoria }}</p>
+      <p v-if="errors.category_id" class="mt-1 text-sm text-red-600">{{ errors.category_id }}</p>
     </div>
 
     <!-- Campo Descripción -->
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Descripción:</label>
       <textarea
-        v-model="formData.descripcion"
+        v-model="formData.description"
         required
         minlength="10"
         maxlength="500"
         rows="4"
         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       ></textarea>
-      <p v-if="errors.descripcion" class="mt-1 text-sm text-red-600">{{ errors.descripcion }}</p>
+      <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}</p>
     </div>
 
     <!-- Campo Archivo -->
@@ -127,24 +127,27 @@
 
 <script>
 import axios from 'axios';
+import { EventBus } from './event-bus.js';
 
 export default {
   data() {
     return {
       categories: [],
       formData: {
-        nombre: '',
+        name: '',
+        description: '',
+        category_id: '',
         location: '',
-        categoria: '',
-        descripcion: '',
-        archivos: []
+        is_done:'',
+        archivo: null
       },
       errors: {
-        nombre: '',
+        name: '',
+        description: '',
+        category_id: '',
         location: '',
-        categoria: '',
-        descripcion: '',
-        archivos: ''
+        is_done:'',
+        archivo: ''
       },
       validImageExtensions: ['image/jpeg', 'image/jpg', 'image/png'],
       validVideoExtensions: ['video/mp4'],
@@ -165,7 +168,7 @@ export default {
   methods: {
     async fetchCategories() {
       try {
-        const response = await axios.get("http://127.0.0.1:8001/api/categories");
+        const response = await axios.get("http://127.0.0.1:8000/api/categories");
         if (response.data.success) {
           this.categories = response.data.data;
         }
@@ -229,36 +232,34 @@ export default {
     validateForm() {
       let isValid = true;
 
-      // Validar nombre
-      if (this.formData.nombre.length < 3) {
-        this.errors.nombre = 'El nombre debe tener al menos 3 caracteres';
+      if (this.formData.name.length < 3) {
+        this.errors.name = 'El nombre debe tener al menos 3 caracteres';
         isValid = false;
       } else {
-        this.errors.nombre = '';
+        this.errors.name = '';
       }
 
-      // Validar location
       if (this.formData.location.length < 3) {
-        this.errors.location = 'La ubicación debe tener al menos 3 caracteres';
+        this.errors.location = 'La localización debe tener al menos 3 caracteres';
         isValid = false;
       } else {
         this.errors.location = '';
       }
 
-      // Validar categoría
-      if (!this.formData.categoria) {
-        this.errors.categoria = 'Por favor seleccione una categoría';
+
+
+      if (!this.formData.category_id) {
+        this.errors.category_id = 'Por favor seleccione una categoría';
         isValid = false;
       } else {
-        this.errors.categoria = '';
+        this.errors.category_id = '';
       }
 
-      // Validar descripción
-      if (this.formData.descripcion.length < 10) {
-        this.errors.descripcion = 'La descripción debe tener al menos 10 caracteres';
+      if (this.formData.description.length < 10) {
+        this.errors.description = 'La descripción debe tener al menos 10 caracteres';
         isValid = false;
       } else {
-        this.errors.descripcion = '';
+        this.errors.description = '';
       }
 
       // Validar archivos
@@ -268,25 +269,23 @@ export default {
       } else {
         this.errors.archivos = '';
       }
+      
 
       return isValid;
     },
     async submitForm() {
+      console.log('Enviando formulario...');
+
       if (this.validateForm()) {
         const formDataToSend = new FormData();
-        formDataToSend.append('nombre', this.formData.nombre);
-        formDataToSend.append('location', this.formData.location);
-        formDataToSend.append('categoria_id', this.formData.categoria);
-        formDataToSend.append('descripcion', this.formData.descripcion);
-        
-        // Agregar todos los archivos
-        this.formData.archivos.forEach((file, index) => {
-          formDataToSend.append(`archivos[${index}]`, file);
-        });
+        formDataToSend.append('nombre', this.formData.name);
+        formDataToSend.append('categoria_id', this.formData.category_id);
+        formDataToSend.append('descripcion', this.formData.description);
+        formDataToSend.append('archivo', this.formData.archivo);
 
         try {
           const response = await axios.post(
-            "http://127.0.0.1:8001/api/ads",
+            "http://127.0.0.1:8000/api/ads",
             formDataToSend,
             {
               headers: {
@@ -294,16 +293,17 @@ export default {
               }
             }
           );
-          
+
           if (response.data.success) {
             alert('Anuncio creado con éxito!');
             // Reset form
             this.formData = {
-              nombre: '',
+              name: '',
+              category_id: '',
               location: '',
-              categoria: '',
-              descripcion: '',
-              archivos: []
+              is_done: '',
+              description: '',
+              archivo: null
             };
             this.previews = [];
           }

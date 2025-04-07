@@ -190,64 +190,40 @@
   onMounted(async () => {
     await fetchCategories();
     try {
-      const response = await axios.get("http://127.0.0.1:8001/api/ads");
-      
-      if (response.data.success) {
-        ads.value = response.data.data;
-        console.log(ads.value);
-      }
-      loading.value = false;
+        const response = await axios.get("http://127.0.0.1:8000/api/ads");
+        
+        if (response.data.success) {
+            ads.value = response.data.data;
+            console.log(ads.value);
+        }
+        loading.value = false;
     } catch (error) {
       console.error("Error fetching ads:", error);
       loading.value = false;
     }
-  });
-  
-  const fetchCategories = async () => {
-  try {
-    const response = await axios.get("http://127.0.0.1:8001/api/categories");
-    if (response.data.success) {
-      // Transform the data if needed
-      categories.value = response.data.data.map(category => ({
-        id: category.id,
-        name: category.name,
-        // Add any other required properties
-      }));
-      console.log("Transformed Categories:", categories.value);
+});
+
+const fetchCategories = async () => {
+    try {
+        const response = await axios.get("http://127.0.0.1:8000/api/categories");
+        if (response.data.success) {
+            // Assuming you have a categories ref to store the data
+            categories.value = response.data.data;
+            console.log(categories.value);
+        }
+    } catch (error) {
+        console.error("Error fetching categories:", error);
     }
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-  }
-};
-  
-  const filteredAds = computed(() => {
-  let filtered = ads.value;
-  
-  // Apply search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(ad => 
-      ad.name.toLowerCase().includes(query) ||
-      ad.description.toLowerCase().includes(query) ||
-      ad.location.toLowerCase().includes(query)
+}
+
+const filteredAds = computed(() => {
+    if (!searchQuery.value) return ads.value;
+    
+    return ads.value.filter(ad =>
+        ad.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        ad.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        ad.location.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
-  }
-  
-  // Apply category filter
-  if (selectedCategory.value) {
-    filtered = filtered.filter(ad => 
-      ad.category_id === selectedCategory.value
-    );
-  }
-  
-  // Apply status filter
-  if (statusFilter.value !== null) {
-    filtered = filtered.filter(ad => 
-      ad.is_done === statusFilter.value
-    );
-  }
-  
-  return filtered;
 });
   
   const onSort = (event) => {
