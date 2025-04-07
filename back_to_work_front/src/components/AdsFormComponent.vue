@@ -139,7 +139,7 @@ export default {
         category_id: '',
         location: '',
         is_done:'',
-        archivo: null,
+        media: null,
       },
       errors: {
         name: '',
@@ -147,7 +147,7 @@ export default {
         category_id: '',
         location: '',
         is_done:'',
-        archivo: ''
+        media: ''
       },
       validImageExtensions: ['image/jpeg', 'image/jpg', 'image/png'],
       validVideoExtensions: ['video/mp4'],
@@ -228,7 +228,9 @@ export default {
       });
       
       // Actualizar array de archivos para el formulario
-      this.formData.archivos = this.previews.map(preview => preview.file);
+      this.formData.archivo = this.previews.map(preview => preview.file);
+      console.log(this.formData.archivo);
+      console.log(this.previews);
     },
     removeFile(index) {
       this.previews.splice(index, 1);
@@ -267,7 +269,6 @@ export default {
         this.errors.description = '';
       }
 
-      // Validar archivos
       if (this.previews.length === 0) {
         this.errors.archivos = 'Debe subir al menos un archivo';
         isValid = false;
@@ -278,6 +279,7 @@ export default {
 
       return isValid;
     },
+
     async submitForm() {
       console.log('Enviando formulario...');
 
@@ -289,7 +291,18 @@ export default {
         formDataToSend.append('category_id', this.formData.category_id);
         formDataToSend.append('description', this.formData.description);
         formDataToSend.append('user_id', this.user.id);
-        formDataToSend.append('archivo', this.formData.archivo);
+        
+
+        if (this.formData.archivo && this.formData.archivo.length > 0) {
+          this.formData.archivo.forEach((file) => {
+            formDataToSend.append('media[]', file);
+          });
+        }
+
+
+        for (let [key, value] of formDataToSend.entries()) {
+          console.log(key, value);
+        }
 
         try {
           const response = await axios.post(
@@ -304,20 +317,20 @@ export default {
 
           if (response.data.success) {
             alert('Anuncio creado con éxito!');
-            // Reset form
+
             this.formData = {
               name: '',
               category_id: '',
               location: '',
               is_done: '',
               description: '',
-              archivo: null
+              media: null
             };
             this.previews = [];
           }
         } catch (error) {
-          console.error('Error al enviar el formulario:', error);
-          alert('Hubo un error al enviar el formulario');
+          console.error('Error al enviar el formulario:', error.response ? error.response.data : error);
+          alert('Hubo un error al enviar el formulario: ' + (error.response?.data?.message || error.message));
         }
       }
     }
