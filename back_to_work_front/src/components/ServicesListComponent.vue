@@ -33,6 +33,8 @@
               </svg>
               New Ad
             </button>
+
+
           </div>
         </div>
       </div>
@@ -132,6 +134,11 @@
             </Column>
           </DataTable>
         </div>
+        <div>
+          <button @click="showSuccess">Mostrar éxito</button>
+          <button @click="showError">Mostrar error</button>
+          <button @click="showCustom">Toast personalizado</button>
+        </div>
       </div>
   
       <!-- Create Ad Modal -->
@@ -160,6 +167,7 @@
   import Dialog from 'primevue/dialog';
   import axios from "axios";
   import { watch } from 'vue';
+  import { useToast } from 'vue-toastification'
   
   const searchQuery = ref('');
   const loading = ref(true);
@@ -170,6 +178,24 @@
   const openCreateAdModal = ref(false);
   const selectedCategory = ref(null);
   const statusFilter = ref(null);
+  const toast = useToast()
+
+  const showSuccess = () => {
+      toast.success("¡Operación exitosa!")
+    }
+
+    const showError = () => {
+      toast.error("Algo salió mal")
+    }
+
+    const showCustom = () => {
+      toast.info("Mensaje personalizado", {
+        position: "top-center",
+        timeout: 2000,
+        closeOnClick: false,
+        icon: "⭐"
+      })
+    }
   
   const formatDate = (dateString) => {
     if (!dateString) return '';

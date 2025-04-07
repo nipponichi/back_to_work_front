@@ -86,7 +86,11 @@
           >
         </label>
       </div>
-      
+      <div>
+        <button @click="showSuccess">Mostrar éxito</button>
+        <button @click="showError">Mostrar error</button>
+        <button @click="showCustom">Toast personalizado</button>
+      </div>
       <p v-if="errors.media" class="mt-1 text-sm text-red-600">{{ errors.media }}</p>
       
       <!-- Mostrar miniaturas -->
@@ -127,6 +131,7 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification'
 
 export default {
   data() {
@@ -170,6 +175,22 @@ export default {
     }
   },
   methods: {
+    showSuccess() {
+      this.$toast.success("¡Operación completada con éxito!", {
+        timeout: 3000
+      });
+    },
+    showError() {
+      this.$toast.error("Ocurrió un error inesperado");
+    },
+    showCustom() {
+      this.$toast("Mensaje personalizado", {
+        position: "bottom-right",
+        closeOnClick: false,
+        icon: "✏️",
+        toastClassName: "my-custom-toast-class"
+      });
+    },
     async fetchCategories() {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/categories");
@@ -304,3 +325,11 @@ export default {
   }
 }
 </script>
+<style>
+/* Puedes personalizar los estilos */
+.my-custom-toast-class {
+  background-color: #4a5568;
+  color: white;
+  border-radius: 12px;
+}
+</style>
