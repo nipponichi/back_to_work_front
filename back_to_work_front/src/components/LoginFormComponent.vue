@@ -44,7 +44,6 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { EventBus } from './event-bus.js';
 
 const email = ref('');
 const password = ref('');
@@ -67,16 +66,7 @@ const handleLogin = async () => {
       console.log("token 2", accessToken);
 
       localStorage.setItem("user", JSON.stringify(response.data.data.user));
-      let userStr = localStorage.getItem("user");
-      let user = JSON.parse(userStr);
-      console.log(user.name);
 
-      const userId = response.data.data.user.id;
-       // Guardamos el user.id en el bus de eventos
-      EventBus.userId = userId;
-      console.log(user.id);
-
-      // Redirigir después del login
       const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
       localStorage.removeItem("redirectAfterLogin");
       router.push(redirectPath);

@@ -65,7 +65,7 @@
     <!-- Campo Archivo -->
     <div class="mb-6">
       <label class="block text-gray-700 font-medium mb-2">
-        Subir archivos: 
+        Subir media: 
         <span class="text-sm text-gray-500">(Máx. 5 fotos y 1 video)</span>
       </label>
       
@@ -75,7 +75,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
-            <p class="pt-1 text-sm tracking-wider text-gray-400">Selecciona archivos</p>
+            <p class="pt-1 text-sm tracking-wider text-gray-400">Selecciona media</p>
           </div>
           <input 
             type="file" 
@@ -87,7 +87,7 @@
         </label>
       </div>
       
-      <p v-if="errors.archivos" class="mt-1 text-sm text-red-600">{{ errors.archivos }}</p>
+      <p v-if="errors.media" class="mt-1 text-sm text-red-600">{{ errors.media }}</p>
       
       <!-- Mostrar miniaturas -->
       <div v-if="previews.length" class="mt-4">
@@ -127,7 +127,6 @@
 
 <script>
 import axios from 'axios';
-import { EventBus } from './event-bus.js';
 
 export default {
   data() {
@@ -139,7 +138,7 @@ export default {
         category_id: '',
         location: '',
         is_done:'',
-        archivo: null
+        media: [],
       },
       errors: {
         name: '',
@@ -147,15 +146,20 @@ export default {
         category_id: '',
         location: '',
         is_done:'',
-        archivo: ''
+        media: []
       },
       validImageExtensions: ['image/jpeg', 'image/jpg', 'image/png'],
       validVideoExtensions: ['video/mp4'],
-      previews: []
+      previews: [],
+      user:''
     }
   },
   mounted() {
     this.fetchCategories();
+    let userStr = localStorage.getItem("user");
+    let user2 = JSON.parse(userStr);
+    this.user=user2;
+    console.log(user2);
   },
   computed: {
     hasVideo() {
@@ -177,36 +181,34 @@ export default {
       }
     },
     handleFileUpload(event) {
-      this.errors.archivos = '';
+      this.errors.media = '';
       const files = Array.from(event.target.files);
       
-      // Validar tipos de archivo
+      // Validar tipos de media
       const invalidFiles = files.filter(file => 
         !this.validImageExtensions.includes(file.type) && 
         !this.validVideoExtensions.includes(file.type)
       );
       
       if (invalidFiles.length > 0) {
-        this.errors.archivos = 'Solo se permiten imágenes JPG, JPEG, PNG o videos MP4';
+        this.errors.media = 'Solo se permiten imágenes JPG, JPEG, PNG o videos MP4';
         return;
       }
       
       // Validar cantidad de videos
       const videoFiles = files.filter(file => this.validVideoExtensions.includes(file.type));
       if (videoFiles.length > 1 || (this.hasVideo && videoFiles.length > 0)) {
-        this.errors.archivos = 'Solo se permite 1 video';
+        this.errors.media = 'Solo se permite 1 video';
         return;
       }
       
-      // Validar cantidad de imágenes
       const imageFiles = files.filter(file => this.validImageExtensions.includes(file.type));
       const totalImages = this.imageCount + imageFiles.length;
       if (totalImages > 5) {
-        this.errors.archivos = 'Máximo 5 fotos permitidas';
+        this.errors.media = 'Máximo 5 fotos permitidas';
         return;
       }
       
-      // Procesar archivos válidos
       files.forEach(file => {
         if ((this.validImageExtensions.includes(file.type) && this.imageCount < 5) || 
             (this.validVideoExtensions.includes(file.type) && !this.hasVideo)) {
@@ -222,12 +224,11 @@ export default {
         }
       });
       
-      // Actualizar array de archivos para el formulario
-      this.formData.archivos = this.previews.map(preview => preview.file);
+      console.log(this.previews);
     },
     removeFile(index) {
       this.previews.splice(index, 1);
-      this.formData.archivos = this.previews.map(preview => preview.file);
+      this.formData.media = this.previews.map(preview => preview.file);
     },
     validateForm() {
       let isValid = true;
@@ -246,8 +247,6 @@ export default {
         this.errors.location = '';
       }
 
-
-
       if (!this.formData.category_id) {
         this.errors.category_id = 'Por favor seleccione una categoría';
         isValid = false;
@@ -255,61 +254,50 @@ export default {
         this.errors.category_id = '';
       }
 
-      if (this.formData.description.length < 10) {
+      if (this.formData.description.length < 5) {
         this.errors.description = 'La descripción debe tener al menos 10 caracteres';
         isValid = false;
       } else {
         this.errors.description = '';
       }
 
-      // Validar archivos
       if (this.previews.length === 0) {
-        this.errors.archivos = 'Debe subir al menos un archivo';
+        this.errors.media = 'Debe subir al menos un media';
         isValid = false;
       } else {
-        this.errors.archivos = '';
+        this.errors.media = '';
       }
       
 
       return isValid;
     },
-    async submitForm() {
-      console.log('Enviando formulario...');
 
+    async submitForm() {
       if (this.validateForm()) {
         const formDataToSend = new FormData();
-        formDataToSend.append('nombre', this.formData.name);
-        formDataToSend.append('categoria_id', this.formData.category_id);
-        formDataToSend.append('descripcion', this.formData.description);
-        formDataToSend.append('archivo', this.formData.archivo);
+        
+        formDataToSend.append('name', this.formData.name);
+        formDataToSend.append('location', this.formData.location);
+        formDataToSend.append('is_done', 0);
+        formDataToSend.append('category_id', this.formData.category_id);
+        formDataToSend.append('description', this.formData.description);
+        formDataToSend.append('user_id', this.user.id);
+        this.previews.forEach((preview, index) => {
+          formDataToSend.append(`media[${index}]`, preview.file);
+        });
+        
+
+        for (let [key, value] of formDataToSend.entries()) {
+          console.log(key, value);
+        }
 
         try {
-          const response = await axios.post(
-            "http://127.0.0.1:8000/api/ads",
-            formDataToSend,
-            {
-              headers: {
-                'Content-Type': 'multipart/form-data'
-              }
-            }
-          );
+          const response = await axios.post("http://127.0.0.1:8000/api/ads", formDataToSend);
+          console.log(response.data)
 
-          if (response.data.success) {
-            alert('Anuncio creado con éxito!');
-            // Reset form
-            this.formData = {
-              name: '',
-              category_id: '',
-              location: '',
-              is_done: '',
-              description: '',
-              archivo: null
-            };
-            this.previews = [];
-          }
         } catch (error) {
-          console.error('Error al enviar el formulario:', error);
-          alert('Hubo un error al enviar el formulario');
+          console.error('Error:', error.response?.data || error.message);
+          alert('Error: ' + (error.response?.data?.message || error.message));
         }
       }
     }
