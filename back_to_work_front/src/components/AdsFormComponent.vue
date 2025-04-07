@@ -139,7 +139,7 @@ export default {
         category_id: '',
         location: '',
         is_done:'',
-        archivo: null
+        archivo: null,
       },
       errors: {
         name: '',
@@ -151,14 +151,16 @@ export default {
       },
       validImageExtensions: ['image/jpeg', 'image/jpg', 'image/png'],
       validVideoExtensions: ['video/mp4'],
-      previews: []
+      previews: [],
+      user:''
     }
   },
   mounted() {
     this.fetchCategories();
     let userStr = localStorage.getItem("user");
-    let user = JSON.parse(userStr);
-    console.log(userStr);
+    let user2 = JSON.parse(userStr);
+    this.user=user2;
+    console.log(user2);
   },
   computed: {
     hasVideo() {
@@ -286,6 +288,7 @@ export default {
         formDataToSend.append('is_done', 0);
         formDataToSend.append('category_id', this.formData.category_id);
         formDataToSend.append('description', this.formData.description);
+        formDataToSend.append('user_id', this.user.id);
         formDataToSend.append('archivo', this.formData.archivo);
 
         try {
