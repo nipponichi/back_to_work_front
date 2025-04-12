@@ -5,10 +5,15 @@ import router from './router'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import PrimeVue from 'primevue/config'
+import Aura from '@primeuix/themes/aura';
+
 
 const app = createApp(App)
 
-app.use(PrimeVue),
+app.use(PrimeVue, {
+  theme: {
+      preset: Aura
+}}),
 app.use(Toast, {
     transition: "Vue-Toastification__bounce",
     maxToasts: 5,

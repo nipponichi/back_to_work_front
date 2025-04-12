@@ -39,7 +39,7 @@
 
     <div class="max-w-6xl mx-auto mt-8">
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
-          <DataTable
+        <DataTable
           ref="dt"
           :value="filteredAds"
           dataKey="id"
@@ -54,75 +54,74 @@
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :rowsPerPageOptions="[5, 10, 25]"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} ads"
-          class="p-datatable-lg cursor-pointer"
-
+          class="p-datatable-lg cursor-pointer bg-white"
         >
           <template #empty> 
-            <div class="p-6 text-center text-gray-500 text-lg">
+            <div class="p-6 text-center text-gray-800 text-lg bg-white">
               No ads found. Create your first ad!
             </div>
           </template>
           <template #loading> 
-            <div class="p-6 text-center text-gray-500 text-lg">
+            <div class="p-6 text-center text-gray-800 text-lg bg-white">
               <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-amber-500 mb-3"></div>
               <p class="text-lg">Loading ads data...</p>
             </div>
           </template>
         
-          <Column field="id" header="ID" sortable 
-            class="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl p-4 text-gray-700 text-lg"
-            >
-          </Column>
+<!--           <Column field="id" header="ID" sortable 
+            headerClass="font-bold bg-white p-4 text-left text-xl text-gray-800"
+            bodyClass="p-4 bg-white text-gray-800">
+          </Column> -->
           
           <Column field="name" header="Name" sortable 
-            headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
-            bodyClass="p-4">
+            headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
+            bodyClass="p-4 bg-white">
             <template #body="{ data }">
               <span class="font-semibold text-gray-800 text-lg">{{ data.name }}</span>
             </template>
           </Column>
           
           <Column field="description" header="Description" 
-            headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
-            bodyClass="p-4">
+            headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
+            bodyClass="p-4 bg-white">
             <template #body="{ data }">
-              <p class="text-gray-700 line-clamp-2 text-lg">{{ data.description }}</p>
+              <p class="text-gray-800 bg-white text-lg">{{ data.description }}</p>
             </template>
           </Column>
-
+    
           <Column field="category" header="Category" 
-            headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
-            bodyClass="p-4">
+            headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
+            bodyClass="p-4 bg-white">
             <template #body="{ data }">
-              <span class="text-lg">{{ getCategoryName(data.category_id) }}</span>
+              <span class="text-lg text-gray-800">{{ getCategoryName(data.category_id) }}</span>
             </template>
           </Column>
           
           <Column field="location" header="Location" sortable 
-            headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
-            bodyClass="p-4">
+            headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
+            bodyClass="p-4 bg-white">
             <template #body="{ data }">
               <div class="flex items-center">
-                <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 mr-2 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
-                <span class="text-lg">{{ data.location }}</span>
+                <span class="text-lg text-gray-800">{{ data.location }}</span>
               </div>
             </template>
           </Column>
           
           <Column field="due_date" header="Due Date" sortable 
-            headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
-            bodyClass="p-4">
+            headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
+            bodyClass="p-4 bg-white">
             <template #body="{ data }">
-              <span class="whitespace-nowrap text-lg">{{ formatDate(data.due_date) }}</span>
+              <span class="whitespace-nowrap text-lg text-gray-800">{{ formatDate(data.due_date) }}</span>
             </template>
           </Column>
           
           <Column field="is_done" header="Status" 
-            headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
-            bodyClass="p-4">
+            headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
+            bodyClass="p-4 bg-white">
             <template #body="{ data }">
               <Tag 
                 :value="data.is_done ? 'Completed' : 'Pending'" 
@@ -224,10 +223,14 @@ export default {
           const options = { year: 'numeric', month: 'short', day: 'numeric' };
           return new Date(dateString).toLocaleDateString(undefined, options);
       },
+
       getCategoryName(categoryId) {
+        console.log('Current categories:', this.categories);
+        console.log('Looking for category ID:', categoryId);
           const category = this.categories.find(cat => cat.id === categoryId);
-          return category ? category.name : 'Uncategorized';
+          return category ? category.category : 'Uncategorized';
       },
+
       handleFilterChange(filters) {
           this.selectedCategory = filters.category;
           this.statusFilter = filters.status;
@@ -265,12 +268,3 @@ export default {
   }
 };
 </script>
-<style>
-tr {
-    padding: 6px;
-  }
-  .p-datatable .p-datatable-tbody > tr:hover {
-    background: #676869 !important;
-    color: #ffffff !important;
-  }
-</style>
