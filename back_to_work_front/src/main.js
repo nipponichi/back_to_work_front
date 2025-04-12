@@ -11,7 +11,8 @@ const app = createApp(App)
 app.use(PrimeVue)
 app.use(Toast, {
     transition: "Vue-Toastification__bounce",
-    maxToasts: 20,
+    maxToasts: 5,
+    timeout: 1500,
     newestOnTop: true
   })
 app.use(router)

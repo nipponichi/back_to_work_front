@@ -40,42 +40,48 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
+<script>
+import AuthService from '../services/api/auth.service'
+import { useToast } from 'vue-toastification';
 
-const email = ref('');
-const password = ref('');
-const errorMessage = ref('');
-const router = useRouter();
 
-const handleLogin = async () => {
-  try {
-    const response = await axios.post("http://127.0.0.1:8000/api/login", { 
-      email: email.value,
-      password: password.value 
-    });
-    console.log("Respuesta del servidor:", response.data);
+export default {
+  data() {
+    return {
+      email: '',
+      password: '',
+      errorMessage: '',
+      toast: useToast()
+    }
+  },
+  methods: {
+    async handleLogin() {
+      try {
+        const response = await AuthService.login(this.email, this.password)
+        if (response.data.success) {
+          // 2 horas
+          this.toast.success("Login succesfully")
+          const tokenExpiration = Date.now() + 2 * 3600 * 1000;
 
-    if (response.data.success) {
-      const expiration = Date.now() + 2 * 3600 * 1000;
+          localStorage.setItem("tokenExpiration", tokenExpiration);
+          localStorage.setItem("token", response.data.data.accessToken);
+          let accessToken = localStorage.getItem("token");
+          console.log("token 2", accessToken);
 
-      localStorage.setItem("token", response.data.data.accessToken);
-      let accessToken = localStorage.getItem("token");
-      console.log("token 2", accessToken);
+          localStorage.setItem("user", JSON.stringify(response.data.data.user));
 
-      localStorage.setItem("user", JSON.stringify(response.data.data.user));
-
-      const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
-      localStorage.removeItem("redirectAfterLogin");
-      router.push(redirectPath);
-    } else {
-      errorMessage.value = response.data.message;
-    } 
-  } catch (error) {
-    console.error("Error al enviar la solicitud:", error);
-    errorMessage.value = "Hubo un error al procesar la solicitud.";
+          const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+          localStorage.removeItem("redirectAfterLogin");
+          this.$router.push(redirectPath);
+        } else {
+          this.errorMessage = response.data.message;
+        } 
+      } catch (error) {
+        this.toast.error("Unable to login")
+        console.error("Error al enviar la solicitud:", error);
+        this.errorMessage = "Hubo un error al procesar la solicitud.";
+      }
+    }
   }
-};
+}
 </script>

@@ -4,24 +4,25 @@
 
       <ul class="grid grid-cols-4 gap-4 absolute left-1/2 transform -translate-x-1/2">
         <li>
-          <RouterLink to="/" class="block w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
+          <RouterLink to="/" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
             🏠 Inicio
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/about" class="block w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
+          <RouterLink to="/about" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
             ℹ️ Acerca de
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/service" class="block w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
+          <RouterLink to="/service" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
             🛠️ Servicios
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/contact" class="block w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
+          <!-- Comentado para evitar activar el chat y bloquear la pagina al acceder -->
+<!--           <RouterLink to="/contact" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
             📞 Contacto
-          </RouterLink>
+          </RouterLink> -->
         </li>
       </ul>
       
@@ -54,67 +55,68 @@
   </nav>
 </template>
 
-<script setup>
-import { ref, onMounted, watch, watchEffect, onUnmounted } from "vue";
-import { useRouter } from "vue-router";
-import axios from "axios";
+<script>
+import AuthService from "../services/api/auth.service";
+import { useToast } from 'vue-toastification';
 
-const isOpen = ref(false);
-const accessToken = ref(null);
-let user = ref("");
-const router = useRouter();
-const dropdownMenu = ref(null);
+export default {
+  data() {
+    return {
+      isOpen: false,
+      accessToken: null,
+      user: "",
+      dropdownMenu: null,
+      toast: useToast()
+    };
+  },
+  mounted() {
+    this.accessToken = localStorage.getItem("token");
+    let userStr = localStorage.getItem("user");
+    this.user = JSON.parse(userStr);
+    
+    document.addEventListener("click", this.handleClickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener("click", this.handleClickOutside);
+  },
+  watch: {
+    '$route'() {
+      this.accessToken = localStorage.getItem("token");
+      let userStr = localStorage.getItem("user");
+      this.user = JSON.parse(userStr);
+    },
+    accessToken() {
+      this.accessToken = localStorage.getItem("token");
+      let userStr = localStorage.getItem("user");
+      this.user = JSON.parse(userStr);
+    }
+  },
+  methods: {
+    toggleDropdown() {
+      this.isOpen = !this.isOpen;
+    },
+    handleClickOutside(event) {
+      if (this.$refs.dropdownMenu && !this.$refs.dropdownMenu.contains(event.target)) {
+        this.isOpen = false;
+      }
+    },
+    closeDropdown() {
+      this.isOpen = false;
+    },
+    async logout() {
+      const response = await AuthService.logout(this.accessToken)
+      if (response.data.success) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        this.accessToken = null;
+        this.user = "";
+        this.$router.push("/login");
+        this.toast.success("Logout successful");
+      } else {
+        this.toast.error("Logout failed");
+      }
 
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
-};
-
-
-const handleClickOutside = (event) => {
-  if (dropdownMenu.value && !dropdownMenu.value.contains(event.target)) {
-    isOpen.value = false;
+    }
   }
 };
-
-const closeDropdown = () => {
-  isOpen.value = false;
-};
-
-const logout = async () => {
-  const response = await axios.post("http://127.0.0.1:8000/api/logout", {}, {
-    headers: {
-      Authorization: `Bearer ${accessToken.value}`
-    }
-  });
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  accessToken.value = null;
-  user = "";
-  router.push("/login");
-};
-
-onMounted(() => {
-  accessToken.value = localStorage.getItem("token");
-  let userStr = localStorage.getItem("user");
-  user = JSON.parse(userStr)
-  
-  document.addEventListener("click", handleClickOutside);
-});
-
-onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
-});
-
-watch(() => router.currentRoute.value, () => {
-  accessToken.value = localStorage.getItem("token");
-  let userStr = localStorage.getItem("user");
-  user = JSON.parse(userStr)
-
-});
-
-watchEffect(() => {
-  accessToken.value = localStorage.getItem("token");
-  let userStr = localStorage.getItem("user");
-  user = JSON.parse(userStr)
-});
 </script>
