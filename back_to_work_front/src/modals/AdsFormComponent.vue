@@ -1,6 +1,5 @@
 <template>
   <form @submit.prevent="submitForm" enctype="multipart/form-data">
-    <!-- Campo Nombre -->
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Nombre:</label>
       <input
@@ -14,7 +13,6 @@
       <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
     </div>
 
-    <!-- Campo Location -->
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Location:</label>
       <input
@@ -28,7 +26,6 @@
       <p v-if="errors.location" class="mt-1 text-sm text-red-600">{{ errors.location }}</p>
     </div>
 
-    <!-- Campo Categoría -->
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Categoría:</label>
       <select 

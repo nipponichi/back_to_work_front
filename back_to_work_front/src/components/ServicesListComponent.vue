@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-    <!-- Header and Search Section -->
+
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">Advertisement Management</h1>
@@ -37,7 +37,6 @@
       </div>
     </div>
 
-    <!-- Data Table Section -->
     <div class="max-w-6xl mx-auto mt-8">
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
           <DataTable
@@ -51,10 +50,12 @@
           :sortField="sortField"
           :sortOrder="sortOrder"
           @sort="onSort"
+          @rowClick="onRowClick"
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :rowsPerPageOptions="[5, 10, 25]"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} ads"
-          class="p-datatable-lg"
+          class="p-datatable-lg cursor-pointer"
+
         >
           <template #empty> 
             <div class="p-6 text-center text-gray-500 text-lg">
@@ -69,8 +70,8 @@
           </template>
         
           <Column field="id" header="ID" sortable 
-            headerClass="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl"
-            bodyClass="p-4 text-gray-700 text-lg">
+            class="font-bold text-gray-800 bg-gray-100 p-4 text-left text-xl p-4 text-gray-700 text-lg"
+            >
           </Column>
           
           <Column field="name" header="Name" sortable 
@@ -145,14 +146,26 @@
       <div class="bg-white text-black text-2xl p-8 rounded">
         <AdsFormComponent />
       </div>
+    </Dialog>
 
+    <Dialog
+      v-model:visible="openAdDetailModal"
+      header="Create New Advertisement"
+      :modal="true"
+      :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
+      headerClass="border-b border-gray-200 p-4 font-semibold text-lg"
+      contentClass="p-4"
+    >
+      <div class="bg-white text-black text-2xl p-8 rounded">
+        <AdDetailComponent />
+      </div>
     </Dialog>
   </div>
 </template>
 
 <script>
-import AdverFilters from '../modals/AdverFilters.vue';
-import AdsFormComponent from "./AdsFormComponent.vue";
+import AdDetailComponent from '../modals/AdDetailComponent.vue';
+import AdsFormComponent from "../modals/AdsFormComponent.vue";
 import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -163,7 +176,7 @@ import UserService from '../services/api/user.service';
 
 export default {
   components: {
-      AdverFilters,
+      AdDetailComponent,
       AdsFormComponent,
       InputText,
       DataTable,
@@ -180,6 +193,7 @@ export default {
           ads: [],
           categories: [],
           openCreateAdModal: false,
+          openAdDetailModal: false,
           selectedCategory: null,
           statusFilter: null,
           toast: useToast()
@@ -201,6 +215,10 @@ export default {
       this.fetchAds();
   },
   methods: {
+      onRowClick() {
+          this.openAdDetailModal = true;
+      },
+
       formatDate(dateString) {
           if (!dateString) return '';
           const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -247,3 +265,12 @@ export default {
   }
 };
 </script>
+<style>
+tr {
+    padding: 6px;
+  }
+  .p-datatable .p-datatable-tbody > tr:hover {
+    background: #676869 !important;
+    color: #ffffff !important;
+  }
+</style>
