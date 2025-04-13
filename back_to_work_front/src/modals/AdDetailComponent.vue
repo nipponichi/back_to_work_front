@@ -82,6 +82,7 @@
             </tr>
           </thead>
           <tbody>
+            <!-- Mostrar pujas existentes -->
             <tr v-for="(bid, index) in bids" :key="bid.id" class="border-b">
               <td class="px-6 py-3">{{ bid.user_id }}</td> <!-- Asumimos que el campo usuario es 'user_id' -->
               <td class="px-6 py-3">{{ bid.bid }}</td> <!-- Monto de la puja -->
@@ -92,12 +93,24 @@
                 </button>
               </td>
             </tr>
+            <!-- Fila vacía para nueva puja -->
+            <tr class="border-b">
+              <td class="px-6 py-3">Nuevo Usuario</td>
+              <td class="px-6 py-3">
+                <input v-model="newBid.bid" type="number" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Monto" />
+              </td>
+              <td class="px-6 py-3">
+                <input v-model="newBid.description" type="text" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Descripción" />
+              </td>
+              <td class="px-6 py-3">
+                <button @click="submitNewBid" class="text-green-500 hover:text-green-700">
+                  Añadir
+                </button>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
-      <button @click="addBid" class="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-        Añadir nueva puja
-      </button>
     </div>
 
     <div class="mb-4 p-4">
@@ -133,7 +146,8 @@ export default {
       },
       categories: [],
       showBidGrid: false,
-      bids: [] // Empezamos con un array vacío para las pujas
+      bids: [], // Empezamos con un array vacío para las pujas
+      newBid: { bid: '', description: '' } // Para manejar la nueva puja
     };
   },
   async mounted() {
@@ -197,13 +211,10 @@ export default {
         this.fetchBids(); // Obtener pujas cuando se muestre el grid
       }
     },
-    addBid() {
-      const newBid = { user: 'Nuevo usuario', amount: 100, description: 'Nueva puja' };
-
-      // Recoger los datos de la puja
+    submitNewBid() {
       const data = {
-        bid: newBid.amount,
-        description: newBid.description,
+        bid: this.newBid.bid,
+        description: this.newBid.description,
         ad_id: this.id, // ID del anuncio
         user_id: 1, // Este valor debe venir del usuario autenticado
         is_valid: 1 // Asumimos que la puja es válida al añadirla
@@ -213,11 +224,14 @@ export default {
       axios.post('http://127.0.0.1:8000/api/offers', data)
         .then(response => {
           if (response.data.success) {
+            // Añadir la nueva puja a la lista en frontend
             this.bids.push({
-              user: 'Nuevo usuario',
-              amount: newBid.amount,
-              description: newBid.description
+              id: response.data.data.id,
+              user_id: 1, // Suponiendo que el usuario es el que ha hecho la puja
+              bid: this.newBid.bid,
+              description: this.newBid.description
             });
+            this.newBid = { bid: '', description: '' }; // Limpiar los campos
             console.log("Puja añadida con éxito", response.data);
           } else {
             console.error("Error al añadir la puja", response.data);
@@ -242,11 +256,5 @@ export default {
       }
     }
   }
-}
+};
 </script>
-
-<style scoped>
-.aspect-square {
-  aspect-ratio: 1/1;
-}
-</style>
