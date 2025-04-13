@@ -50,12 +50,13 @@
           :sortField="sortField"
           :sortOrder="sortOrder"
           @sort="onSort"
-          @rowClick="onRowClick"
+          @rowClick="onRowClick($event.data.id)"
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :rowsPerPageOptions="[5, 10, 25]"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} ads"
-          class="p-datatable-lg cursor-pointer bg-white"
-        >
+          class="p-datatable-lg cursor-pointer bg-white custom-datatable"
+          tableStyle="min-width: 50rem"
+          >
           <template #empty> 
             <div class="p-6 text-center text-gray-800 text-lg bg-white">
               No ads found. Create your first ad!
@@ -67,11 +68,6 @@
               <p class="text-lg">Loading ads data...</p>
             </div>
           </template>
-        
-<!--           <Column field="id" header="ID" sortable 
-            headerClass="font-bold bg-white p-4 text-left text-xl text-gray-800"
-            bodyClass="p-4 bg-white text-gray-800">
-          </Column> -->
           
           <Column field="name" header="Name" sortable 
             headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
@@ -85,7 +81,7 @@
             headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
             bodyClass="p-4 bg-white">
             <template #body="{ data }">
-              <p class="text-gray-800 bg-white text-lg">{{ data.description }}</p>
+              <p class="text-gray-800 text-lg">{{ data.description }}</p>
             </template>
           </Column>
     
@@ -149,14 +145,14 @@
 
     <Dialog
       v-model:visible="openAdDetailModal"
-      header="Create New Advertisement"
+      header="Ad details"
       :modal="true"
       :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
       headerClass="border-b border-gray-200 p-4 font-semibold text-lg"
       contentClass="p-4"
     >
       <div class="bg-white text-black text-2xl p-8 rounded">
-        <AdDetailComponent />
+        <AdDetailComponent  :id="selectedId"/>
       </div>
     </Dialog>
   </div>
@@ -195,7 +191,8 @@ export default {
           openAdDetailModal: false,
           selectedCategory: null,
           statusFilter: null,
-          toast: useToast()
+          toast: useToast(),
+          selectedId: ''
       };
   },
   computed: {
@@ -214,7 +211,8 @@ export default {
       this.fetchAds();
   },
   methods: {
-      onRowClick() {
+      onRowClick(id) {
+          this.selectedId = id;
           this.openAdDetailModal = true;
       },
 
@@ -225,8 +223,6 @@ export default {
       },
 
       getCategoryName(categoryId) {
-        console.log('Current categories:', this.categories);
-        console.log('Looking for category ID:', categoryId);
           const category = this.categories.find(cat => cat.id === categoryId);
           return category ? category.category : 'Uncategorized';
       },
@@ -268,3 +264,32 @@ export default {
   }
 };
 </script>
+
+<style>
+
+.custom-datatable .p-datatable-tbody > tr:not(.p-highlight):hover {
+  background-color: #dddddd !important;
+  color: white !important;
+}
+
+.custom-datatable .p-datatable-tbody > tr:not(.p-highlight):hover > td {
+  background-color: inherit !important;
+  color: white !important;
+}
+
+.custom-datatable .p-datatable-tbody > tr > td {
+  background-color: #ffffff !important;
+  transition: background-color 0.2s ease;
+  color: white !important;
+}
+
+/* .custom-datatable .p-datatable-tbody > tr.p-highlight,
+.custom-datatable .p-datatable-tbody > tr.p-highlight > td {
+  background-color: #eec00b !important;
+} */
+
+.custom-datatable .p-datatable-tbody > tr:not(.p-highlight):hover .p-tag {
+  background-color: #4b5563 !important;
+  color: white !important;
+}
+</style>
