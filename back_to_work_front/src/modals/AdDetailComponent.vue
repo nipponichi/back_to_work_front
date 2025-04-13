@@ -84,7 +84,9 @@
           <tbody>
             <!-- Mostrar pujas existentes -->
             <tr v-for="(bid, index) in bids" :key="bid.id" class="border-b">
-              <td class="px-6 py-3">{{ bid.userName || `Usuario ${bid.user_id}` }}</td> <!-- Mostrar nombre de usuario o ID -->
+              <!--<td class="px-6 py-3">{{ bid.userName || `Usuario ${bid.user_id}` }}</td> -->
+              <!-- Mostrar nombre de usuario o ID -->
+              <td class="px-6 py-3">{{ bid.user_id }}</td>
               <td class="px-6 py-3">{{ bid.bid }}</td> <!-- Monto de la puja -->
               <td class="px-6 py-3">{{ bid.description }}</td> <!-- Descripción -->
               <td class="px-6 py-3">
