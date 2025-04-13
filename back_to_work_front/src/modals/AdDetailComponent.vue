@@ -84,7 +84,7 @@
           <tbody>
             <!-- Mostrar pujas existentes -->
             <tr v-for="(bid, index) in bids" :key="bid.id" class="border-b">
-              <td class="px-6 py-3">{{ bid.user_id }}</td> <!-- Asumimos que el campo usuario es 'user_id' -->
+              <td class="px-6 py-3">{{ bid.userName || `Usuario ${bid.user_id}` }}</td> <!-- Mostrar nombre de usuario o ID -->
               <td class="px-6 py-3">{{ bid.bid }}</td> <!-- Monto de la puja -->
               <td class="px-6 py-3">{{ bid.description }}</td> <!-- Descripción -->
               <td class="px-6 py-3">
@@ -147,13 +147,15 @@ export default {
       categories: [],
       showBidGrid: false,
       bids: [], // Empezamos con un array vacío para las pujas
-      newBid: { bid: '', description: '' } // Para manejar la nueva puja
+      users: [], // Para almacenar los datos de los usuarios
+      newBid: { bid: '', description: '' }, // Para manejar la nueva puja
     };
   },
   async mounted() {
     await this.fetchAdData();
     await this.fetchCategories();
     await this.fetchBids(); // Llamada para obtener las pujas
+    await this.fetchUsers(); // Llamada para obtener los usuarios
   },
   methods: {
     async fetchAdData() {
@@ -181,17 +183,43 @@ export default {
       try {
         const response = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
         if (response.data.success) {
+          // Asignar las pujas recibidas
           this.bids = response.data.data.map(offer => ({
-            id: offer.id,               // Asegurarnos de tener el ID de la puja
-            user_id: offer.user_id,      // O como prefieras obtener el nombre de usuario
-            bid: offer.bid,             // Monto de la puja
-            description: offer.description  // Descripción de la puja
+            id: offer.id,
+            user_id: offer.user_id,
+            bid: offer.bid,
+            description: offer.description
           }));
           console.log("Bids:", this.bids);
         }
       } catch (error) {
         console.error("Error fetching bids:", error);
       }
+    },
+    async fetchUsers() {
+      try {
+        const userIds = this.bids.map(bid => bid.user_id);
+        if (userIds.length > 0) {
+          const response = await axios.get(`http://127.0.0.1:8000/api/users`, {
+            params: { ids: userIds.join(',') }
+          });
+          if (response.data.success) {
+            this.users = response.data.data;
+            this.assignUserNamesToBids();
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    },
+    assignUserNamesToBids() {
+      this.bids.forEach(bid => {
+        const user = this.users.find(user => user.id === bid.user_id);
+        if (user) {
+          bid.userName = user.name; // Asignar el nombre del usuario a la puja
+        }
+      });
+      console.log("Bids with user names:", this.bids);
     },
     getCategoryName(categoryId) {
       const category = this.categories.find(cat => cat.id === categoryId);
@@ -207,54 +235,54 @@ export default {
     },
     toggleBidGrid() {
       this.showBidGrid = !this.showBidGrid;
-      if (this.showBidGrid) {
-        this.fetchBids(); // Obtener pujas cuando se muestre el grid
+      if (this.showBidGrid && this.bids.length === 0) {
+        this.fetchBids(); // Obtener pujas solo si no se han cargado previamente
       }
     },
     submitNewBid() {
       const data = {
         bid: this.newBid.bid,
         description: this.newBid.description,
-        ad_id: this.id, // ID del anuncio
-        user_id: 1, // Este valor debe venir del usuario autenticado
-        is_valid: 1 // Asumimos que la puja es válida al añadirla
+        ad_id: this.id, // Anuncio relacionado
+        user_id: 1, //user_id actual
+        is_valid: true, // Añadir el campo is_valid a true
       };
 
-      // Hacer la petición POST para agregar la nueva puja
+      console.log(data);
+
       axios.post('http://127.0.0.1:8000/api/offers', data)
         .then(response => {
-          if (response.data.success) {
-            // Añadir la nueva puja a la lista en frontend
-            this.bids.push({
-              id: response.data.data.id,
-              user_id: 1, // Suponiendo que el usuario es el que ha hecho la puja
-              bid: this.newBid.bid,
-              description: this.newBid.description
-            });
-            this.newBid = { bid: '', description: '' }; // Limpiar los campos
-            console.log("Puja añadida con éxito", response.data);
-          } else {
-            console.error("Error al añadir la puja", response.data);
-          }
+          // Añadir la puja localmente
+          const newBid = {
+            id: response.data.id,
+            user_id: 1,
+            userName: "Nuevo Usuario", // O el nombre correcto del usuario
+            bid: this.newBid.bid,
+            description: this.newBid.description
+          };
+          this.bids.push(newBid); // Añadir a la lista local de pujas
+          this.newBid = { bid: '', description: '' }; // Limpiar el formulario
         })
         .catch(error => {
-          console.error("Error al hacer la petición", error);
+          console.error("Error adding new bid:", error);
         });
     },
-    async removeBid(bidId) {
-      try {
-        const response = await axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`);
-        if (response.data.success) {
-          // Eliminar la puja de la lista local
+    removeBid(bidId) {
+      axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`)
+        .then(() => {
+          // Eliminar la puja localmente sin recargar toda la lista
           this.bids = this.bids.filter(bid => bid.id !== bidId);
-          console.log("Puja eliminada con éxito");
-        } else {
-          console.error("Error al eliminar la puja", response.data);
-        }
-      } catch (error) {
-        console.error("Error al hacer la petición de eliminación", error);
-      }
+        })
+        .catch(error => {
+          console.error("Error deleting bid:", error);
+        });
     }
   }
 };
 </script>
+
+<style scoped>
+.aspect-square {
+  aspect-ratio: 1/1;
+}
+</style>
