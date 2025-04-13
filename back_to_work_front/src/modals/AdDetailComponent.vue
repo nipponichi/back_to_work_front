@@ -226,10 +226,12 @@ export default {
       console.log(data);
 
       axios.post('http://127.0.0.1:8000/api/offers', data)
-        .then(() => {
-          // Actualizar el listado después de añadir la puja
-          this.fetchBids();
-          this.newBid = { bid: '', description: '' }; // Limpiar el formulario
+        .then((response) => {
+          if (response.data.success) {
+            // Actualizar el listado con la nueva puja
+            this.bids.push(response.data.data); // Añadir la nueva puja directamente al listado
+            this.newBid = { bid: '', description: '' }; // Limpiar el formulario
+          }
         })
         .catch(error => {
           console.error("Error adding new bid:", error);
@@ -237,9 +239,11 @@ export default {
     },
     removeBid(bidId) {
       axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`)
-        .then(() => {
-          // Actualizar el listado después de eliminar la puja
-          this.fetchBids();
+        .then((response) => {
+          if (response.data.success) {
+            // Filtrar las pujas eliminadas
+            this.bids = this.bids.filter(bid => bid.id !== bidId);
+          }
         })
         .catch(error => {
           console.error("Error deleting bid:", error);
