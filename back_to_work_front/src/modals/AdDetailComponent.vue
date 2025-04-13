@@ -68,6 +68,13 @@
       </div>
     </div>
   </div>
+
+  <div class="mb-4 p-4">
+    <div>
+      <Button class="bg-amber-500 rounded p-4 mr-4 cursor-pointer hover:bg-amber-200">Pujar</Button>
+      <Button class="bg-green-500 rounded p-4 cursor-pointer hover:bg-green-300">Chatear</Button>
+    </div>
+  </div>
 </template>
 
 <script>
