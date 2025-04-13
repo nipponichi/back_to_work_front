@@ -78,16 +78,18 @@
               <th class="px-6 py-3 text-left">Usuario</th>
               <th class="px-6 py-3 text-left">Monto</th>
               <th class="px-6 py-3 text-left">Descripción</th>
-              <th class="px-6 py-3 text-left"></th>
+              <th class="px-6 py-3 text-left">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(bid, index) in bids" :key="index" class="border-b">
-              <td class="px-6 py-3">{{ bid.user }}</td>
-              <td class="px-6 py-3">{{ bid.amount }}</td>
-              <td class="px-6 py-3">{{ bid.description }}</td>
+            <tr v-for="(bid, index) in bids" :key="bid.id" class="border-b">
+              <td class="px-6 py-3">{{ bid.user_id }}</td> <!-- Asumimos que el campo usuario es 'user_id' -->
+              <td class="px-6 py-3">{{ bid.bid }}</td> <!-- Monto de la puja -->
+              <td class="px-6 py-3">{{ bid.description }}</td> <!-- Descripción -->
               <td class="px-6 py-3">
-                <button @click="removeBid(index)" class="text-red-500 hover:text-red-700">Eliminar</button>
+                <button @click="removeBid(bid.id)" class="text-red-500 hover:text-red-700">
+                  Eliminar
+                </button>
               </td>
             </tr>
           </tbody>
@@ -131,15 +133,13 @@ export default {
       },
       categories: [],
       showBidGrid: false,
-      bids: [
-        { user: 'Juan', amount: 50, description: 'Puja inicial' },
-        { user: 'Ana', amount: 70, description: 'Puja más alta' }
-      ]
+      bids: [] // Empezamos con un array vacío para las pujas
     };
   },
   async mounted() {
     await this.fetchAdData();
     await this.fetchCategories();
+    await this.fetchBids(); // Llamada para obtener las pujas
   },
   methods: {
     async fetchAdData() {
@@ -163,6 +163,22 @@ export default {
         console.error("Error fetching categories:", error);
       }
     },
+    async fetchBids() {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
+        if (response.data.success) {
+          this.bids = response.data.data.map(offer => ({
+            id: offer.id,               // Asegurarnos de tener el ID de la puja
+            user_id: offer.user_id,      // O como prefieras obtener el nombre de usuario
+            bid: offer.bid,             // Monto de la puja
+            description: offer.description  // Descripción de la puja
+          }));
+          console.log("Bids:", this.bids);
+        }
+      } catch (error) {
+        console.error("Error fetching bids:", error);
+      }
+    },
     getCategoryName(categoryId) {
       const category = this.categories.find(cat => cat.id === categoryId);
       return category ? category.category : 'Sin categoría';
@@ -177,9 +193,12 @@ export default {
     },
     toggleBidGrid() {
       this.showBidGrid = !this.showBidGrid;
+      if (this.showBidGrid) {
+        this.fetchBids(); // Obtener pujas cuando se muestre el grid
+      }
     },
     addBid() {
-      const newBid = { user: 'Nuevo usuario', amount: 100, description: 'Nueva puja' }; // Aquí agregarías los datos reales
+      const newBid = { user: 'Nuevo usuario', amount: 100, description: 'Nueva puja' };
 
       // Recoger los datos de la puja
       const data = {
@@ -195,7 +214,7 @@ export default {
         .then(response => {
           if (response.data.success) {
             this.bids.push({
-              user: 'Nuevo usuario', // Aquí podrías manejar el usuario autenticado
+              user: 'Nuevo usuario',
               amount: newBid.amount,
               description: newBid.description
             });
@@ -208,8 +227,19 @@ export default {
           console.error("Error al hacer la petición", error);
         });
     },
-    removeBid(index) {
-      this.bids.splice(index, 1);
+    async removeBid(bidId) {
+      try {
+        const response = await axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`);
+        if (response.data.success) {
+          // Eliminar la puja de la lista local
+          this.bids = this.bids.filter(bid => bid.id !== bidId);
+          console.log("Puja eliminada con éxito");
+        } else {
+          console.error("Error al eliminar la puja", response.data);
+        }
+      } catch (error) {
+        console.error("Error al hacer la petición de eliminación", error);
+      }
     }
   }
 }
