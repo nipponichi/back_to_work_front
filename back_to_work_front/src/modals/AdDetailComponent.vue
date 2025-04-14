@@ -9,14 +9,13 @@
       <p class="mt-2 text-gray-600" v-if="adData.due_date">Fecha de finalización: {{ adData.due_date }}</p>
     </div>
 
-    <!-- Grid de Pujas -->
+    <!-- Grid de nueva puja -->
     <div v-if="showBidGrid" class="mt-6">
       <div class="overflow-x-auto bg-white shadow-md rounded-md">
         <table class="min-w-full text-sm">
           <tbody>
-            <!-- Fila vacía para nueva puja -->
-            <tr class="border-b">
-              <td class="px-6 py-3">Nuevo Usuario</td>
+            <tr v-if="showNewBidRow" class="border-b">
+              <td class="px-6 py-3">{{ loggedInUser ? loggedInUser.name : 'Usuario no logado' }}</td>
               <td class="px-6 py-3">
                 <input v-model="newBid.bid" type="number" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Monto" />
               </td>
@@ -24,7 +23,11 @@
                 <input v-model="newBid.description" type="text" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Descripción" />
               </td>
               <td class="px-6 py-3">
-                <button @click="submitNewBid" class="text-green-500 hover:text-green-700">
+                <button
+                  @click="submitNewBid"
+                  class="text-green-500 hover:text-green-700"
+                  :disabled="isSubmitting"
+                >
                   Añadir
                 </button>
               </td>
@@ -34,7 +37,7 @@
       </div>
     </div>
 
-    <!-- Pujas -->
+    <!-- Pujas existentes -->
     <div v-if="bids.length > 0" class="mt-6">
       <h3 class="text-lg font-semibold mb-4">Pujas</h3>
       <div class="overflow-x-auto bg-white shadow-md rounded-md">
@@ -48,21 +51,15 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Mostrar pujas existentes -->
-            <tr v-for="(bid, index) in bids" :key="bid.id" class="border-b">
-              <td class="px-6 py-3">{{ bid.user.name }}</td> <!-- Nombre del usuario -->
-              <td class="px-6 py-3">{{ bid.bid }}</td> <!-- Monto de la puja -->
-              <td class="px-6 py-3">{{ bid.description }}</td> <!-- Descripción -->
+            <tr v-for="bid in bids" :key="bid.id" class="border-b">
+              <td class="px-6 py-3">{{ bid.user?.name || 'Desconocido' }}</td>
+              <td class="px-6 py-3">{{ bid.bid }}</td>
+              <td class="px-6 py-3">{{ bid.description }}</td>
               <td class="px-6 py-3">
-                <!-- Mostrar acciones solo si el usuario logado es el que hizo la puja -->
-                <template v-if="loggedInUser && bid.user.id === loggedInUser.id">
+                <template v-if="loggedInUser && bid.user && bid.user.id === loggedInUser.id">
                   <button @click="removeBid(bid.id)" class="text-red-500 hover:text-red-700">
                     Eliminar
                   </button>
-                </template>
-                <!-- Si no es el mismo usuario, no mostramos nada -->
-                <template v-else>
-                  <!-- Celda vacía en lugar de las acciones -->
                 </template>
               </td>
             </tr>
@@ -71,16 +68,18 @@
       </div>
     </div>
 
-    <!-- Botones Pujar y Chatear debajo del grid de pujas -->
+    <!-- Botones -->
     <div class="mt-6 text-center">
-      <button 
+      <button
         @click="toggleBidGrid"
-        class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+        class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      >
         {{ showBidGrid ? 'Cerrar Pujas' : 'Pujar' }}
       </button>
-      <button 
+      <button
         @click="chat"
-        class="ml-4 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
+        class="ml-4 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+      >
         Chatear
       </button>
     </div>
@@ -89,7 +88,6 @@
 
 <script>
 import axios from 'axios';
-import UserService from '../services/api/user.service'; // Para obtener el usuario logado
 
 export default {
   props: {
@@ -100,98 +98,104 @@ export default {
   },
   data() {
     return {
-      adData: null, // Aquí guardamos los datos del anuncio
-      categories: [],
-      bids: [], // Array para las pujas
-      newBid: { bid: '', description: '' }, // Datos para una nueva puja
-      loggedInUser: null, // Usuario logado
-      bidsLoaded: false, // Flag para evitar recargar pujas
-      showBidGrid: false, // Inicialmente el grid está oculto
+      adData: null,
+      bids: [],
+      newBid: {
+        bid: null,
+        description: ''
+      },
+      loggedInUser: null,
+      showBidGrid: false,
+      showNewBidRow: false,
+      isSubmitting: false
     };
   },
   async mounted() {
     await this.fetchAdData();
-    await this.fetchCategories();
-    await this.fetchLoggedInUser(); // Obtener el usuario logado
-    await this.fetchBids(); // Obtener las pujas del anuncio
+    await this.fetchLoggedInUser();
+    await this.fetchBids();
   },
   methods: {
     async fetchAdData() {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/ads/${this.id}`);
-        if (response.data.success) {
-          this.adData = response.data.data; // Guardamos los detalles del anuncio
+        const res = await axios.get(`http://127.0.0.1:8000/api/ads/${this.id}`);
+        if (res.data.success) {
+          this.adData = res.data.data;
         }
-      } catch (error) {
-        console.error("Error fetching ad data:", error);
-      }
-    },
-    async fetchCategories() {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/api/categories');
-        if (response.data.success) {
-          this.categories = response.data.data; // Guardamos las categorías
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
+      } catch (err) {
+        console.error("Error al obtener el anuncio:", err);
       }
     },
     async fetchLoggedInUser() {
       try {
-        const user = JSON.parse(localStorage.getItem("user")); // Obtenemos el usuario logado desde el localStorage
-        this.loggedInUser = user; // Guardamos el usuario logado
-      } catch (error) {
-        console.error("Error fetching logged-in user:", error);
+        const user = JSON.parse(localStorage.getItem("user"));
+        this.loggedInUser = user;
+      } catch (err) {
+        console.error("No se pudo obtener el usuario:", err);
       }
     },
     async fetchBids() {
-      if (this.bidsLoaded) return; // Evitar recargar las pujas si ya se cargaron
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
-        if (response.data.success) {
-          this.bids = response.data.data; // Guardamos las pujas
-          this.bidsLoaded = true; // Marcamos que las pujas se han cargado
+        const res = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
+        if (res.data.success) {
+          this.bids = res.data.data;
         }
-      } catch (error) {
-        console.error("Error fetching bids:", error);
+      } catch (err) {
+        console.error("Error al obtener pujas:", err);
       }
     },
     toggleBidGrid() {
-      this.showBidGrid = !this.showBidGrid; // Alternar la visibilidad del grid
+      if (this.showBidGrid) {
+        this.showNewBidRow = false;
+        this.showBidGrid = false;
+      } else {
+        this.showNewBidRow = true;
+        this.showBidGrid = true;
+      }
     },
-    submitNewBid() {
-      const data = {
-        bid: this.newBid.bid,
-        description: this.newBid.description,
-        ad_id: this.id,
-        user_id: this.loggedInUser.id, // Usamos el user_id logado
-        is_valid: true,
-      };
+    async submitNewBid() {
+      if (!this.newBid.bid || !this.newBid.description) return;
 
-      axios.post('http://127.0.0.1:8000/api/offers', data)
-        .then((response) => {
-          if (response.data.success) {
-            this.bids.push(response.data.data); // Añadimos la nueva puja al listado
-            this.newBid = { bid: '', description: '' }; // Limpiamos los campos del formulario
-          }
-        })
-        .catch(error => {
-          console.error("Error adding new bid:", error);
+      this.isSubmitting = true;
+
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/api/offers', {
+          bid: this.newBid.bid,
+          description: this.newBid.description,
+          ad_id: this.adData.id,
+          user_id: this.loggedInUser.id,
+          is_valid: true
         });
+
+        if (response.data.success) {
+          const newBid = response.data.data;
+          // Si el backend no devuelve user, recarga lista
+          if (!newBid.user) {
+            await this.fetchBids();
+          } else {
+            this.bids.unshift(newBid);
+          }
+          this.newBid = { bid: null, description: '' };
+          this.showNewBidRow = false;
+          this.showBidGrid = false;
+        }
+      } catch (error) {
+        console.error("Error al añadir la puja:", error);
+      } finally {
+        this.isSubmitting = false;
+      }
     },
-    removeBid(bidId) {
-      axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`)
-        .then((response) => {
-          if (response.data.success) {
-            this.bids = this.bids.filter(bid => bid.id !== bidId);
-          }
-        })
-        .catch(error => {
-          console.error("Error deleting bid:", error);
-        });
+    async removeBid(bidId) {
+      try {
+        const response = await axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`);
+        if (response.data.success) {
+          this.bids = this.bids.filter(bid => bid.id !== bidId);
+        }
+      } catch (err) {
+        console.error("Error al eliminar puja:", err);
+      }
     },
     chat() {
-      // Función para manejar la lógica de chat (puedes implementarla más tarde)
       alert('Función de chat no implementada aún');
     }
   }
