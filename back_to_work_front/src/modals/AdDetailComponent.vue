@@ -82,7 +82,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(bid, index) in bids" :key="bid.id" class="border-b">
+            <tr v-for="bid in bids" :key="bid.id" class="border-b">
               <td class="px-6 py-3">{{ bid.user_id }}</td>
               <td class="px-6 py-3">{{ bid.bid }}</td>
               <td class="px-6 py-3">{{ bid.description }}</td> 

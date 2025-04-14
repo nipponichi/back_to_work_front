@@ -23,23 +23,23 @@
     <div class="max-w-6xl mx-auto mt-8">
       <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <DataTable
-        ref="dt"
-        :value="filteredUsers"
-        dataKey="id"
-        :paginator="true"
-        :rows="10"
-        :filters="filters"
-        :loading="loading"
-        :sortField="sortField"
-        :sortOrder="sortOrder"
-        @sort="onSort"
-        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-        :rowsPerPageOptions="[5, 10, 25]"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
-        class="p-datatable-lg cursor-pointer bg-white custom-datatable"
-        tableStyle="min-width: 50rem"
-      >
-        <template #empty> 
+          ref="dt"
+          :value="filteredUsers"
+          dataKey="id"
+          :paginator="true"
+          :rows="10"
+          :filters="filters"
+          :loading="loading"
+          :sortField="sortField"
+          :sortOrder="sortOrder"
+          @sort="onSort"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          :rowsPerPageOptions="[5, 10, 25]"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+          class="p-datatable-lg cursor-pointer bg-white custom-datatable"
+          tableStyle="min-width: 50rem"
+        >
+        <template #empty>
           <div class="p-6 text-center text-gray-800 text-lg bg-white">
             No users found.
           </div>
@@ -57,8 +57,7 @@
           <template #body="{ data }">
             <span class="font-semibold text-gray-800 text-lg">{{ data.name }}</span>
           </template>
-        </Column>
-        
+        </Column>  
         <Column field="categories" header="Categories"
           headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
           bodyClass="p-4 bg-white">
@@ -72,16 +71,27 @@
             <span v-else class="text-gray-500 text-lg">No categories</span>
           </template>
         </Column>
-        <Column header="Utilities"
+        <Column 
+        header="Actions" 
         headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
-        bodyClass="p-4 bg-white">
-          <div class="flex space-x-2">
-            <button               
-            >hola</button>
+        bodyClass="p-4 bg-white"
+      >
+        <template #body="{ data }">
+          <Tooltip 
+            position="top" 
+            content="Iniciar chat" 
+            :showDelay="300" 
+            appendTo="body" 
+          >
             <button 
-            />
-          </div>
-        </Column>
+              class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors cursor-pointer"
+              @click="openChat(data)">
+            >
+              <i class="pi pi-comment text-black"></i>
+            </button>
+          </Tooltip>
+        </template>
+      </Column>
       </DataTable>
       </div>
     </div>

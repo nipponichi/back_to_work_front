@@ -1,17 +1,23 @@
-@import "tailwindcss";
 
-/* Modales */
-/* .p-dialog .p-dialog-header {
-    background: white;
-    color: Black;
-    font-weight: bold;
-    font-size: 22px;
-    border-top-left-radius: 0.5rem !important;
-    border-top-right-radius: 0.5rem !important;
-    padding: 10px 10px;
-}
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
-.p-dialog-mask {
-    background-color: rgba(0, 0, 0, 0.5) !important;
+.pi {
+    font-family: primeicons;
+    font-style: normal;
+    font-weight: 400;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    display: inline-block;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+
+
+.simpleDelete-button {
+    color:rgb(239, 68, 68);
+    border: 1px solid;
+    
 }
- */
