@@ -6,6 +6,7 @@ import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura';
+import 'primeicons/primeicons.css'
 
 
 const app = createApp(App)

@@ -82,18 +82,17 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Mostrar pujas existentes -->
             <tr v-for="(bid, index) in bids" :key="bid.id" class="border-b">
-              <td class="px-6 py-3">{{ bid.user_id }}</td> <!-- Mostrar el user_id -->
-              <td class="px-6 py-3">{{ bid.bid }}</td> <!-- Monto de la puja -->
-              <td class="px-6 py-3">{{ bid.description }}</td> <!-- Descripción -->
+              <td class="px-6 py-3">{{ bid.user_id }}</td>
+              <td class="px-6 py-3">{{ bid.bid }}</td>
+              <td class="px-6 py-3">{{ bid.description }}</td> 
               <td class="px-6 py-3">
                 <button @click="removeBid(bid.id)" class="text-red-500 hover:text-red-700">
                   Eliminar
                 </button>
               </td>
             </tr>
-            <!-- Fila vacía para nueva puja -->
+
             <tr class="border-b">
               <td class="px-6 py-3">Nuevo Usuario</td>
               <td class="px-6 py-3">
@@ -113,13 +112,12 @@
       </div>
     </div>
 
-    <!-- Botón Pujar/Cerrar pujas -->
     <div class="mb-4 p-4">
       <div>
         <Button 
           class="bg-amber-500 rounded p-4 mr-4 cursor-pointer hover:bg-amber-200" 
           @click="toggleBidGrid">
-          {{ showBidGrid ? 'Cerrar pujas' : 'Pujar' }} <!-- Cambiar el texto dinámicamente -->
+          {{ showBidGrid ? 'Cerrar pujas' : 'Pujar' }}
         </Button>
         <Button class="bg-green-500 rounded p-4 cursor-pointer hover:bg-green-300">Chatear</Button>
       </div>
@@ -151,9 +149,9 @@ export default {
       },
       categories: [],
       showBidGrid: false,
-      bids: [], // Empezamos con un array vacío para las pujas
-      newBid: { bid: '', description: '' }, // Para manejar la nueva puja
-      bidsLoaded: false, // Bandera para evitar recargar las pujas
+      bids: [],
+      newBid: { bid: '', description: '' },
+      bidsLoaded: false,
     };
   },
   async mounted() {
@@ -183,14 +181,14 @@ export default {
       }
     },
     async fetchBids() {
-      if (this.bidsLoaded) return; // Si las pujas ya están cargadas, no hacer la consulta
+      if (this.bidsLoaded) return;
 
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
+        const response = await UserService.show('offers',this.id);
         if (response.data.success) {
-          this.bids = response.data.data; // Solo necesitamos los datos de las pujas
+          this.bids = response.data.data;
           console.log("Bids:", this.bids);
-          this.bidsLoaded = true; // Marcar que las pujas ya están cargadas
+          this.bidsLoaded = true;
         }
       } catch (error) {
         console.error("Error fetching bids:", error);
@@ -209,18 +207,18 @@ export default {
       return `${'http://127.0.0.1:8000/storage'}/${path}`;
     },
     toggleBidGrid() {
-      this.showBidGrid = !this.showBidGrid; // Cambiar el estado de visibilidad del grid
+      this.showBidGrid = !this.showBidGrid;
       if (this.showBidGrid && !this.bidsLoaded) {
-        this.fetchBids(); // Solo cargar las pujas si no se han cargado previamente
+        this.fetchBids();
       }
     },
     submitNewBid() {
       const data = {
         bid: this.newBid.bid,
         description: this.newBid.description,
-        ad_id: this.id, // Anuncio relacionado
-        user_id: 1, //user_id actual
-        is_valid: true, // Añadir el campo is_valid a true
+        ad_id: this.id,
+        user_id: 1,
+        is_valid: true,
       };
 
       console.log(data);
@@ -228,9 +226,8 @@ export default {
       axios.post('http://127.0.0.1:8000/api/offers', data)
         .then((response) => {
           if (response.data.success) {
-            // Actualizar el listado con la nueva puja
-            this.bids.push(response.data.data); // Añadir la nueva puja directamente al listado
-            this.newBid = { bid: '', description: '' }; // Limpiar el formulario
+            this.bids.push(response.data.data);
+            this.newBid = { bid: '', description: '' };
           }
         })
         .catch(error => {
@@ -241,7 +238,6 @@ export default {
       axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`)
         .then((response) => {
           if (response.data.success) {
-            // Filtrar las pujas eliminadas
             this.bids = this.bids.filter(bid => bid.id !== bidId);
           }
         })

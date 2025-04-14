@@ -105,6 +105,7 @@ export default {
     },
     async logout() {
       const response = await AuthService.logout(this.accessToken)
+      console.log(this.accessToken);
       if (response.data.success) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
