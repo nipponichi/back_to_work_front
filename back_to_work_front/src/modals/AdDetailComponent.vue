@@ -1,98 +1,19 @@
 <template>
   <div class="space-y-6">
-    <!-- Nombre -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Nombre:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-        {{ adData.name }}
-      </div>
+    <!-- Detalle del anuncio -->
+    <div v-if="adData" class="p-6 bg-white rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold text-center text-gray-700">{{ adData.name }}</h2>
+      <p class="mt-4 text-gray-600">{{ adData.description }}</p>
+      <p class="mt-2 text-gray-600">Categoría: {{ adData.category_id }}</p>
+      <p class="mt-2 text-gray-600">Ubicación: {{ adData.location }}</p>
+      <p class="mt-2 text-gray-600" v-if="adData.due_date">Fecha de finalización: {{ adData.due_date }}</p>
     </div>
 
-    <!-- Location -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Location:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-        {{ adData.location }}
-      </div>
-    </div>
-
-    <!-- Categoría -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Categoría:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-        {{ getCategoryName(adData.category_id) }}
-      </div>
-    </div>
-
-    <!-- Descripción -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Descripción:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 whitespace-pre-line">
-        {{ adData.description }}
-      </div>
-    </div>
-
-    <!-- Media -->
-    <div class="mb-6" v-if="adData.pictures && adData.pictures.length">
-      <label class="block text-gray-700 font-medium mb-2">Fotos:</label>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        <div v-for="(picture, index) in adData.pictures" :key="index" class="relative">
-          <div class="rounded border border-gray-200 overflow-hidden bg-gray-100 aspect-square">
-            <img :src="getImageUrl(picture.path)" 
-                 class="w-full h-full object-cover"
-                 :alt="`Imagen ${index + 1} del anuncio`">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Estado -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Estado:</label>
-      <div class="w-full px-3 py-2">
-        <span :class="{
-          'px-3 py-1 rounded-full text-sm font-medium': true,
-          'bg-green-100 text-green-800': adData.is_done,
-          'bg-yellow-100 text-yellow-800': !adData.is_done
-        }">
-          {{ adData.is_done ? 'Completado' : 'Pendiente' }}
-        </span>
-      </div>
-    </div>
-
-    <!-- Fecha -->
-    <div class="mb-4" v-if="adData.due_date">
-      <label class="block text-gray-700 font-medium mb-2">Fecha límite:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-        {{ formatDate(adData.due_date) }}
-      </div>
-    </div>
-
-    <!-- Pujas -->
+    <!-- Grid de Pujas -->
     <div v-if="showBidGrid" class="mt-6">
-      <h3 class="text-lg font-semibold mb-4">Pujas</h3>
       <div class="overflow-x-auto bg-white shadow-md rounded-md">
         <table class="min-w-full text-sm">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="px-6 py-3 text-left">Usuario</th>
-              <th class="px-6 py-3 text-left">Monto</th>
-              <th class="px-6 py-3 text-left">Descripción</th>
-              <th class="px-6 py-3 text-left">Acciones</th>
-            </tr>
-          </thead>
           <tbody>
-            <!-- Mostrar pujas existentes -->
-            <tr v-for="(bid, index) in bids" :key="bid.id" class="border-b">
-              <td class="px-6 py-3">{{ bid.user_id }}</td> <!-- Mostrar el user_id -->
-              <td class="px-6 py-3">{{ bid.bid }}</td> <!-- Monto de la puja -->
-              <td class="px-6 py-3">{{ bid.description }}</td> <!-- Descripción -->
-              <td class="px-6 py-3">
-                <button @click="removeBid(bid.id)" class="text-red-500 hover:text-red-700">
-                  Eliminar
-                </button>
-              </td>
-            </tr>
             <!-- Fila vacía para nueva puja -->
             <tr class="border-b">
               <td class="px-6 py-3">Nuevo Usuario</td>
@@ -113,23 +34,62 @@
       </div>
     </div>
 
-    <!-- Botón Pujar/Cerrar pujas -->
-    <div class="mb-4 p-4">
-      <div>
-        <Button 
-          class="bg-amber-500 rounded p-4 mr-4 cursor-pointer hover:bg-amber-200" 
-          @click="toggleBidGrid">
-          {{ showBidGrid ? 'Cerrar pujas' : 'Pujar' }} <!-- Cambiar el texto dinámicamente -->
-        </Button>
-        <Button class="bg-green-500 rounded p-4 cursor-pointer hover:bg-green-300">Chatear</Button>
+    <!-- Pujas -->
+    <div v-if="bids.length > 0" class="mt-6">
+      <h3 class="text-lg font-semibold mb-4">Pujas</h3>
+      <div class="overflow-x-auto bg-white shadow-md rounded-md">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="px-6 py-3 text-left">Usuario</th>
+              <th class="px-6 py-3 text-left">Monto</th>
+              <th class="px-6 py-3 text-left">Descripción</th>
+              <th class="px-6 py-3 text-left">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Mostrar pujas existentes -->
+            <tr v-for="(bid, index) in bids" :key="bid.id" class="border-b">
+              <td class="px-6 py-3">{{ bid.user.name }}</td> <!-- Nombre del usuario -->
+              <td class="px-6 py-3">{{ bid.bid }}</td> <!-- Monto de la puja -->
+              <td class="px-6 py-3">{{ bid.description }}</td> <!-- Descripción -->
+              <td class="px-6 py-3">
+                <!-- Mostrar acciones solo si el usuario logado es el que hizo la puja -->
+                <template v-if="loggedInUser && bid.user.id === loggedInUser.id">
+                  <button @click="removeBid(bid.id)" class="text-red-500 hover:text-red-700">
+                    Eliminar
+                  </button>
+                </template>
+                <!-- Si no es el mismo usuario, no mostramos nada -->
+                <template v-else>
+                  <!-- Celda vacía en lugar de las acciones -->
+                </template>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
+
+    <!-- Botones Pujar y Chatear debajo del grid de pujas -->
+    <div class="mt-6 text-center">
+      <button 
+        @click="toggleBidGrid"
+        class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+        {{ showBidGrid ? 'Cerrar Pujas' : 'Pujar' }}
+      </button>
+      <button 
+        @click="chat"
+        class="ml-4 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
+        Chatear
+      </button>
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import UserService from '../services/api/user.service';
+import UserService from '../services/api/user.service'; // Para obtener el usuario logado
 
 export default {
   props: {
@@ -140,33 +100,27 @@ export default {
   },
   data() {
     return {
-      adData: {
-        name: '',
-        description: '',
-        category_id: '',
-        location: '',
-        is_done: false,
-        due_date: null,
-        pictures: []
-      },
+      adData: null, // Aquí guardamos los datos del anuncio
       categories: [],
-      showBidGrid: false,
-      bids: [], // Empezamos con un array vacío para las pujas
-      newBid: { bid: '', description: '' }, // Para manejar la nueva puja
-      bidsLoaded: false, // Bandera para evitar recargar las pujas
+      bids: [], // Array para las pujas
+      newBid: { bid: '', description: '' }, // Datos para una nueva puja
+      loggedInUser: null, // Usuario logado
+      bidsLoaded: false, // Flag para evitar recargar pujas
+      showBidGrid: false, // Inicialmente el grid está oculto
     };
   },
   async mounted() {
     await this.fetchAdData();
     await this.fetchCategories();
+    await this.fetchLoggedInUser(); // Obtener el usuario logado
+    await this.fetchBids(); // Obtener las pujas del anuncio
   },
   methods: {
     async fetchAdData() {
       try {
-        const response = await UserService.show(`ads/${this.id}`);
+        const response = await axios.get(`http://127.0.0.1:8000/api/ads/${this.id}`);
         if (response.data.success) {
-          this.adData = response.data.data;
-          console.log("Ad data:", this.adData);
+          this.adData = response.data.data; // Guardamos los detalles del anuncio
         }
       } catch (error) {
         console.error("Error fetching ad data:", error);
@@ -174,63 +128,51 @@ export default {
     },
     async fetchCategories() {
       try {
-        const response = await UserService.get("categories");
+        const response = await axios.get('http://127.0.0.1:8000/api/categories');
         if (response.data.success) {
-          this.categories = response.data.data;
+          this.categories = response.data.data; // Guardamos las categorías
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
     },
+    async fetchLoggedInUser() {
+      try {
+        const user = JSON.parse(localStorage.getItem("user")); // Obtenemos el usuario logado desde el localStorage
+        this.loggedInUser = user; // Guardamos el usuario logado
+      } catch (error) {
+        console.error("Error fetching logged-in user:", error);
+      }
+    },
     async fetchBids() {
-      if (this.bidsLoaded) return; // Si las pujas ya están cargadas, no hacer la consulta
-
+      if (this.bidsLoaded) return; // Evitar recargar las pujas si ya se cargaron
       try {
         const response = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
         if (response.data.success) {
-          this.bids = response.data.data; // Solo necesitamos los datos de las pujas
-          console.log("Bids:", this.bids);
-          this.bidsLoaded = true; // Marcar que las pujas ya están cargadas
+          this.bids = response.data.data; // Guardamos las pujas
+          this.bidsLoaded = true; // Marcamos que las pujas se han cargado
         }
       } catch (error) {
         console.error("Error fetching bids:", error);
       }
     },
-    getCategoryName(categoryId) {
-      const category = this.categories.find(cat => cat.id === categoryId);
-      return category ? category.category : 'Sin categoría';
-    },
-    formatDate(dateString) {
-      if (!dateString) return '';
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    },
-    getImageUrl(path) {
-      return `${'http://127.0.0.1:8000/storage'}/${path}`;
-    },
     toggleBidGrid() {
-      this.showBidGrid = !this.showBidGrid; // Cambiar el estado de visibilidad del grid
-      if (this.showBidGrid && !this.bidsLoaded) {
-        this.fetchBids(); // Solo cargar las pujas si no se han cargado previamente
-      }
+      this.showBidGrid = !this.showBidGrid; // Alternar la visibilidad del grid
     },
     submitNewBid() {
       const data = {
         bid: this.newBid.bid,
         description: this.newBid.description,
-        ad_id: this.id, // Anuncio relacionado
-        user_id: 1, //user_id actual
-        is_valid: true, // Añadir el campo is_valid a true
+        ad_id: this.id,
+        user_id: this.loggedInUser.id, // Usamos el user_id logado
+        is_valid: true,
       };
-
-      console.log(data);
 
       axios.post('http://127.0.0.1:8000/api/offers', data)
         .then((response) => {
           if (response.data.success) {
-            // Actualizar el listado con la nueva puja
-            this.bids.push(response.data.data); // Añadir la nueva puja directamente al listado
-            this.newBid = { bid: '', description: '' }; // Limpiar el formulario
+            this.bids.push(response.data.data); // Añadimos la nueva puja al listado
+            this.newBid = { bid: '', description: '' }; // Limpiamos los campos del formulario
           }
         })
         .catch(error => {
@@ -241,13 +183,16 @@ export default {
       axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`)
         .then((response) => {
           if (response.data.success) {
-            // Filtrar las pujas eliminadas
             this.bids = this.bids.filter(bid => bid.id !== bidId);
           }
         })
         .catch(error => {
           console.error("Error deleting bid:", error);
         });
+    },
+    chat() {
+      // Función para manejar la lógica de chat (puedes implementarla más tarde)
+      alert('Función de chat no implementada aún');
     }
   }
 };
