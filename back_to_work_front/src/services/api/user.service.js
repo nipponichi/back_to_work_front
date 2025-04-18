@@ -6,7 +6,7 @@ class UserService {
   }
 
   show(route, data) {
-    return api.get(route, data)
+    return api.get(`${route}/${data}`)
   }
 
   set(route, data) {

@@ -2,25 +2,25 @@
   <nav class="absolute top-0 left-0 w-full p-4 bg-transparent z-50 mt-10">
     <div class="flex justify-between items-center w-full">
 
-      <ul class="grid grid-cols-4 gap-4 absolute left-1/2 transform -translate-x-1/2 list-none">
+      <ul class="grid grid-cols-4 gap-4 absolute left-1/2 transform -translate-x-1/2">
         <li>
-          <RouterLink to="/" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300 no-underline">
+          <RouterLink to="/" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
             🏠 Inicio
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/about" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300 no-underline">
+          <RouterLink to="/about" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
             ℹ️ Acerca de
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/service" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300 no-underline">
+          <RouterLink to="/service" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
             🛠️ Servicios
           </RouterLink>
         </li>
         <li>
           <!-- Comentado para evitar activar el chat y bloquear la pagina al acceder -->
-          <RouterLink to="/contact" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300 no-underline">
+          <RouterLink to="/contact" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
             📞 Contacto
           </RouterLink>
         </li>

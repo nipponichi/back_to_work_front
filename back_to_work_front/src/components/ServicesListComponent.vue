@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
@@ -38,7 +38,7 @@
     </div>
 
     <div class="max-w-6xl mx-auto mt-8">
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <DataTable
           ref="dt"
           :value="filteredAds"

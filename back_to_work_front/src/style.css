@@ -3,6 +3,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply m-0 p-0;
+  }
+
+  button {
+    @apply border-none focus:outline-none;
+  }
+
+  ul {
+    @apply list-none;
+  }
+
+  a {
+    @apply no-underline;
+  }
+}
+
 .pi {
     font-family: primeicons;
     font-style: normal;

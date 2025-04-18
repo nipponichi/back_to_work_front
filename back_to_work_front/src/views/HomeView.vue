@@ -30,7 +30,7 @@
           Seccion test 2
         </p>
 
-        <button @click="isModalOpen = true" class="cursor-pointer bg-gray-300 px-3 py-2 rounded-lg hover:bg-gray-400">Modal</button>
+        <button @click="isModalOpen = true" class="cursor-pointer bg-gray-300 px-3 py-2 rounded-lg border-none hover:bg-gray-400">Modal</button>
       </div>
     </section> 
       <AdverFilters />

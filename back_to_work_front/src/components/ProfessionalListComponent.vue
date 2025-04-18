@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">Professional Inquiries</h1>
@@ -33,6 +33,7 @@
           :sortField="sortField"
           :sortOrder="sortOrder"
           @sort="onSort"
+          @rowClick="onRowClick($event.data.id)"
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           :rowsPerPageOptions="[5, 10, 25]"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
@@ -77,24 +78,52 @@
         bodyClass="p-4 bg-white"
       >
         <template #body="{ data }">
-          <Tooltip 
-            position="top" 
-            content="Iniciar chat" 
-            :showDelay="300" 
-            appendTo="body" 
-          >
-            <button 
-              class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors cursor-pointer"
-              @click="openChat(data)">
+          <div class="flex gap-2">
+            <Tooltip 
+              position="top" 
+              content="Iniciar chat" 
+              :showDelay="300" 
+              appendTo="body"
             >
-              <i class="pi pi-comment text-black"></i>
-            </button>
-          </Tooltip>
+              <button 
+                class="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-300 flex items-center justify-center transition-colors cursor-pointer"
+                @click="openChat(data)"
+              >
+                <i class="pi pi-comment text-white"></i>
+              </button>
+            </Tooltip>
+      
+            <Tooltip 
+              position="top" 
+              content="Segunda acción" 
+              :showDelay="300" 
+              appendTo="body"
+            >
+              <button 
+                class="w-8 h-8 rounded-full bg-blue-500 hover:bg-blue-300 flex items-center justify-center transition-colors cursor-pointer"
+                @click="otraFuncion(data)"
+              >
+                <i class="pi pi-cog text-white"></i>
+              </button>
+            </Tooltip>
+          </div>
         </template>
       </Column>
       </DataTable>
       </div>
     </div>
+    <Dialog
+      v-model:visible="openProDetailModal"
+      header="Pro details"
+      :modal="true"
+      :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
+      headerClass="border-b border-gray-200 p-4 font-semibold text-lg"
+      contentClass="p-4"
+    >
+      <div class="bg-white text-black text-2xl p-8 rounded">
+        <ProDetailComponent  :id="selectedId"/>
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -104,21 +133,26 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import { useToast } from 'vue-toastification';
 import UserService from '../services/api/user.service';
+import ProDetailComponent from '../modals/ProDetailComponent.vue';
+import Dialog from 'primevue/dialog';
 
 export default {
   components: {   
       InputText,
       DataTable,
-      Column
+      Column,
+      ProDetailComponent,
+      Dialog
   },
   data() {
       return {
-          searchQuery: '',
-          loading: true,
-          sortField: null,
-          sortOrder: null,
-          users: [],
-          toast: useToast()
+        openProDetailModal: false,
+        selectedId: null,
+        searchQuery: '',
+        loading: true,
+        sortField: null,
+        sortOrder: null,          users: [],
+        toast: useToast()
       };
   },
   computed: {
@@ -134,6 +168,11 @@ export default {
       this.fetchProfessionalUsers();
   },
   methods: {
+      onRowClick(id) {
+          this.selectedId = id;
+          this.openProDetailModal = true;
+      },
+
       onSort(event) {
           this.sortField = event.sortField;
           this.sortOrder = event.sortOrder;
@@ -153,21 +192,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.custom-datatable .p-datatable-tbody > tr:not(.p-highlight):hover {
-  background-color: #dddddd !important;
-  color: white !important;
-}
-
-.custom-datatable .p-datatable-tbody > tr:not(.p-highlight):hover > td {
-  background-color: inherit !important;
-  color: white !important;
-}
-
-.custom-datatable .p-datatable-tbody > tr > td {
-  background-color: #ffffff !important;
-  transition: background-color 0.2s ease;
-  color: white !important;
-}
-</style>
