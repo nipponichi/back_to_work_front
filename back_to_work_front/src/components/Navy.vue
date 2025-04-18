@@ -1,45 +1,45 @@
 <template>
-  <nav class="absolute top-0 left-0 w-full p-4 bg-transparent z-50">
+  <nav class="absolute top-0 left-0 w-full p-4 bg-transparent z-50 mt-10">
     <div class="flex justify-between items-center w-full">
 
-      <ul class="grid grid-cols-4 gap-4 absolute left-1/2 transform -translate-x-1/2">
+      <ul class="grid grid-cols-4 gap-4 absolute left-1/2 transform -translate-x-1/2 list-none">
         <li>
-          <RouterLink to="/" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
+          <RouterLink to="/" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300 no-underline">
             🏠 Inicio
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/about" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
+          <RouterLink to="/about" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300 no-underline">
             ℹ️ Acerca de
           </RouterLink>
         </li>
         <li>
-          <RouterLink to="/service" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
+          <RouterLink to="/service" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300 no-underline">
             🛠️ Servicios
           </RouterLink>
         </li>
         <li>
           <!-- Comentado para evitar activar el chat y bloquear la pagina al acceder -->
-<!--           <RouterLink to="/contact" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
+          <RouterLink to="/contact" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300 no-underline">
             📞 Contacto
-          </RouterLink> -->
+          </RouterLink>
         </li>
       </ul>
       
-      <div ref="dropdownMenu" class="relative ml-auto">
-        <div @click="toggleDropdown" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
+      <div ref="dropdownMenu" class="relative ml-auto mr-10">
+        <div @click="toggleDropdown" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center ">
           {{ accessToken ? `👤 ${user.name || "Usuario"}` : "📝 Cuenta" }}
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </div>
 
-        <div v-if="isOpen" class="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-lg overflow-hidden">
+        <div v-if="isOpen" class="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-lg overflow-hidden no-underline">
           <template v-if="!accessToken">
-            <RouterLink to="/login" class="block px-4 py-2 text-gray-700 hover:bg-gray-200" @click="closeDropdown">
+            <RouterLink to="/login" class="block px-4 py-2 text-gray-700 hover:bg-gray-200 no-underline" @click="closeDropdown">
               🔑 Iniciar Sesión
             </RouterLink>
-            <RouterLink to="/register" class="block px-4 py-2 text-gray-700 hover:bg-gray-200" @click="closeDropdown">
+            <RouterLink to="/register" class="block px-4 py-2 text-gray-700 hover:bg-gray-200 no-underline" @click="closeDropdown">
               📝 Registrarse
             </RouterLink>
           </template>
