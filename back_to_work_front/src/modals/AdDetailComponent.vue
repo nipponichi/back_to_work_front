@@ -1,75 +1,44 @@
 <template>
   <div class="space-y-6">
-    <!-- Nombre -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Nombre:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-        {{ adData.name }}
-      </div>
+    <!-- Detalle del anuncio -->
+    <div v-if="adData" class="p-6 bg-white rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold text-center text-gray-700">{{ adData.name }}</h2>
+      <p class="mt-4 text-gray-600">{{ adData.description }}</p>
+      <p class="mt-2 text-gray-600">Categoría: {{ adData.category_id }}</p>
+      <p class="mt-2 text-gray-600">Ubicación: {{ adData.location }}</p>
+      <p class="mt-2 text-gray-600" v-if="adData.due_date">Fecha de finalización: {{ adData.due_date }}</p>
     </div>
 
-    <!-- Location -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Location:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-        {{ adData.location }}
-      </div>
-    </div>
-
-    <!-- Categoría -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Categoría:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-        {{ getCategoryName(adData.category_id) }}
-      </div>
-    </div>
-
-    <!-- Descripción -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Descripción:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 whitespace-pre-line">
-        {{ adData.description }}
-      </div>
-    </div>
-
-    <!-- Media -->
-    <div class="mb-6" v-if="adData.pictures && adData.pictures.length">
-      <label class="block text-gray-700 font-medium mb-2">Fotos:</label>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        <div v-for="(picture, index) in adData.pictures" :key="index" class="relative">
-          <div class="rounded border border-gray-200 overflow-hidden bg-gray-100 aspect-square">
-            <img :src="getImageUrl(picture.path)" 
-                 class="w-full h-full object-cover"
-                 :alt="`Imagen ${index + 1} del anuncio`">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Estado -->
-    <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Estado:</label>
-      <div class="w-full px-3 py-2">
-        <span :class="{
-          'px-3 py-1 rounded-full text-sm font-medium': true,
-          'bg-green-100 text-green-800': adData.is_done,
-          'bg-yellow-100 text-yellow-800': !adData.is_done
-        }">
-          {{ adData.is_done ? 'Completado' : 'Pendiente' }}
-        </span>
-      </div>
-    </div>
-
-    <!-- Fecha -->
-    <div class="mb-4" v-if="adData.due_date">
-      <label class="block text-gray-700 font-medium mb-2">Fecha límite:</label>
-      <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-        {{ formatDate(adData.due_date) }}
-      </div>
-    </div>
-
-    <!-- Pujas -->
+    <!-- Grid de nueva puja -->
     <div v-if="showBidGrid" class="mt-6">
+      <div class="overflow-x-auto bg-white shadow-md rounded-md">
+        <table class="min-w-full text-sm">
+          <tbody>
+            <tr v-if="showNewBidRow" class="border-b">
+              <td class="px-6 py-3">{{ loggedInUser ? loggedInUser.name : 'Usuario no logado' }}</td>
+              <td class="px-6 py-3">
+                <input v-model="newBid.bid" type="number" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Monto" />
+              </td>
+              <td class="px-6 py-3">
+                <input v-model="newBid.description" type="text" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Descripción" />
+              </td>
+              <td class="px-6 py-3">
+                <button
+                  @click="submitNewBid"
+                  class="text-green-500 hover:text-green-700"
+                  :disabled="isSubmitting"
+                >
+                  Añadir
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pujas existentes -->
+    <div v-if="bids.length > 0" class="mt-6">
       <h3 class="text-lg font-semibold mb-4">Pujas</h3>
       <div class="overflow-x-auto bg-white shadow-md rounded-md">
         <table class="min-w-full text-sm">
@@ -83,28 +52,15 @@
           </thead>
           <tbody>
             <tr v-for="bid in bids" :key="bid.id" class="border-b">
-              <td class="px-6 py-3">{{ bid.user_id }}</td>
+              <td class="px-6 py-3">{{ bid.user?.name || 'Desconocido' }}</td>
               <td class="px-6 py-3">{{ bid.bid }}</td>
-              <td class="px-6 py-3">{{ bid.description }}</td> 
+              <td class="px-6 py-3">{{ bid.description }}</td>
               <td class="px-6 py-3">
-                <button @click="removeBid(bid.id)" class="text-red-500 hover:text-red-700">
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-
-            <tr class="border-b">
-              <td class="px-6 py-3">Nuevo Usuario</td>
-              <td class="px-6 py-3">
-                <input v-model="newBid.bid" type="number" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Monto" />
-              </td>
-              <td class="px-6 py-3">
-                <input v-model="newBid.description" type="text" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Descripción" />
-              </td>
-              <td class="px-6 py-3">
-                <button @click="submitNewBid" class="text-green-500 hover:text-green-700">
-                  Añadir
-                </button>
+                <template v-if="loggedInUser && bid.user && bid.user.id === loggedInUser.id">
+                  <button @click="removeBid(bid.id)" class="text-red-500 hover:text-red-700">
+                    Eliminar
+                  </button>
+                </template>
               </td>
             </tr>
           </tbody>
@@ -112,22 +68,26 @@
       </div>
     </div>
 
-    <div class="mb-4 p-4">
-      <div>
-        <Button 
-          class="bg-amber-500 rounded p-4 mr-4 cursor-pointer hover:bg-amber-200" 
-          @click="toggleBidGrid">
-          {{ showBidGrid ? 'Cerrar pujas' : 'Pujar' }}
-        </Button>
-        <Button class="bg-green-500 rounded p-4 cursor-pointer hover:bg-green-300">Chatear</Button>
-      </div>
+    <!-- Botones -->
+    <div class="mt-6 text-center">
+      <button
+        @click="toggleBidGrid"
+        class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      >
+        {{ showBidGrid ? 'Cerrar Pujas' : 'Pujar' }}
+      </button>
+      <button
+        @click="chat"
+        class="ml-4 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+      >
+        Chatear
+      </button>
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import UserService from '../services/api/user.service';
 
 export default {
   props: {
@@ -138,112 +98,105 @@ export default {
   },
   data() {
     return {
-      adData: {
-        name: '',
-        description: '',
-        category_id: '',
-        location: '',
-        is_done: false,
-        due_date: null,
-        pictures: []
-      },
-      categories: [],
-      showBidGrid: false,
+      adData: null,
       bids: [],
-      newBid: { bid: '', description: '' },
-      bidsLoaded: false,
+      newBid: {
+        bid: null,
+        description: ''
+      },
+      loggedInUser: null,
+      showBidGrid: false,
+      showNewBidRow: false,
+      isSubmitting: false
     };
   },
   async mounted() {
     await this.fetchAdData();
-    await this.fetchCategories();
+    await this.fetchLoggedInUser();
+    await this.fetchBids();
   },
   methods: {
     async fetchAdData() {
       try {
-        const response = await UserService.show(`ads/${this.id}`);
-        if (response.data.success) {
-          this.adData = response.data.data;
-          console.log("Ad data:", this.adData);
+        const res = await axios.get(`http://127.0.0.1:8000/api/ads/${this.id}`);
+        if (res.data.success) {
+          this.adData = res.data.data;
         }
-      } catch (error) {
-        console.error("Error fetching ad data:", error);
+      } catch (err) {
+        console.error("Error al obtener el anuncio:", err);
       }
     },
-    async fetchCategories() {
+    async fetchLoggedInUser() {
       try {
-        const response = await UserService.get("categories");
-        if (response.data.success) {
-          this.categories = response.data.data;
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
+        const user = JSON.parse(localStorage.getItem("user"));
+        this.loggedInUser = user;
+      } catch (err) {
+        console.error("No se pudo obtener el usuario:", err);
       }
     },
     async fetchBids() {
-      if (this.bidsLoaded) return;
-
       try {
-        const response = await UserService.show('offers',this.id);
-        if (response.data.success) {
-          this.bids = response.data.data;
-          console.log("Bids:", this.bids);
-          this.bidsLoaded = true;
+        const res = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
+        if (res.data.success) {
+          this.bids = res.data.data;
         }
-      } catch (error) {
-        console.error("Error fetching bids:", error);
+      } catch (err) {
+        console.error("Error al obtener pujas:", err);
       }
-    },
-    getCategoryName(categoryId) {
-      const category = this.categories.find(cat => cat.id === categoryId);
-      return category ? category.category : 'Sin categoría';
-    },
-    formatDate(dateString) {
-      if (!dateString) return '';
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    },
-    getImageUrl(path) {
-      return `${'http://127.0.0.1:8000/storage'}/${path}`;
     },
     toggleBidGrid() {
-      this.showBidGrid = !this.showBidGrid;
-      if (this.showBidGrid && !this.bidsLoaded) {
-        this.fetchBids();
+      if (this.showBidGrid) {
+        this.showNewBidRow = false;
+        this.showBidGrid = false;
+      } else {
+        this.showNewBidRow = true;
+        this.showBidGrid = true;
       }
     },
-    submitNewBid() {
-      const data = {
-        bid: this.newBid.bid,
-        description: this.newBid.description,
-        ad_id: this.id,
-        user_id: 1,
-        is_valid: true,
-      };
+    async submitNewBid() {
+      if (!this.newBid.bid || !this.newBid.description) return;
 
-      console.log(data);
+      this.isSubmitting = true;
 
-      axios.post('http://127.0.0.1:8000/api/offers', data)
-        .then((response) => {
-          if (response.data.success) {
-            this.bids.push(response.data.data);
-            this.newBid = { bid: '', description: '' };
-          }
-        })
-        .catch(error => {
-          console.error("Error adding new bid:", error);
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/api/offers', {
+          bid: this.newBid.bid,
+          description: this.newBid.description,
+          ad_id: this.adData.id,
+          user_id: this.loggedInUser.id,
+          is_valid: true
         });
+
+        if (response.data.success) {
+          const newBid = response.data.data;
+          // Si el backend no devuelve user, recarga lista
+          if (!newBid.user) {
+            await this.fetchBids();
+          } else {
+            this.bids.unshift(newBid);
+          }
+          this.newBid = { bid: null, description: '' };
+          this.showNewBidRow = false;
+          this.showBidGrid = false;
+        }
+      } catch (error) {
+        console.error("Error al añadir la puja:", error);
+      } finally {
+        this.isSubmitting = false;
+      }
     },
-    removeBid(bidId) {
-      axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`)
-        .then((response) => {
-          if (response.data.success) {
-            this.bids = this.bids.filter(bid => bid.id !== bidId);
-          }
-        })
-        .catch(error => {
-          console.error("Error deleting bid:", error);
-        });
+    async removeBid(bidId) {
+      try {
+        const response = await axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`);
+        if (response.data.success) {
+          this.bids = this.bids.filter(bid => bid.id !== bidId);
+        }
+      } catch (err) {
+        console.error("Error al eliminar puja:", err);
+      }
+    },
+    chat() {
+      alert('Función de chat no implementada aún');
     }
   }
 };
