@@ -70,7 +70,6 @@
     <!-- Modal para añadir o editar categoría -->
     <Dialog v-model:visible="addCategoryModal" :header="modalTitle" modal :closable="true" class="w-96" :style="{ transition: 'all 0.3s ease' }">
       <div class="flex flex-col gap-4 p-4">
-
         <label class="text-gray-800 font-semibold">Category Name:</label>
         <InputText v-model="newCategoryName" placeholder="Enter category name..." />
 
@@ -106,7 +105,6 @@
             Cancel
           </button>
         </div>
-
       </div>
     </Dialog>
   </div>
@@ -131,7 +129,7 @@ const editingCategoryId = ref(null);
 const newCategoryName = ref('');
 const newCategoryDescription = ref('');
 const savingCategory = ref(false);
-const modalTitle = ref('Add New Category'); // Se agrega modalTitle
+const modalTitle = ref('Add New Category'); // Título del modal
 
 // Función para obtener las categorías
 const fetchCategories = async () => {
@@ -154,7 +152,7 @@ const openEditCategoryModal = (category) => {
   newCategoryName.value = category.category;
   newCategoryDescription.value = category.description;
   editingCategoryId.value = category.id;
-  modalTitle.value = "Edit Category"; // Cambiar el título de la modal para edición
+  modalTitle.value = "Edit Category"; // Cambiar título al editar
   addCategoryModal.value = true;
 };
 
@@ -173,6 +171,7 @@ const closeAddCategoryModal = () => {
   resetForm();
 };
 
+// Función para guardar la categoría (crear o editar)
 const saveCategory = async () => {
   if (!newCategoryName.value.trim()) {
     toast.error('Category name cannot be empty');
@@ -214,6 +213,21 @@ const saveCategory = async () => {
   }
 };
 
+// Función para eliminar la categoría
+const deleteCategory = async (categoryId) => {
+  try {
+    const response = await CategoryService.delete(`categories/${categoryId}`);
+    if (response.data.success) {
+      toast.success('Category deleted successfully!');
+      fetchCategories(); // Actualiza la lista de categorías
+    } else {
+      toast.error('Failed to delete category.');
+    }
+  } catch (error) {
+    toast.error('Error deleting category.');
+  }
+};
+
 // Función para restablecer los campos del formulario
 const resetForm = () => {
   newCategoryName.value = '';
@@ -235,6 +249,7 @@ onMounted(() => {
   height: 16px;
   animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
