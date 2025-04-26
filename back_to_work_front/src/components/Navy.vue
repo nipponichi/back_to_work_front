@@ -119,7 +119,7 @@ export default {
       if (this.user && this.user.is_admin) {
         this.$router.push("/about"); // Redirige si es admin
       } else {
-        this.toast.error("Acceso denegado: solo administradores.");
+        this.toast.error("Acceso denegado: Solo administradores.");
       }
     }
   }
