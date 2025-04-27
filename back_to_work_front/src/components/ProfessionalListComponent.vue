@@ -67,6 +67,59 @@
       </div>
     </div>
 
+    <!-- BLOQUE DE USUARIOS -->
+    <div class="max-w-6xl mx-auto mt-16">
+      <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200">
+          <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Existing Users</h2>
+        </div>
+
+        <DataTable
+          :value="users"
+          dataKey="id"
+          :paginator="true"
+          :rows="10"
+          :loading="loadingUsers"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          :rowsPerPageOptions="[5, 10, 25]"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+          class="p-datatable-lg cursor-pointer bg-white custom-datatable"
+          tableStyle="min-width: 30rem"
+        >
+          <template #empty>
+            <div class="p-6 text-center text-gray-800 text-lg bg-white">
+              No users found.
+            </div>
+          </template>
+
+          <template #loading>
+            <div class="p-6 text-center text-gray-800 text-lg bg-white">
+              <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-amber-500 mb-3"></div>
+              <p class="text-lg">Loading users...</p>
+            </div>
+          </template>
+
+          <Column field="name" header="Name"
+            headerClass="font-bold text-gray-800 bg-white p-4 text-left text-xl"
+            bodyClass="p-4 bg-white">
+            <template #body="{ data }">
+              <span class="text-gray-800 text-lg">{{ data.name }}</span>
+            </template>
+          </Column>
+
+          <Column header="Actions"
+            headerClass="font-bold text-gray-800 bg-white p-4 text-center text-xl"
+            bodyClass="p-4 bg-white text-center">
+            <template #body="{ data }">
+              <button @click="blockUser(data.id)" class="text-red-600 hover:text-red-800 mx-2">
+                <i class="pi pi-ban"></i>
+              </button>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+    </div>
+
     <!-- Modal para añadir o editar categoría -->
     <Dialog v-model:visible="addCategoryModal" :header="modalTitle" modal :closable="true" class="w-96" :style="{ transition: 'all 0.3s ease' }">
       <div class="flex flex-col gap-4 p-4">
@@ -118,21 +171,25 @@ import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import CategoryService from '../services/api/category.service';
+import UserService from '../services/api/user.service'; // 👈 Importado!
 
 const toast = useToast();
 
 // Estados reactivos
 const categories = ref([]);
+const users = ref([]);
 const loadingCategories = ref(true);
+const loadingUsers = ref(true);
 const addCategoryModal = ref(false);
 const editingCategoryId = ref(null);
 const newCategoryName = ref('');
 const newCategoryDescription = ref('');
 const savingCategory = ref(false);
-const modalTitle = ref('Add New Category'); // Título del modal
+const modalTitle = ref('Add New Category');
 
-// Función para obtener las categorías
+// Obtener categorías
 const fetchCategories = async () => {
+  loadingCategories.value = true;
   try {
     const response = await CategoryService.get('categories');
     if (response.data.success) {
@@ -147,31 +204,50 @@ const fetchCategories = async () => {
   }
 };
 
-// Función para abrir la modal de edición
+// Obtener usuarios
+const fetchUsers = async () => {
+  loadingUsers.value = true;
+  try {
+    const response = await UserService.get('users');
+    if (response.data.success) {
+      users.value = response.data.data;
+    } else {
+      toast.error('Failed to fetch users.');
+    }
+  } catch (error) {
+    toast.error('Error fetching users.');
+  } finally {
+    loadingUsers.value = false;
+  }
+};
+
+// Función para bloquear usuario (a futuro puedes usar UserService.set)
+const blockUser = (userId) => {
+  toast.info(`User with ID ${userId} would be blocked.`);
+};
+
+// Modal de categorías
 const openEditCategoryModal = (category) => {
   newCategoryName.value = category.category;
   newCategoryDescription.value = category.description;
   editingCategoryId.value = category.id;
-  modalTitle.value = "Edit Category"; // Cambiar título al editar
+  modalTitle.value = "Edit Category";
   addCategoryModal.value = true;
 };
 
-// Función para abrir la modal de agregar
 const openAddCategoryModal = () => {
-  modalTitle.value = "Add New Category"; // Título al abrir la modal de agregar
+  modalTitle.value = "Add New Category";
   newCategoryName.value = '';
   newCategoryDescription.value = '';
   editingCategoryId.value = null;
   addCategoryModal.value = true;
 };
 
-// Función para cerrar la modal
 const closeAddCategoryModal = () => {
   addCategoryModal.value = false;
   resetForm();
 };
 
-// Función para guardar la categoría (crear o editar)
 const saveCategory = async () => {
   if (!newCategoryName.value.trim()) {
     toast.error('Category name cannot be empty');
@@ -190,7 +266,6 @@ const saveCategory = async () => {
   try {
     let response;
     if (editingCategoryId.value) {
-      // Si se está editando una categoría existente, usa PUT
       response = await CategoryService.put(`categories/${editingCategoryId.value}`, payload);
       if (response.data.success) {
         toast.success('Category updated successfully!');
@@ -198,7 +273,6 @@ const saveCategory = async () => {
         toast.error('Failed to update category.');
       }
     } else {
-      // Si no se está editando, es una nueva categoría, usa POST
       response = await CategoryService.post('categories', payload);
       if (response.data.success) {
         toast.success('Category added successfully!');
@@ -206,20 +280,19 @@ const saveCategory = async () => {
         toast.error('Failed to add category.');
       }
     }
-    fetchCategories(); // Actualiza la lista de categorías
-    closeAddCategoryModal(); // Cierra el modal
+    fetchCategories();
+    closeAddCategoryModal();
   } catch (error) {
     toast.error('Error saving category.');
   }
 };
 
-// Función para eliminar la categoría
 const deleteCategory = async (categoryId) => {
   try {
     const response = await CategoryService.delete(`categories/${categoryId}`);
     if (response.data.success) {
       toast.success('Category deleted successfully!');
-      fetchCategories(); // Actualiza la lista de categorías
+      fetchCategories();
     } else {
       toast.error('Failed to delete category.');
     }
@@ -228,15 +301,16 @@ const deleteCategory = async (categoryId) => {
   }
 };
 
-// Función para restablecer los campos del formulario
 const resetForm = () => {
   newCategoryName.value = '';
   newCategoryDescription.value = '';
   editingCategoryId.value = null;
 };
 
+// Montaje inicial
 onMounted(() => {
-  fetchCategories(); // Cargar categorías al montar el componente
+  fetchCategories();
+  fetchUsers();
 });
 </script>
 
