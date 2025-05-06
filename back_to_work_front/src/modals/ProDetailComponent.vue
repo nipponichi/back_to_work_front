@@ -18,17 +18,17 @@
 
     <!-- Categoría -->
     <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Categoría:</label>
+      <label class="block text-gray-700 font-medium mb-2">Categorías:</label>
       <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-        
+        {{ userData.categories?.map(c => c.description).join(', ') || 'No hay categorías asignadas' }}
       </div>
-    </div>  
+    </div>
 
     <!-- Stats -->
     <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Stats:</label>
+      <label class="block text-gray-700 font-medium mb-2">Provincia:</label>
       <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 whitespace-pre-line">
-
+        {{ userData.provinces?.name }}
       </div>
     </div>
 
