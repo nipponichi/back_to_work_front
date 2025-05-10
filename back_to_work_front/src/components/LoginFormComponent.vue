@@ -54,34 +54,42 @@ export default {
       toast: useToast()
     }
   },
+ 
   methods: {
-    async handleLogin() {
-      try {
-        const response = await AuthService.login(this.email, this.password)
-        if (response.data.success) {
-          // 2 horas
-          this.toast.success("Login succesfully")
-          const tokenExpiration = Date.now() + 2 * 3600 * 1000;
+  async handleLogin() {
+    try {
+      const response = await AuthService.login(this.email, this.password);
 
-          localStorage.setItem("tokenExpiration", tokenExpiration);
-          localStorage.setItem("token", response.data.data.accessToken);
-          let accessToken = localStorage.getItem("token");
-          console.log("token 2", accessToken);
+      // Si la respuesta es exitosa, proceder con el login
+      if (response.data.success) {
+        this.toast.success("Login successfully");
+        const tokenExpiration = Date.now() + 2 * 3600 * 1000;
 
-          localStorage.setItem("user", JSON.stringify(response.data.data.user));
+        localStorage.setItem("tokenExpiration", tokenExpiration);
+        localStorage.setItem("token", response.data.data.accessToken);
+        let accessToken = localStorage.getItem("token");
+        console.log("token 2", accessToken);
 
-          const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
-          localStorage.removeItem("redirectAfterLogin");
-          this.$router.push(redirectPath);
-        } else {
-          this.errorMessage = response.data.message;
-        } 
-      } catch (error) {
-        this.toast.error("Unable to login")
+        localStorage.setItem("user", JSON.stringify(response.data.data.user));
+
+        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+        localStorage.removeItem("redirectAfterLogin");
+        this.$router.push(redirectPath);
+      }
+
+    } catch (error) {
+      // Verificar si el error fue debido a un bloqueo de cuenta
+      if (error.message && error.message.includes('blocked')) {
+        this.toast.error("Your account has been blocked. Please contact the administrator.");
+        this.errorMessage = "Your account has been blocked. Please contact the administrator.";
+      } else {
+        this.toast.error("Unable to login");
         console.error("Error al enviar la solicitud:", error);
         this.errorMessage = "Hubo un error al procesar la solicitud.";
       }
     }
   }
+}
+
 }
 </script>

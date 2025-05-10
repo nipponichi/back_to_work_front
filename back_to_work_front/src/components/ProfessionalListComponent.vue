@@ -111,8 +111,8 @@
             headerClass="font-bold text-gray-800 bg-white p-4 text-center text-xl"
             bodyClass="p-4 bg-white text-center">
             <template #body="{ data }">
-              <button @click="blockUser(data.id)" class="text-red-600 hover:text-red-800 mx-2">
-                <i class="pi pi-ban"></i>
+              <button @click="toggleBlockUser(data)" class="text-red-600 hover:text-red-800 mx-2">
+                <i :class="data.is_blocked ? 'pi pi-lock' : 'pi pi-ban'"></i>
               </button>
             </template>
           </Column>
@@ -120,7 +120,7 @@
       </div>
     </div>
 
-    <!-- Modal para añadir o editar categoría -->
+    <!-- MODAL DE CATEGORÍAS -->
     <Dialog v-model:visible="addCategoryModal" :header="modalTitle" modal :closable="true" class="w-96" :style="{ transition: 'all 0.3s ease' }">
       <div class="flex flex-col gap-4 p-4">
         <label class="text-gray-800 font-semibold">Category Name:</label>
@@ -171,9 +171,12 @@ import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import CategoryService from '../services/api/category.service';
-import UserService from '../services/api/user.service'; // 👈 Importado!
+import UserService from '../services/api/user.service';
 
 const toast = useToast();
+
+// ✅ Bandera global
+let initialized = false;
 
 // Estados reactivos
 const categories = ref([]);
@@ -187,7 +190,7 @@ const newCategoryDescription = ref('');
 const savingCategory = ref(false);
 const modalTitle = ref('Add New Category');
 
-// Obtener categorías
+// Funciones de datos
 const fetchCategories = async () => {
   loadingCategories.value = true;
   try {
@@ -197,14 +200,13 @@ const fetchCategories = async () => {
     } else {
       toast.error('Failed to fetch categories.');
     }
-  } catch (error) {
+  } catch {
     toast.error('Error fetching categories.');
   } finally {
     loadingCategories.value = false;
   }
 };
 
-// Obtener usuarios
 const fetchUsers = async () => {
   loadingUsers.value = true;
   try {
@@ -214,113 +216,89 @@ const fetchUsers = async () => {
     } else {
       toast.error('Failed to fetch users.');
     }
-  } catch (error) {
+  } catch {
     toast.error('Error fetching users.');
   } finally {
     loadingUsers.value = false;
   }
 };
 
-// Función para bloquear usuario (a futuro puedes usar UserService.set)
-const blockUser = (userId) => {
-  toast.info(`User with ID ${userId} would be blocked.`);
+const toggleBlockUser = async (user) => {
+  try {
+    let response;
+    if (user.is_blocked) {
+      // Desbloquear usuario
+      response = await UserService.update(`users/unblock/${user.id}`);
+      if (response.data.success) {
+        toast.success(`User ${user.name} has been unblocked.`);
+      } else {
+        toast.error('Failed to unblock user.');
+      }
+    } else {
+      // Bloquear usuario
+      response = await UserService.update(`users/block/${user.id}`);
+      if (response.data.success) {
+        toast.success(`User ${user.name} has been blocked.`);
+      } else {
+        toast.error('Failed to block user.');
+      }
+    }
+    fetchUsers(); // Actualizamos la lista de usuarios
+  } catch (error) {
+    console.error('Error blocking/unblocking user:', error);
+    toast.error(`Error toggling user block status: ${error.response?.data?.message || error.message || 'Unknown error'}`);
+  }
 };
 
-// Modal de categorías
-const openEditCategoryModal = (category) => {
-  newCategoryName.value = category.category;
-  newCategoryDescription.value = category.description;
-  editingCategoryId.value = category.id;
-  modalTitle.value = "Edit Category";
-  addCategoryModal.value = true;
-};
-
+// Funciones del modal de categorías
 const openAddCategoryModal = () => {
-  modalTitle.value = "Add New Category";
+  modalTitle.value = 'Add New Category';
   newCategoryName.value = '';
   newCategoryDescription.value = '';
-  editingCategoryId.value = null;
   addCategoryModal.value = true;
 };
 
 const closeAddCategoryModal = () => {
   addCategoryModal.value = false;
-  resetForm();
 };
 
 const saveCategory = async () => {
-  if (!newCategoryName.value.trim()) {
-    toast.error('Category name cannot be empty');
-    return;
-  }
-  if (newCategoryDescription.value.length > 256) {
-    toast.error('Description must be less than 256 characters');
-    return;
-  }
-
-  const payload = {
-    category: newCategoryName.value,
-    description: newCategoryDescription.value
-  };
-
+  savingCategory.value = true;
   try {
-    let response;
-    if (editingCategoryId.value) {
-      response = await CategoryService.put(`categories/${editingCategoryId.value}`, payload);
-      if (response.data.success) {
-        toast.success('Category updated successfully!');
-      } else {
-        toast.error('Failed to update category.');
-      }
-    } else {
-      response = await CategoryService.post('categories', payload);
-      if (response.data.success) {
-        toast.success('Category added successfully!');
-      } else {
-        toast.error('Failed to add category.');
-      }
-    }
-    fetchCategories();
-    closeAddCategoryModal();
-  } catch (error) {
-    toast.error('Error saving category.');
-  }
-};
-
-const deleteCategory = async (categoryId) => {
-  try {
-    const response = await CategoryService.delete(`categories/${categoryId}`);
+    const response = await CategoryService.post('categories', {
+      category: newCategoryName.value,
+      description: newCategoryDescription.value,
+    });
     if (response.data.success) {
-      toast.success('Category deleted successfully!');
+      toast.success('Category added successfully.');
       fetchCategories();
+      closeAddCategoryModal();
     } else {
-      toast.error('Failed to delete category.');
+      toast.error('Failed to save category.');
     }
   } catch (error) {
-    toast.error('Error deleting category.');
+    toast.error(`Error saving category: ${error.response?.data?.message || error.message || 'Unknown error'}`);
+  } finally {
+    savingCategory.value = false;
   }
 };
 
-const resetForm = () => {
-  newCategoryName.value = '';
-  newCategoryDescription.value = '';
-  editingCategoryId.value = null;
-};
-
-// Montaje inicial
 onMounted(() => {
-  fetchCategories();
-  fetchUsers();
+  if (!initialized) {
+    fetchCategories();
+    fetchUsers();
+    initialized = true;
+  }
 });
 </script>
 
 <style scoped>
 .loader {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #f59e0b;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
   border-radius: 50%;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   animation: spin 1s linear infinite;
 }
 
