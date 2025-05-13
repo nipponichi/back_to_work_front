@@ -14,34 +14,14 @@
     </div>
 
     <div class="mb-4">
-      <label class="block text-gray-700 font-medium mb-2">Location:</label>
-      <input
-        type="text"
-        v-model="formData.location"
-        required
-        minlength="3"
-        maxlength="50"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-      <p v-if="errors.location" class="mt-1 text-sm text-red-600">{{ errors.location }}</p>
+      <label class="block mb-2 text-sm font-medium text-gray-700">Province</label>
+      <Select v-model="formData.location" editable :options="provinces" optionLabel="name" :optionValue="(province) => province" placeholder="Select a province" class="w-full md:w-56" />
     </div>
+
 
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Categoría:</label>
-      <select 
-        v-model="formData.category_id" 
-        required
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="">Seleccione una categoría</option>
-        <option
-          v-for="category in categories"
-          :key="category.id"
-          :value="category.id"
-        >
-          {{ category.category }}
-        </option>
-      </select>
+      <Select v-model="formData.category_id" editable :options="categories" optionLabel="category" :optionValue="(category) => category" placeholder="Select a category" class="w-full md:w-56" />
       <p v-if="errors.category_id" class="mt-1 text-sm text-red-600">{{ errors.category_id }}</p>
     </div>
 
@@ -50,6 +30,7 @@
       <textarea
         v-model="formData.description"
         required
+        noResizable
         minlength="10"
         maxlength="500"
         rows="4"
@@ -119,23 +100,24 @@
         <p class="mt-1 text-xs text-gray-500">Formatos: JPG, PNG, MP4</p>
       </div>
     </div>
-
-    <button 
-      type="submit" 
-      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-    >
+    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
       Enviar
-    </button>
+    </button> 
   </form>
 </template>
 
 <script>
 import { useToast } from 'vue-toastification'
 import UserService from '../services/api/user.service';
+import Select from 'primevue/select';
 
 export default {
+  components: {
+    Select
+  },
   data() {
     return {
+      provinces: [],
       categories: [],
       formData: {
         name: '',
@@ -160,8 +142,9 @@ export default {
       toast: useToast(),
     }
   },
-  mounted() {
+  async mounted() {
     this.fetchCategories();
+    await this.fetchProvinces()
     let userStr = localStorage.getItem("user");
     let user2 = JSON.parse(userStr);
     this.user=user2;
@@ -176,6 +159,15 @@ export default {
     }
   },
   methods: {
+    async fetchProvinces() {
+      try {
+        const response = await UserService.get("provinces");
+        this.provinces = response.data.data;
+        console.log(this.provinces);
+      } catch (error) {
+        console.error('Error fetching provinces:', error);
+      }
+    },
     async fetchCategories() {
       try {
         const response = await UserService.get("categories");

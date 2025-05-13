@@ -58,6 +58,7 @@ export default {
     async handleLogin() {
       try {
         const response = await AuthService.login(this.email, this.password)
+        console.log("Response:", response);
         if (response.data.success) {
           // 2 horas
           this.toast.success("Login succesfully")
@@ -66,7 +67,6 @@ export default {
           localStorage.setItem("tokenExpiration", tokenExpiration);
           localStorage.setItem("token", response.data.data.accessToken);
           let accessToken = localStorage.getItem("token");
-          console.log("token 2", accessToken);
 
           localStorage.setItem("user", JSON.stringify(response.data.data.user));
 
@@ -75,11 +75,10 @@ export default {
           this.$router.push(redirectPath);
         } else {
           this.errorMessage = response.data.message;
+          console.log("Error en el inicio de sesión:", this.errorMessage);
         } 
       } catch (error) {
-        this.toast.error("Unable to login")
-        console.error("Error al enviar la solicitud:", error);
-        this.errorMessage = "Hubo un error al procesar la solicitud.";
+        this.toast.error(error.response.data.message);
       }
     }
   }

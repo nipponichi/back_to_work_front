@@ -114,7 +114,7 @@
     </div>
     <Dialog
       v-model:visible="openProDetailModal"
-      header="Pro details"
+      header="Preferencias de usuario"
       :modal="true"
       :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
       headerClass="border-b border-gray-200 p-4 font-semibold text-lg"

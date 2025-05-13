@@ -6,6 +6,7 @@ import ContactView from "../views/ContactView.vue";
 import ServicesView from "../views/ServicesView.vue";
 import RegisterFormComponent from "../components/RegisterFormComponent.vue";
 import LoginFormComponent from "../components/LoginFormComponent.vue";
+import VerifyEmailComponent from "../components/VerifyEmailComponent.vue";
 
 const routes = [
     { path: '/', component: HomeView, name: 'home' },
@@ -14,6 +15,9 @@ const routes = [
     { path: '/service', component: ServicesView,  name: 'service'},
     { path: '/login', component: LoginFormComponent,  name: 'login'},
     { path: '/register', component: RegisterFormComponent,  name: 'register'},
+    { path: '/verify-email', component: VerifyEmailComponent, 
+      props: (route) => ({id: route.query.id, hash: route.query.hash, signature: route.query.signature}),
+      name: 'verify-email'}
 ]
 
 const router = createRouter({

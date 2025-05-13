@@ -31,18 +31,19 @@
 
   <script setup>
   import { ref } from "vue";
-  import axios from "axios";
+  import { useToast } from "vue-toastification";
+  import userService from "../services/api/user.service";
 
   const email = ref("");
   const errorMessage = ref("");
   
   const handleResetPassword = async () => {
     try {
-      const response = await axios.post("http://localhost:8000/api/reset-password", { 
+      const response = await userService("reset-password", { 
         email: email.value 
       });
       console.log("Respuesta del servidor:", response.data);
-      alert("Solicitud enviada con éxito");
+      useToast("Solicitud enviada con éxito");
     } catch (error) {
       console.error("Error al enviar la solicitud:", error);
       errorMessage.value = "Hubo un error al procesar la solicitud.";

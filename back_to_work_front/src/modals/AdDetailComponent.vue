@@ -88,6 +88,8 @@
 
 <script>
 import axios from 'axios';
+import userService from '../services/api/user.service';
+import { useToast } from 'vue-toastification';
 
 export default {
   props: {
@@ -107,7 +109,8 @@ export default {
       loggedInUser: null,
       showBidGrid: false,
       showNewBidRow: false,
-      isSubmitting: false
+      isSubmitting: false,
+      toast: useToast(),
     };
   },
   async mounted() {
@@ -159,7 +162,7 @@ export default {
       this.isSubmitting = true;
 
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/offers', {
+        const response = await userService.set('offers', {
           bid: this.newBid.bid,
           description: this.newBid.description,
           ad_id: this.adData.id,
@@ -169,7 +172,7 @@ export default {
 
         if (response.data.success) {
           const newBid = response.data.data;
-          // Si el backend no devuelve user, recarga lista
+          this.toast.success('Puja enviada con éxito');
           if (!newBid.user) {
             await this.fetchBids();
           } else {
@@ -187,9 +190,10 @@ export default {
     },
     async removeBid(bidId) {
       try {
-        const response = await axios.delete(`http://127.0.0.1:8000/api/offers/${bidId}`);
+        const response = await userService.delete(`http://127.0.0.1:8000/api/offers/${bidId}`);
         if (response.data.success) {
           this.bids = this.bids.filter(bid => bid.id !== bidId);
+          this.toast.success('Puja eliminada con éxito');
         }
       } catch (err) {
         console.error("Error al eliminar puja:", err);

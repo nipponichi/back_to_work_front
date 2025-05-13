@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <!-- Nombre -->
+    
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Nombre:</label>
       <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
@@ -8,7 +8,6 @@
       </div>
     </div>
 
-    <!-- Location, email es solo testing -->
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Email:</label>
       <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
@@ -16,7 +15,6 @@
       </div>
     </div>
 
-    <!-- Categoría -->
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Categorías:</label>
       <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
@@ -24,7 +22,6 @@
       </div>
     </div>
 
-    <!-- Stats -->
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Provincia:</label>
       <div class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 whitespace-pre-line">
@@ -32,12 +29,10 @@
       </div>
     </div>
 
-    <!-- Media -->
     <div class="mb-6">
       <label class="block text-gray-700 font-medium mb-2">Fotos:</label>
     </div>
 
-    <!-- Estado -->
     <div class="mb-4">
       <label class="block text-gray-700 font-medium mb-2">Estado:</label>
       <div class="w-full px-3 py-2">
