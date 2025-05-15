@@ -8,7 +8,7 @@
     <div>
         <h1 class="bg-green-500">CONTACT</h1>
         <ResetPasswordComponent />
-        <ContactFormComponent />
-        <ChatComponent />
+<!--         <ContactFormComponent />
+        <ChatComponent /> -->
     </div>
 </template>

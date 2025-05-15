@@ -1,23 +1,15 @@
 <template>
   <div class="max-w-md mx-auto my-24 p-8 text-center">
-    <!-- Estado de carga -->
+
     <div v-if="loading" class="text-gray-600 text-lg">
       Verificando tu email...
     </div>
 
-    <!-- Verificación exitosa -->
     <div v-if="success" class="space-y-4">
       <h2 class="text-2xl font-bold text-green-600">¡Email verificado!</h2>
       <p class="text-gray-700">Tu dirección de email ha sido verificada correctamente.</p>
-      <router-link 
-        to="/login" 
-        class="inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-      >
-        Iniciar sesión
-      </router-link>
     </div>
 
-    <!-- Error en verificación -->
     <div v-if="error" class="space-y-4">
       <h2 class="text-2xl font-bold text-red-600">Error en la verificación</h2>
       <p class="text-gray-700">{{ errorMessage }}</p>
@@ -33,7 +25,7 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import UserService from '../services/api/user.service';
 
 export default {
@@ -47,6 +39,7 @@ export default {
     const success = ref(false)
     const error = ref(false)
     const errorMessage = ref('')
+    const router = useRouter()
     const route = useRoute()
 
     const verifyEmail = async () => {
@@ -59,6 +52,9 @@ export default {
         
         if (response.data.success) {
           success.value = true
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
         } else {
           throw new Error(response.data.message || 'Error desconocido')
         }
