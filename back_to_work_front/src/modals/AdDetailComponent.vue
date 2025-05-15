@@ -55,12 +55,15 @@
               <td class="px-6 py-3">{{ bid.user?.name || 'Desconocido' }}</td>
               <td class="px-6 py-3">{{ bid.bid }}</td>
               <td class="px-6 py-3">{{ bid.description }}</td>
-              <td class="px-6 py-3">
+              <td class="px-6 py-3 space-x-2">
                 <template v-if="loggedInUser && bid.user && bid.user.id === loggedInUser.id">
                   <button @click="removeBid(bid.id)" class="text-red-500 hover:text-red-700">
                     Eliminar
                   </button>
                 </template>
+                <button @click="openPaymentModal(bid)" class="text-blue-500 hover:text-blue-700">
+                  ✅
+                </button>
               </td>
             </tr>
           </tbody>
@@ -83,11 +86,22 @@
         Chatear
       </button>
     </div>
+
+    <!-- Modal de SimulatedPayment -->
+    <div v-if="showPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 relative w-[90%] max-w-md">
+        <button @click="closePaymentModal" class="absolute top-2 right-2 text-gray-600 hover:text-black text-lg">
+          &times;
+        </button>
+        <SimulatedPayment :bid="selectedBid" />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import SimulatedPayment from '../components/SimulatedPayment.vue';
 
 export default {
   props: {
@@ -95,6 +109,9 @@ export default {
       type: [Number, String],
       required: true
     }
+  },
+  components: {
+    SimulatedPayment
   },
   data() {
     return {
@@ -107,7 +124,9 @@ export default {
       loggedInUser: null,
       showBidGrid: false,
       showNewBidRow: false,
-      isSubmitting: false
+      isSubmitting: false,
+      showPaymentModal: false,
+      selectedBid: null
     };
   },
   async mounted() {
@@ -169,7 +188,6 @@ export default {
 
         if (response.data.success) {
           const newBid = response.data.data;
-          // Si el backend no devuelve user, recarga lista
           if (!newBid.user) {
             await this.fetchBids();
           } else {
@@ -197,6 +215,14 @@ export default {
     },
     chat() {
       alert('Función de chat no implementada aún');
+    },
+    openPaymentModal(bid) {
+      this.selectedBid = bid;
+      this.showPaymentModal = true;
+    },
+    closePaymentModal() {
+      this.showPaymentModal = false;
+      this.selectedBid = null;
     }
   }
 };
@@ -204,6 +230,6 @@ export default {
 
 <style scoped>
 .aspect-square {
-  aspect-ratio: 1/1;
+  aspect-ratio: 1 / 1;
 }
 </style>
