@@ -6,7 +6,7 @@
       <p class="mt-4 text-gray-600">{{ adData.description }}</p>
       <p class="mt-2 text-gray-600">Categoría: {{ adData.category_id }}</p>
       <p class="mt-2 text-gray-600">Ubicación: {{ adData.location }}</p>
-      <p class="mt-2 text-gray-600" v-if="adData.due_date">Fecha de finalización: {{ adData.due_date }}</p>
+      <p v-if="adData.due_date" class="mt-2 text-gray-600">Fecha de finalización: {{ adData.due_date }}</p>
     </div>
 
     <!-- Grid de nueva puja -->
@@ -90,10 +90,16 @@
     <!-- Modal de SimulatedPayment -->
     <div v-if="showPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-lg p-6 relative w-[90%] max-w-md">
-        <button @click="closePaymentModal" class="absolute top-2 right-2 text-gray-600 hover:text-black text-lg">
+        <!-- Botón de cierre (aspa) -->
+        <button @click="showPaymentModal = false" class="absolute top-2 right-2 text-gray-600 hover:text-black text-lg">
           &times;
         </button>
-        <SimulatedPayment :bid="selectedBid" />
+
+        <!-- Componente SimulatedPayment con evento close para cerrar modal -->
+        <SimulatedPayment
+          :acceptedBid="selectedBid?.bid"
+          @close="showPaymentModal = false"
+        />
       </div>
     </div>
   </div>
