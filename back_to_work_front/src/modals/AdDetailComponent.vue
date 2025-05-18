@@ -4,7 +4,7 @@
     <div v-if="adData" class="p-6 bg-white rounded-lg shadow-md">
       <h2 class="text-2xl font-semibold text-center text-gray-700">{{ adData.name }}</h2>
       <p class="mt-4 text-gray-600">{{ adData.description }}</p>
-      <p class="mt-2 text-gray-600">Categoría: {{ adData.category_id }}</p>
+      <p class="mt-2 text-gray-600">Categoría: {{ getCategoryName(adData.category_id) }}</p>
       <p class="mt-2 text-gray-600">Ubicación: {{ adData.location }}</p>
       <p v-if="adData.due_date" class="mt-2 text-gray-600">Fecha de finalización: {{ adData.due_date }}</p>
     </div>
@@ -112,6 +112,7 @@
 
 <script>
 import axios from 'axios';
+import UserService from '../services/api/user.service';
 
 export default {
   props: {
@@ -134,7 +135,8 @@ export default {
       isSubmitting: false,
       showPaymentModal: false,
       selectedBid: null,
-      isProcessingPayment: false
+      isProcessingPayment: false,
+      categories: [] 
     };
   },
   async mounted() {
@@ -142,11 +144,27 @@ export default {
     await this.fetchAdData();
     await this.fetchLoggedInUser();
     await this.fetchBids();
+    await this.fetchCategories();
   },
   beforeUnmount() {
     window.removeEventListener('message', this.receiveMessage);
   },
   methods: {
+    async fetchCategories() {
+      try {
+        const res = await axios.get('http://127.0.0.1:8000/api/categories');
+        if (res.data.success) {
+          this.categories = res.data.data;
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    },
+
+    getCategoryName(categoryId) {
+      const category = this.categories.find(cat => cat.id === categoryId);
+      return category ? category.category : 'Uncategorized';
+    },
     async receiveMessage(event) {
       if (event.origin !== 'http://localhost:5174') return;
 
