@@ -87,15 +87,20 @@
       </button>
     </div>
 
+    <!-- Spinner centrado en overlay -->
+    <div v-if="isProcessingPayment" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div class="flex flex-col items-center space-y-4">
+        <div class="spinner"></div>
+        <span class="text-white text-lg font-semibold">Procesando pago...</span>
+      </div>
+    </div>
+
     <!-- Modal de SimulatedPayment -->
     <div v-if="showPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-lg p-6 relative w-[90%] max-w-md">
-        <!-- Botón de cierre (aspa) -->
         <button @click="showPaymentModal = false" class="absolute top-2 right-2 text-gray-600 hover:text-black text-lg">
           &times;
         </button>
-
-        <!-- Componente SimulatedPayment con evento close para cerrar modal -->
         <SimulatedPayment
           :acceptedBid="selectedBid?.bid"
           @close="showPaymentModal = false"
@@ -115,8 +120,6 @@ export default {
       required: true
     }
   },
-  components: {
-  },
   data() {
     return {
       adData: null,
@@ -130,7 +133,8 @@ export default {
       showNewBidRow: false,
       isSubmitting: false,
       showPaymentModal: false,
-      selectedBid: null
+      selectedBid: null,
+      isProcessingPayment: false
     };
   },
   async mounted() {
@@ -138,54 +142,53 @@ export default {
     await this.fetchAdData();
     await this.fetchLoggedInUser();
     await this.fetchBids();
-    window.addEventListener('message', this.receiveMessage);
   },
-
   beforeUnmount() {
     window.removeEventListener('message', this.receiveMessage);
   },
   methods: {
-
     async receiveMessage(event) {
+      if (event.origin !== 'http://localhost:5174') return;
 
-  if (event.origin !== 'http://localhost:5174') return;
+      const data = event.data;
 
-  const data = event.data;
+      if (data && data.PaymentOK === true && data.bidId) {
+        console.log(`Pago OK recibido para la puja: ${data.bidId}`);
 
-  if (data && data.PaymentOK === true && data.bidId) {
-    console.log(`Pago OK recibido para la puja: ${data.bidId}`);
+        try {
+          const res = await axios.post(`http://127.0.0.1:8000/api/offers/${data.bidId}/mark-paid`);
 
-    try {
-      const res = await axios.post(`http://127.0.0.1:8000/api/offers/${data.bidId}/mark-paid`);
-
-      if (res.data.success) {
-        await this.fetchBids();
-        this.$emit('close-ad-detail');
-      } else {
-        console.warn('El servidor no confirmó el pago como exitoso.');
-      }
-    } catch (error) {
-      console.error('Error actualizando el estado de pago:', error);
-    }
-  }
-},
-
-goToPayment(bid) {
-  console.log("AQUI");
-  const externalUrl = 'http://localhost:5174/payment';
-  if (externalUrl.startsWith('http://localhost')) {
-    const newWindow = window.open(externalUrl, '_blank');
-
-    setTimeout(() => {
-      newWindow.postMessage({
-        bid: {
-          id: bid.id,
-          amount: bid.bid
+          if (res.data.success) {
+            await this.fetchBids();
+            this.$emit('close-ad-detail');
+          } else {
+            console.warn('El servidor no confirmó el pago como exitoso.');
+          }
+        } catch (error) {
+          console.error('Error actualizando el estado de pago:', error);
+        } finally {
+          this.isProcessingPayment = false;
         }
-      }, 'http://localhost:5174'); // Debe ser la URL de origen exacta o '*'
-    }, 500);
-  }
-},
+      }
+    },
+
+    goToPayment(bid) {
+      this.isProcessingPayment = true;
+
+      const externalUrl = 'http://localhost:5174/payment';
+      if (externalUrl.startsWith('http://localhost')) {
+        const newWindow = window.open(externalUrl, '_blank');
+
+        setTimeout(() => {
+          newWindow.postMessage({
+            bid: {
+              id: bid.id,
+              amount: bid.bid
+            }
+          }, 'http://localhost:5174');
+        }, 500);
+      }
+    },
 
     async fetchAdData() {
       try {
@@ -216,13 +219,8 @@ goToPayment(bid) {
       }
     },
     toggleBidGrid() {
-      if (this.showBidGrid) {
-        this.showNewBidRow = false;
-        this.showBidGrid = false;
-      } else {
-        this.showNewBidRow = true;
-        this.showBidGrid = true;
-      }
+      this.showBidGrid = !this.showBidGrid;
+      this.showNewBidRow = this.showBidGrid;
     },
     async submitNewBid() {
       if (!this.newBid.bid || !this.newBid.description) return;
@@ -281,7 +279,18 @@ goToPayment(bid) {
 </script>
 
 <style scoped>
-.aspect-square {
-  aspect-ratio: 1 / 1;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #3b82f6;
+  border-top: 4px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
