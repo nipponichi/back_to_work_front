@@ -138,37 +138,38 @@ export default {
     await this.fetchAdData();
     await this.fetchLoggedInUser();
     await this.fetchBids();
+    window.addEventListener('message', this.receiveMessage);
   },
 
   beforeUnmount() {
     window.removeEventListener('message', this.receiveMessage);
   },
   methods: {
-  
+
     async receiveMessage(event) {
-  // Validar origen (ajustar para producción)
+
   if (event.origin !== 'http://localhost:5174') return;
 
   const data = event.data;
 
-  if (data && data.PaymentOK === true && data.offerId) {
-    console.log(`Pago OK recibido para la puja: ${data.offerId}`);
+  if (data && data.PaymentOK === true && data.bidId) {
+    console.log(`Pago OK recibido para la puja: ${data.bidId}`);
 
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/api/offers/${data.offerId}/mark-paid`);
+      const res = await axios.post(`http://127.0.0.1:8000/api/offers/${data.bidId}/mark-paid`);
 
       if (res.data.success) {
-        await this.fetchBids(); // Refrescar lista de pujas
-        this.$emit('close-ad-detail');   // Emitir evento para cerrar modal de detalles
+        await this.fetchBids();
+        this.$emit('close-ad-detail');
       } else {
         console.warn('El servidor no confirmó el pago como exitoso.');
       }
     } catch (error) {
       console.error('Error actualizando el estado de pago:', error);
-      // Opcional: mostrar notificación al usuario
     }
   }
 },
+
 goToPayment(bid) {
   console.log("AQUI");
   const externalUrl = 'http://localhost:5174/payment';
