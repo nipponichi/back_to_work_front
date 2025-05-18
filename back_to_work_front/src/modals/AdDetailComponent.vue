@@ -61,7 +61,7 @@
                     Eliminar
                   </button>
                 </template>
-                <button @click="openPaymentModal(bid)" class="text-blue-500 hover:text-blue-700">
+                <button @click="goToPayment(bid)" class="text-blue-500 hover:text-blue-700">
                   ✅
                 </button>
               </td>
@@ -107,7 +107,6 @@
 
 <script>
 import axios from 'axios';
-import SimulatedPayment from '../components/SimulatedPayment.vue';
 
 export default {
   props: {
@@ -117,7 +116,6 @@ export default {
     }
   },
   components: {
-    SimulatedPayment
   },
   data() {
     return {
@@ -136,11 +134,58 @@ export default {
     };
   },
   async mounted() {
+    window.addEventListener('message', this.receiveMessage);
     await this.fetchAdData();
     await this.fetchLoggedInUser();
     await this.fetchBids();
   },
+
+  beforeUnmount() {
+    window.removeEventListener('message', this.receiveMessage);
+  },
   methods: {
+  
+    async receiveMessage(event) {
+  // Validar origen (ajustar para producción)
+  if (event.origin !== 'http://localhost:5174') return;
+
+  const data = event.data;
+
+  if (data && data.PaymentOK === true && data.offerId) {
+    console.log(`Pago OK recibido para la puja: ${data.offerId}`);
+
+    try {
+      const res = await axios.post(`http://127.0.0.1:8000/api/offers/${data.offerId}/mark-paid`);
+
+      if (res.data.success) {
+        await this.fetchBids(); // Refrescar lista de pujas
+        this.$emit('close-ad-detail');   // Emitir evento para cerrar modal de detalles
+      } else {
+        console.warn('El servidor no confirmó el pago como exitoso.');
+      }
+    } catch (error) {
+      console.error('Error actualizando el estado de pago:', error);
+      // Opcional: mostrar notificación al usuario
+    }
+  }
+},
+goToPayment(bid) {
+  console.log("AQUI");
+  const externalUrl = 'http://localhost:5174/payment';
+  if (externalUrl.startsWith('http://localhost')) {
+    const newWindow = window.open(externalUrl, '_blank');
+
+    setTimeout(() => {
+      newWindow.postMessage({
+        bid: {
+          id: bid.id,
+          amount: bid.bid
+        }
+      }, 'http://localhost:5174'); // Debe ser la URL de origen exacta o '*'
+    }, 500);
+  }
+},
+
     async fetchAdData() {
       try {
         const res = await axios.get(`http://127.0.0.1:8000/api/ads/${this.id}`);

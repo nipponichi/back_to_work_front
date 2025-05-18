@@ -143,6 +143,7 @@
       </div>
     </Dialog>
 
+    <!--
     <Dialog
       v-model:visible="openAdDetailModal"
       header="Ad details"
@@ -155,6 +156,21 @@
         <AdDetailComponent  :id="selectedId"/>
       </div>
     </Dialog>
+  -->
+  <Dialog
+  v-model:visible="openAdDetailModal"
+  header="Ad details"
+  :modal="true"
+  :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
+  headerClass="border-b border-gray-200 p-4 font-semibold text-lg"
+  contentClass="p-4"
+>
+  <div class="bg-white text-black text-2xl p-8 rounded">
+    <AdDetailComponent  
+      :id="selectedId" 
+      @close-ad-detail="openAdDetailModal = false" />
+  </div>
+</Dialog>
   </div>
 </template>
 
@@ -181,6 +197,7 @@ export default {
   },
   data() {
       return {
+          showAdDetailModal: false,
           searchQuery: '',
           loading: true,
           sortField: null,
