@@ -235,14 +235,11 @@ export default {
   },
   methods: {
     handlePaymentSuccess({ adId }) {
-  console.log('[handlePaymentSuccess] payment received for adId:', adId);
-  console.log('[handlePaymentSuccess] Closing detail modal...');
-  this.openAdDetailModal = false;
-  this.adToRate = adId;
-  console.log('[handlePaymentSuccess] Will open rating modal shortly...');
+    this.openAdDetailModal = false;
+    this.adToRate = adId;
+    console.log('Modal de valoracion se lanza en breve...');
   setTimeout(() => {
     this.showRatingModal = true;
-    console.log('[handlePaymentSuccess] Rating modal opened');
   }, 300);
 },
     onRowClick(id) {
