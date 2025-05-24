@@ -54,6 +54,7 @@ export default {
       toast: useToast()
     }
   },
+ 
   methods: {
     async handleLogin() {
       try {
@@ -68,7 +69,7 @@ export default {
           localStorage.setItem("token", response.data.data.accessToken);
           let accessToken = localStorage.getItem("token");
 
-          localStorage.setItem("user", JSON.stringify(response.data.data.user));
+        localStorage.setItem("user", JSON.stringify(response.data.data.user));
 
           const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
           localStorage.removeItem("redirectAfterLogin");
@@ -82,5 +83,7 @@ export default {
       }
     }
   }
+}
+
 }
 </script>

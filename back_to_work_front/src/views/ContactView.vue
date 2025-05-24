@@ -60,3 +60,24 @@
         }
     };
 </script>
+<script>
+    import ContactFormComponent from '../components/ContactFormComponent.vue';
+    import ResetPasswordComponent from '../components/ResetPasswordComponent.vue';
+    import ChatComponent from '../components/ChatComponent.vue';
+    export default {
+        name: 'ContactView',
+        components: {
+            ContactFormComponent,
+            ResetPasswordComponent,
+            ChatComponent
+        },
+        methods: {
+            goToPayment() {
+                const externalUrl = 'http://localhost:5174/payment';
+                if (externalUrl.startsWith('http://localhost')) {
+                window.open(externalUrl, '_blank'); 
+                }
+            }
+        }
+    };
+</script>

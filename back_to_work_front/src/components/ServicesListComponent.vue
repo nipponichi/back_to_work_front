@@ -56,7 +56,7 @@
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} ads"
           class="p-datatable-lg cursor-pointer bg-white custom-datatable"
           tableStyle="min-width: 50rem"
-          >
+        >
           <template #empty> 
             <div class="p-6 text-center text-gray-800 text-lg bg-white">
               No ads found. Create your first ad!
@@ -152,10 +152,29 @@
       contentClass="p-4"
     >
       <div class="bg-white text-black text-2xl p-8 rounded">
-        <AdDetailComponent  :id="selectedId"/>
+        <AdDetailComponent  
+        :id="selectedId" 
+        @close-ad-detail="openAdDetailModal = false" 
+        @payment-success="handlePaymentSuccess"
+        />
+     
       </div>
     </Dialog>
-  </div>
+  
+  <Dialog
+  v-model:visible="showRatingModal"
+  header="Valora este anuncio"
+  :modal="true"
+  :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
+  headerClass="border-b border-gray-200 p-4 font-semibold text-lg"
+  contentClass="p-4"
+>
+  <AdRatingComponent 
+    :adId="adToRate" 
+    @close="showRatingModal = false" 
+  />
+</Dialog>
+</div>
 </template>
 
 <script>
@@ -168,108 +187,113 @@ import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
 import { useToast } from 'vue-toastification';
 import UserService from '../services/api/user.service';
+import AdRatingComponent from '../modals/AdRatingComponent.vue';
 
 export default {
   components: {
-      AdDetailComponent,
-      AdsFormComponent,
-      InputText,
-      DataTable,
-      Column,
-      Tag,
-      Dialog
+    AdDetailComponent,
+    AdsFormComponent,
+    InputText,
+    DataTable,
+    Column,
+    Tag,
+    Dialog,
+    AdRatingComponent
   },
   data() {
-      return {
-          searchQuery: '',
-          loading: true,
-          sortField: null,
-          sortOrder: null,
-          ads: [],
-          categories: [],
-          openCreateAdModal: false,
-          openAdDetailModal: false,
-          selectedCategory: null,
-          statusFilter: null,
-          toast: useToast(),
-          selectedId: '',
+    return {
+      showAdDetailModal: false,
+      searchQuery: '',
+      loading: true,
+      sortField: null,
+      sortOrder: null,
+      ads: [],
+      categories: [],
+      openCreateAdModal: false,
+      openAdDetailModal: false,
+      selectedCategory: null,
+      statusFilter: null,
+      toast: useToast(),
+      selectedId: '',
           user: null,
-          accessToken: null,
-      };
+          accessToken: null,,
+      showRatingModal: false,
+      adToRate: null,
+    };
   },
   computed: {
-      filteredAds() {
-          if (!this.searchQuery) return this.ads;
-          
-          return this.ads.filter(ad =>
-              ad.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-              ad.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-              ad.location.toLowerCase().includes(this.searchQuery.toLowerCase())
-          );
-      }
+    filteredAds() {
+      if (!this.searchQuery) return this.ads;
+      return this.ads.filter(ad =>
+        ad.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        ad.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        ad.location.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
   },
   mounted() {
     this.accessToken = localStorage.getItem("token");
     let userStr = localStorage.getItem("user");
     this.user = JSON.parse(userStr);
-      this.fetchCategories();
+    this.fetchCategories();
       if (this.user.is_pro) {
-        this.fetchAds();
+      this.fetchAds();
       } else {
         this.fetchMyAds();
       }
 
   },
   methods: {
-      onRowClick(id) {
-          this.selectedId = id;
-          this.openAdDetailModal = true;
-      },
-
-      formatDate(dateString) {
-          if (!dateString) return '';
-          const options = { year: 'numeric', month: 'short', day: 'numeric' };
-          return new Date(dateString).toLocaleDateString(undefined, options);
-      },
-
-      getCategoryName(categoryId) {
-          const category = this.categories.find(cat => cat.id === categoryId);
-          return category ? category.category : 'Uncategorized';
-      },
-
-      handleFilterChange(filters) {
-          this.selectedCategory = filters.category;
-          this.statusFilter = filters.status;
-      },
-      onSort(event) {
-          this.sortField = event.sortField;
-          this.sortOrder = event.sortOrder;
-      },
-      submitAdForm() {
-          console.log("Submitting ad form...");
-          this.openCreateAdModal = false;
-      },
-      async fetchCategories() {
-          try {
-              const response = await UserService.get("categories");
-              if (response.data.success) {
-                  this.categories = response.data.data;
-              }
-          } catch (error) {
-              console.error("Error fetching categories:", error);
-          }
-      },
-      async fetchAds() {
-          try {
-              const response = await UserService.get("ads");
-              if (response.data.success) {
-                  this.ads = response.data.data;
-              }
-              this.loading = false;
-          } catch (error) {
-              console.error("Error fetching ads:", error);
-              this.loading = false;
-          }
+    handlePaymentSuccess({ adId }) {
+    this.openAdDetailModal = false;
+    this.adToRate = adId;
+    console.log('Modal de valoracion se lanza en breve...');
+  setTimeout(() => {
+    this.showRatingModal = true;
+  }, 300);
+},
+    onRowClick(id) {
+      this.selectedId = id;
+      this.openAdDetailModal = true;
+    },
+    formatDate(dateString) {
+      if (!dateString) return '';
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    },
+    getCategoryName(categoryId) {
+      const category = this.categories.find(cat => cat.id === categoryId);
+      return category ? category.category : 'Uncategorized';
+    },
+    handleFilterChange(filters) {
+      this.selectedCategory = filters.category;
+      this.statusFilter = filters.status;
+    },
+    onSort(event) {
+      this.sortField = event.sortField;
+      this.sortOrder = event.sortOrder;
+    },
+    async fetchCategories() {
+      try {
+        const response = await UserService.get("categories");
+        if (response.data.success) {
+          this.categories = response.data.data;
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    },
+    async fetchAds() {
+      try {
+        const response = await UserService.get("ads");
+        if (response.data.success) {
+          this.ads = response.data.data;
+        }
+        this.loading = false;
+      } catch (error) {
+        console.error("Error fetching ads:", error);
+        this.loading = false;
+      }
       },
       async fetchMyAds() {
           try {
@@ -283,10 +307,31 @@ export default {
               console.error("Error fetching users:", error);
               this.loading = false;
           }
-      }
+    }
   }
 };
 </script>
+
+<style>
+.custom-datatable .p-datatable-tbody > tr:not(.p-highlight):hover {
+  background-color: #dddddd !important;
+  color: white !important;
+}
+.custom-datatable .p-datatable-tbody > tr:not(.p-highlight):hover > td {
+  background-color: inherit !important;
+  color: white !important;
+}
+.custom-datatable .p-datatable-tbody > tr > td {
+  background-color: #ffffff !important;
+  transition: background-color 0.2s ease;
+  color: white !important;
+}
+.custom-datatable .p-datatable-tbody > tr:not(.p-highlight):hover .p-tag {
+  background-color: #4b5563 !important;
+  color: white !important;
+}
+</style>
+
 
 <style>
 
