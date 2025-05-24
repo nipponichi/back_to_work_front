@@ -151,7 +151,8 @@ export default {
         searchQuery: '',
         loading: true,
         sortField: null,
-        sortOrder: null,          users: [],
+        sortOrder: null,          
+        ads: [],
         toast: useToast()
       };
   },
@@ -165,7 +166,7 @@ export default {
       }
   },
   mounted() {
-      this.fetchProfessionalUsers();
+      this.fetchAds();
   },
   methods: {
       onRowClick(id) {
@@ -177,11 +178,11 @@ export default {
           this.sortField = event.sortField;
           this.sortOrder = event.sortOrder;
       },
-      async fetchProfessionalUsers() {
+      async fetchAds() {
           try {
-              const response = await UserService.get("users");
+              const response = await UserService.show("getAdsByUser", this.user.id);
               if (response.data.success) {
-                  this.users = response.data.data;
+                  this.ads = response.data.data;
               }
               this.loading = false;
           } catch (error) {

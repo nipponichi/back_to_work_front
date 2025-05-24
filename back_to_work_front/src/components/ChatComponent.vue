@@ -1,25 +1,35 @@
 <template>
-  <div class="w-96 border border-gray-300 p-4 rounded-lg shadow-md bg-white">
+  <div class="w-96 border border-gray-300 p-4 rounded-lg shadow-md bg-amber-50">
     <div class="h-60 overflow-y-auto border-b border-gray-300 mb-4 p-2">
-      <div v-for="(message, index) in messages" :key="index" class="mb-2">
-        <span
-          :class="{'font-semibold text-green-600': message.userId === userId, 'font-semibold text-blue-600': message.userId !== userId}"
-        >
-          {{ message.userId === userId ? "Tú" : message.user }}:
-        </span>
-        <span class="text-gray-700"> {{ message.text }}</span>
+      <div 
+        v-for="(message, index) in messages" 
+        :key="index" 
+        :class="[
+          'mb-3 py-2 px-3 rounded-lg max-w-[70%]', // Más estrecho y compacto
+          message.sender_id === senderId 
+            ? 'ml-auto bg-amber-200 text-right shadow-sm' 
+            : 'mr-auto bg-white text-left shadow-sm'
+        ]"
+      >
+        <div class="text-xs font-semibold mb-1" 
+            :class="message.sender_id === senderId ? 'text-amber-700' : 'text-gray-600'">
+          {{ message.sender_id === senderId ? 'Tú' : receiver?.user_name }}
+        </div>
+        <div class="text-gray-800 text-sm">{{ message.message }}</div>
       </div>
     </div>
+    
     <div class="flex items-center space-x-2">
       <input
         v-model="newMessage"
         @keyup.enter="sendMessage"
         placeholder="Escribe un mensaje..."
-        class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="flex-1 px-3 py-2 border border-amber-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
       />
       <button
         @click="sendMessage"
-        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+        class="bg-amber-500 text-white px-4 py-2 rounded-md hover:bg-amber-600 transition disabled:bg-amber-300"
+        :disabled="!newMessage.trim()"
       >
         Enviar
       </button>
@@ -28,58 +38,133 @@
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { io } from "socket.io-client";
+import UserService from '../services/api/user.service';
 
 export default {
-  setup() {
-    const ws = ref(null);
-    const newMessage = ref("");
-    const messages = ref([]);
-    const userId = ref(null); // Cambiado a null inicialmente
-    let user;
-    let userName = ref("");
-    let accessToken = ref("");
-
-    onMounted(() => {
-      accessToken.value = localStorage.getItem("token");
-      userName.value = localStorage.getItem("user");
-      const userString = localStorage.getItem("fullUser");
-      user = JSON.parse(userString);
-      userId.value = user.id; // Asignamos el userId desde el usuario logueado
-      console.log(userName.value);
-      console.log(user);
-
-      ws.value = new WebSocket("ws://localhost:3000");
-
-      ws.value.onopen = () => console.log("✅ Conectado al WebSocket");
-
-      ws.value.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        messages.value.push(message);
+  props: {
+    ad_id: Number,
+    receiver: Object,
+    sender: Object,
+    roomId: {
+      type: String,
+      default: () => `chat-123-456`
+    } 
+  },
+  data() {
+    return {
+      socket: null,
+      newMessage: "",
+      messages: [],
+      senderId: null,
+      is_read: false,
+      chatId: null,
+    };
+  },
+  mounted() {
+    this.senderId = this.sender.id;
+    console.log("Sender", this.sender);
+    console.log("Receiver", this.receiver);
+    if (this.receiver.is_pro) {
+      this.chatId = this.receiver.id;
+    } else {
+      this.chatId = this.sender.id;
+    }
+    this.fetchMessages();
+    this.initSocket();
+  },
+  methods: {
+    initSocket() {
+      this.socket = io(import.meta.env.VITE_CHAT_API_URL, {
+        path: '/socket.io',
+        transports: ['websocket', 'polling']
+      });
+      
+      this.socket.on('connect', () => {
+        console.log('Conectado al socket con ID:', this.socket.id);
+        console.log('Room ID:', this.roomId);
+        this.socket.emit('join-room', '1234');
+      });
+      
+      this.socket.on('chat-message', msg => {
+        this.messages.push(msg);
+        this.scrollToBottom();
+      });
+      
+      this.socket.on('disconnect', () => {
+        console.log('Desconectado del socket');
+      });
+    },
+    
+    async sendMessage() {
+      if (!this.newMessage.trim()) return;
+      const message = {
+        user_name: this.sender.user_name || this.sender.name,
+        message: this.newMessage,
+        sender_id: this.sender.id,
+        receiver_id: this.receiver.id,
+        ad_id: this.ad_id,
+        roomId: '1234',
+        is_read: this.is_read,
+        timestamp: new Date().toISOString(),
       };
 
-      ws.value.onclose = () => console.log("❌ Desconectado del WebSocket");
-    });
-
-    onBeforeUnmount(() => {
-      if (ws.value) ws.value.close();
-    });
-
-    const sendMessage = () => {
-      if (newMessage.value.trim() !== "") {
-        const message = {
-          user: user.name,
-          text: newMessage.value,
-          userId: user.id, // Usamos el user.id del usuario logueado
-        };
-
-        ws.value.send(JSON.stringify(message));
-
-        newMessage.value = "";
+      try {
+        const savedMsg = await UserService.set("chats", message);
+        if (savedMsg.data.success) {
+          message.id = savedMsg.data.id;
+          this.socket.emit("chat-message", message);
+          this.newMessage = "";
+          this.scrollToBottom();
+        }
+      } catch (error) {
+        console.error("Error al enviar mensaje:", error);
       }
-    };
+    },
 
-    return { newMessage, messages, sendMessage, userId };
+    async fetchMessages() {
+      try {
+        const response = await UserService.show("chats", this.ad_id+"-"+this.chatId);
+        if (response.data.success) {
+          this.messages = response.data.data;
+          this.scrollToBottom();
+        }
+      } catch (error) {
+        console.error("Error al obtener mensajes:", error);
+      }
+    },
+
+    formatTime(timestamp) {
+      return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    },
+
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = this.$el.querySelector(".h-60");
+        if (container) container.scrollTop = container.scrollHeight;
+      });
+    }
   },
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+  }
 };
 </script>
+
+<style scoped>
+.h-60::-webkit-scrollbar {
+  width: 6px;
+}
+.h-60::-webkit-scrollbar-track {
+  background: #fef6e6;
+}
+.h-60::-webkit-scrollbar-thumb {
+  background: #d97706;
+  border-radius: 3px;
+}
+.h-60::-webkit-scrollbar-thumb:hover {
+  background: #b45309;
+}
+</style>

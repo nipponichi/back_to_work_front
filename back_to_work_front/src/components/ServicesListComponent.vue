@@ -192,7 +192,9 @@ export default {
           selectedCategory: null,
           statusFilter: null,
           toast: useToast(),
-          selectedId: ''
+          selectedId: '',
+          user: null,
+          accessToken: null,
       };
   },
   computed: {
@@ -207,8 +209,16 @@ export default {
       }
   },
   mounted() {
+    this.accessToken = localStorage.getItem("token");
+    let userStr = localStorage.getItem("user");
+    this.user = JSON.parse(userStr);
       this.fetchCategories();
-      this.fetchAds();
+      if (this.user.is_pro) {
+        this.fetchAds();
+      } else {
+        this.fetchMyAds();
+      }
+
   },
   methods: {
       onRowClick(id) {
@@ -258,6 +268,19 @@ export default {
               this.loading = false;
           } catch (error) {
               console.error("Error fetching ads:", error);
+              this.loading = false;
+          }
+      },
+      async fetchMyAds() {
+          try {
+              const response = await UserService.show("getAdsByUser", this.user.id);
+              console.log(response)
+              if (response.data.success) {
+                  this.ads = response.data.data;
+              }
+              this.loading = false;
+          } catch (error) {
+              console.error("Error fetching users:", error);
               this.loading = false;
           }
       }

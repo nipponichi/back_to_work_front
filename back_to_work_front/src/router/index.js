@@ -8,6 +8,7 @@ import RegisterFormComponent from "../components/RegisterFormComponent.vue";
 import LoginFormComponent from "../components/LoginFormComponent.vue";
 import VerifyEmailComponent from "../components/VerifyEmailComponent.vue";
 import ResetPasswordFormComponent from "../components/ResetPasswordFormComponent.vue";
+import WorksView from "../views/WorksView.vue";
 
 const routes = [
     { path: '/', component: HomeView, name: 'home' },
@@ -21,7 +22,8 @@ const routes = [
       name: 'verify-email'},
     { path: '/reset-password', component: ResetPasswordFormComponent,
       props: (route) => ({ token: route.query.token, email: decodeURIComponent(route.query.email)}),
-      name: 'reset-password', meta: {requiresAuth: false }}
+      name: 'reset-password', meta: {requiresAuth: false }},
+    { path: '/work', component:WorksView, name: 'work'}
 ]
 
 const router = createRouter({

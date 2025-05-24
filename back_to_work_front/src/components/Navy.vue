@@ -16,7 +16,8 @@
         </li>
         <li>
           <RouterLink to="/service" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
-            🛠️ Servicios
+            <span v-if="user?.is_pro">🛠️ Servicios</span>
+            <span v-else>Mis anuncios</span>
           </RouterLink>
         </li>
         <li>
@@ -26,32 +27,40 @@
         </li>
       </ul>
       
-      <div ref="dropdownMenu" class="relative ml-auto mr-10">
-        <div @click="toggleDropdown" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center ">
-          {{ accessToken ? `👤 ${user.user_name || "Usuario"}` : "📝 Cuenta" }}
-          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
+
+      <div class="flex items-center gap-4 ml-auto">
+        <div v-if="user?.is_pro">
+          <RouterLink to="/work" class="w-32 h-12 flex items-center justify-center text-black bg-gray-100 rounded text-lg font-semibold hover:bg-gray-300">
+            <span>Mis trabajos</span>
+          </RouterLink>
         </div>
+        <div ref="dropdownMenu" class="relative ml-auto mr-10">
+          <div @click="toggleDropdown" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center ">
+            {{ accessToken ? `👤 ${user.user_name || "Usuario"}` : "📝 Cuenta" }}
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+          
+          <div v-if="isOpen" class="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-lg overflow-hidden no-underline">
+            <template v-if="!accessToken">
+              <RouterLink to="/login" class="block px-4 py-2 text-gray-700 hover:bg-gray-200 no-underline" @click="closeDropdown">
+                🔑 Iniciar Sesión
+              </RouterLink>
+              <RouterLink to="/register" class="block px-4 py-2 text-gray-700 hover:bg-gray-200 no-underline" @click="closeDropdown">
+                📝 Registrarse
+              </RouterLink>
+            </template>
 
-        <div v-if="isOpen" class="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-lg overflow-hidden no-underline">
-          <template v-if="!accessToken">
-            <RouterLink to="/login" class="block px-4 py-2 text-gray-700 hover:bg-gray-200 no-underline" @click="closeDropdown">
-              🔑 Iniciar Sesión
-            </RouterLink>
-            <RouterLink to="/register" class="block px-4 py-2 text-gray-700 hover:bg-gray-200 no-underline" @click="closeDropdown">
-              📝 Registrarse
-            </RouterLink>
-          </template>
-
-          <template v-else>
-            <button @click="preferences" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200">
-              ⚙️ Preferencias
-            </button>
-            <button @click="logout" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200">
-              🚪 Cerrar Sesión
-            </button>
-          </template>
+            <template v-else>
+              <button @click="preferences" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200">
+                ⚙️ Preferencias
+              </button>
+              <button @click="logout" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200">
+                🚪 Cerrar Sesión
+              </button>
+            </template>
+          </div>
         </div>
       </div>
     </div>
@@ -94,8 +103,10 @@ export default {
   },
   mounted() {
     this.accessToken = localStorage.getItem("token");
+    console.log(this.accessToken);
     let userStr = localStorage.getItem("user");
     this.user = JSON.parse(userStr);
+    console.log(this.user);
     document.addEventListener("click", this.handleClickOutside);
   },
   beforeUnmount() {
