@@ -178,7 +178,16 @@ export default {
 
           if (res.data.success) {
             await this.fetchBids();
-            this.$emit('close-ad-detail');
+            
+
+          //Se obtiene el adId asociado al bidId y se pasa al padre
+          const resAd = await axios.get(`http://127.0.0.1:8000/api/offers/${data.bidId}/ad`);
+          const adId = resAd.data.ad_id;
+          console.log('El valor de adId es:', adId);
+          console.log('Emitiendo evento payment-success con adId:', adId);
+          this.$emit('payment-success', { adId });
+          this.$emit('close-ad-detail');
+
           } else {
             console.warn('El servidor no confirmó el pago como exitoso.');
           }
