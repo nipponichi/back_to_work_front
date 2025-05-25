@@ -26,7 +26,7 @@
 
       <div ref="dropdownMenu" class="relative ml-auto mr-10">
         <div @click="toggleDropdown" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
-          <span>
+          <span @click.stop="accessToken && fetchUserReviews()">
             {{ accessToken ? `👤 ${user.name || "Usuario"} (${userReviews.length})` : "📝 Cuenta" }}
           </span>
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,10 +47,6 @@
           <template v-else>
             <button @click="logout" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200">
               🚪 Cerrar Sesión
-            </button>
-            <hr />
-            <button @click="fetchUserReviews" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-200">
-              ⭐ Ver mis valoraciones
             </button>
           </template>
         </div>
@@ -83,7 +79,7 @@ export default {
     return {
       isOpen: false,
       accessToken: null,
-      user: {},  // objeto, no string
+      user: {},
       toast: useToast(),
       userReviews: [],
       showReviews: false,
@@ -91,7 +87,7 @@ export default {
   },
   mounted() {
     this.accessToken = localStorage.getItem("token");
-    let userStr = localStorage.getItem("user");
+    const userStr = localStorage.getItem("user");
     this.user = JSON.parse(userStr || "{}");
     document.addEventListener("click", this.handleClickOutside);
   },
@@ -101,12 +97,12 @@ export default {
   watch: {
     "$route"() {
       this.accessToken = localStorage.getItem("token");
-      let userStr = localStorage.getItem("user");
+      const userStr = localStorage.getItem("user");
       this.user = JSON.parse(userStr || "{}");
     },
     accessToken() {
       this.accessToken = localStorage.getItem("token");
-      let userStr = localStorage.getItem("user");
+      const userStr = localStorage.getItem("user");
       this.user = JSON.parse(userStr || "{}");
     },
   },
@@ -143,20 +139,13 @@ export default {
       }
     },
     async fetchUserReviews() {
-      console.log("👉 fetchUserReviews llamado");
-     
-     
-
       try {
-        const token = localStorage.getItem('token'); 
-        console.log("📦 Token usado:", token);
+        const token = localStorage.getItem('token');
         const response = await axios.get("http://localhost:8000/api/getStats", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-        console.log("✅ Respuesta recibida:", response.data);
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
 
         if (response.data.success) {
           this.userReviews = response.data.data;
@@ -165,7 +154,7 @@ export default {
           this.toast.error("No se pudieron obtener las valoraciones.");
         }
       } catch (error) {
-        console.error("❌ Error en llamada a http://localhost:8000/api/getStats:", error);
+        console.error("❌ Error en getStats:", error);
         this.toast.error("No se pudieron obtener las valoraciones.");
       }
     },
