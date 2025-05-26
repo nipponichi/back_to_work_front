@@ -52,7 +52,15 @@
           </thead>
           <tbody>
             <tr v-for="bid in bids" :key="bid.id" class="border-b">
-              <td class="px-6 py-3">{{ bid.user?.name || 'Desconocido' }}</td>
+              <td class="px-6 py-3">
+              {{ bid.user?.name || 'Desconocido' }}
+            <span
+             class="text-blue-600 cursor-pointer underline"
+            @click="fetchUserStats(bid.user?.id)"
+            >
+            ({{ bid.userstat.length }})
+          </span>
+          </td>
               <td class="px-6 py-3">{{ bid.bid }}</td>
               <td class="px-6 py-3">{{ bid.description }}</td>
               <td class="px-6 py-3 space-x-2">
@@ -240,6 +248,7 @@ export default {
         const res = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
         if (res.data.success) {
           this.bids = res.data.data;
+          console.log(this.bids);
         }
       } catch (err) {
         console.error("Error al obtener pujas:", err);
