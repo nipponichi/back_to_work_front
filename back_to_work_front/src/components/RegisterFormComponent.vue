@@ -70,6 +70,7 @@
           {{ currentStep === steps.length - 1 ? "Finalizar" : "Siguiente" }}
         </button>
       </div>
+
     </div>
   </template>
   

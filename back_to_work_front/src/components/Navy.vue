@@ -26,9 +26,17 @@
 
       <div ref="dropdownMenu" class="relative ml-auto mr-10">
         <div @click="toggleDropdown" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
-          <span @click.stop="accessToken && fetchUserReviews()">
-            {{ accessToken ? `👤 ${user.name || "Usuario"} (${userReviews.length})` : "📝 Cuenta" }}
-          </span>
+          <span>
+           {{ accessToken ? `👤 ${user.name || "Usuario"} `: "📝 Cuenta" }}
+          <template v-if="accessToken">
+          <button 
+            @click="showUserstatModal = true" 
+            class="bg-blue-500 hover:bg-blue-600 text-white" >
+            (<span class="text-yellow-500 font-extrabold">{{ user.user_stat.length }}</span>)
+          </button>
+
+      </template>
+      </span>
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
@@ -66,6 +74,18 @@
       <p v-else>No tienes valoraciones todavía.</p>
       <button @click="showReviews = false" class="mt-2 text-blue-600 underline">Cerrar</button>
     </div>
+    <Dialog
+        v-model:visible="showUserstatModal"
+        header="User ratings"
+        :modal="true"
+        :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
+        headerClass="border-b border-gray-200 p-4 font-semibold text-lg"
+        contentClass="p-4"
+      >
+      <div class="bg-white text-black text-2xl p-8 rounded">
+        <AdUserstats :id="user.id"/>
+      </div>
+    </Dialog>
   </nav>
 </template>
 
@@ -73,8 +93,15 @@
 import axios from "axios";
 import AuthService from "../services/api/auth.service";
 import { useToast } from "vue-toastification";
+import AdUserstats from "../modals/AdUserstats.vue";
+import Dialog from "primevue/dialog";
 
 export default {
+  components: {
+    AdUserstats,
+    Dialog,
+  },
+
   data() {
     return {
       isOpen: false,
@@ -83,6 +110,7 @@ export default {
       toast: useToast(),
       userReviews: [],
       showReviews: false,
+      showUserstatModal: false,
     };
   },
   mounted() {

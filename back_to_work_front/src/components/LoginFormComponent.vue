@@ -59,12 +59,10 @@ export default {
   async handleLogin() {
     try {
       const response = await AuthService.login(this.email, this.password);
-
-      // Si la respuesta es exitosa, proceder con el login
       if (response.data.success) {
         this.toast.success("Login successfully");
         const tokenExpiration = Date.now() + 2 * 3600 * 1000;
-
+        console.log("response", response)
         localStorage.setItem("tokenExpiration", tokenExpiration);
         localStorage.setItem("token", response.data.data.accessToken);
         let accessToken = localStorage.getItem("token");
