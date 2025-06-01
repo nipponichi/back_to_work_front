@@ -13,19 +13,28 @@
           </span>
         </div>
 
-        <ul class="hidden md:flex space-x-6">
+        <ul class="hidden md:flex space-x-6 text-">
           <li>
-            <RouterLink to="/" class="text-[#7A4E2E] hover:text-[#C56E33] transition">
+            <RouterLink 
+              to="/" 
+              class="block pb-1 text-lg text-[#7A4E2E] hover:text-[#C56E33] transition border-b-2"
+              :class="$route.name === 'home' ? 'bg-white px-2 py-2' : 'border-transparent'">
               Inicio
             </RouterLink>
           </li>
           <li>
-            <RouterLink to="/service" class="text-[#7A4E2E] hover:text-[#C56E33] transition">
-              {{ user?.is_pro ? 'Servicios' : 'Proyectos' }}
+            <RouterLink 
+              to="/service" 
+              class="block pb-1 text-lg text-[#7A4E2E] hover:text-[#C56E33] transition border-b-2"
+              :class="$route.name === 'service' ? 'bg-white px-2 py-2' : 'border-transparent'">
+              {{ user && user.is_pro ? 'Servicios' : 'Proyectos' }}
             </RouterLink>
           </li>
           <li>
-            <RouterLink to="/contact" class="text-[#7A4E2E] hover:text-[#C56E33] transition">
+            <RouterLink 
+              to="/contact" 
+              class="block pb-1 text-lg text-[#7A4E2E] hover:text-[#C56E33] transition border-b-2"
+              :class="$route.name === 'contact' ? 'bg-white px-2 py-2' : 'border-transparent'">
               Contacto
             </RouterLink>
           </li>
@@ -34,11 +43,11 @@
         <div class="flex items-center space-x-3">
           <template v-if="accessToken">
             <RouterLink v-if="user?.is_pro" to="/work"
-                        class="hidden md:block bg-[#C56E33] hover:bg-[#A35429] transition px-4 py-2 rounded-full text-white text-sm">
+                        class="hidden md:block px-4 py-2 rounded-full text-white text-sm">
               Mis Trabajos
             </RouterLink>
             <button @click="preferences"
-                    class="hidden md:block text-[#7A4E2E] hover:text-[#C56E33] transition font-medium">
+                    class="hidden md:block bg-[#F4EDE4]/0 cursor-poiner rounded-full font-medium">
               👤 {{ user?.user_name || "Usuario" }}
             </button>
             <button @click="logout"
@@ -71,27 +80,23 @@
 
     <transition name="fade">
       <div v-if="isMobileMenuOpen" class="md:hidden bg-white/90 backdrop-blur-lg rounded-b-lg p-4 space-y-3 border-t border-[#D6C9B3]">
-        <RouterLink to="/" class="block text-[#7A4E2E] hover:text-[#C56E33] transition">Inicio</RouterLink>
-        <RouterLink to="/service" class="block text-[#7A4E2E] hover:text-[#C56E33] transition">
+        <RouterLink 
+          to="/" 
+          :class="[$route.path === '/' ? 'border-b-2 border-[#7A4E2E]' : '', 'block text-[#7A4E2E] hover:text-[#C56E33] transition']">
+          Inicio
+        </RouterLink>
+        <RouterLink 
+          to="/service" 
+          :class="[$route.path === '/service' ? 'border-b-2 border-[#7A4E2E]' : '', 'block text-[#7A4E2E] hover:text-[#C56E33] transition']">
           {{ user?.is_pro ? 'Servicios' : 'Proyectos' }}
         </RouterLink>
-        <RouterLink to="/contact" class="block text-[#7A4E2E] hover:text-[#C56E33] transition">Contacto</RouterLink>
-
-        <template v-if="accessToken">
-          <button @click="preferences" class="block w-full text-left px-4 py-2 bg-transparent hover:bg-[#F4EDE4] rounded transition text-[#7A4E2E]">
-            👤 {{ user?.user_name || "Usuario" }}
-          </button>
-          <button @click="logout" class="block w-full text-left px-4 py-2 bg-red-400 hover:bg-red-500 text-white rounded transition">
-            Cerrar sesión
-          </button>
-        </template>
-        <template v-else>
-          <RouterLink to="/login"
-                      class="block w-full text-center px-4 py-2 bg-[#7A4E2E] hover:bg-[#C56E33] text-white rounded transition">
-            Acceder
-          </RouterLink>
-        </template>
+        <RouterLink 
+          to="/contact" 
+          :class="[$route.path === '/contact' ? 'border-b-2 border-[#7A4E2E]' : '', 'block text-[#7A4E2E] hover:text-[#C56E33] transition']">
+          Contacto
+        </RouterLink>
       </div>
+
     </transition>
   </nav>
 </div>
@@ -118,10 +123,11 @@ export default {
       isMobileMenuOpen: false,
       user: null,
       dropdownMenu: null,
-      toast: useToast()
+      toast: useToast(),
     };
   },
   mounted() {
+    console.log("Current route object:", this.$route);
     this.accessToken = localStorage.getItem("token");
     let userStr = localStorage.getItem("user");
     this.user = JSON.parse(userStr);
