@@ -7,150 +7,60 @@
       <i class="pi pi-check-circle"></i> Trabajo completado
     </span>
 
-    <div v-if="adData" class="p-6 rounded-lg shadow-md">
-      <h2 class="text-2xl font-semibold text-center text-white">{{ adData.name }}</h2>
-      <p class="mt-4 text-white">{{ adData.description }}</p>
-      <p class="mt-2 text-white">Categoría: {{ adData.category_name }}</p>
-      <p class="mt-2 text-white">Ubicación: {{ adData.location }}</p>
+    <div v-if="adData" class="p-8 space-y-4">
+      <h2 class="text-3xl font-bold text-center text-white">{{ adData.name }}</h2>
 
-      <div v-if="adData?.pictures && adData?.pictures?.length > 0" class="mt-4">
-        <h3 class="font-medium text-white mb-2">
-          Imágenes del anuncio ({{ adData.pictures.length }}):
-        </h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          <div v-for="(picture, index) in adData.pictures" :key="picture.id" class="relative">
-            <img 
-              :src="baseImgUrl + picture.path" 
+      <p class="text-center text-blue-200 text-base">{{ adData.description }}</p>
+
+      <div class="flex flex-col sm:flex-row justify-center gap-4 mt-3">
+        <div class="flex-1 px-3 py-2 bg-white/10 rounded-md text-center">
+          <p class="text-blue-300 text-xs uppercase tracking-wide">Categoría</p>
+          <p class="text-white text-sm font-medium">{{ adData.category_name }}</p>
+        </div>
+        <div class="flex-1 px-3 py-2 bg-white/10 rounded-md text-center">
+          <p class="text-blue-300 text-xs uppercase tracking-wide">Ubicación</p>
+          <p class="text-white text-sm font-medium">{{ adData.location }}</p>
+        </div>
+      </div>
+
+      <div class="mt-5">
+
+        <div v-if="adData?.pictures?.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <div
+            v-for="(picture, index) in adData.pictures"
+            :key="picture.id"
+            class="relative group rounded-lg overflow-hidden border border-white/20"
+          >
+            <img
+              :src="baseImgUrl + picture.path"
               :alt="'Imagen ' + (index + 1) + ' - ' + adData.name"
-              class="w-full h-32 object-cover rounded-lg border border-gray-200 hover:shadow-md cursor-pointer"
+              class="w-full h-28 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer rounded-xl"
               @click="openLightbox(index)"
-            >
-            <span class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+            />
+            <span class="absolute top-1 left-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
               {{ index + 1 }}/{{ adData.pictures.length }}
             </span>
           </div>
         </div>
 
-        <div 
-          v-if="lightbox.isOpen" 
-          class="fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center p-4"
-          @click.self="lightbox.isOpen = false"
-        >
-          <button
-            @click="lightbox.isOpen = false"
-            class="absolute top-6 right-6 text-white bg-gray-800 text-4xl z-[10000] hover:bg-gray-600 transition-colors focus:outline-none"
-            aria-label="Cerrar lightbox"
-          >
-            &times;
-          </button>
-
-          <div class="relative w-full max-w-6xl h-full flex items-center justify-center">
-            <img 
-              :src="baseImgUrl + adData.pictures[lightbox.currentIndex].path" 
-              class="max-h-[90vh] max-w-full object-contain"
-              :alt="'Imagen ' + (lightbox.currentIndex + 1) + ' de ' + adData.name"
-            >
-            <button
-              @click.stop="prevImage"
-              class="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
-              aria-label="Imagen anterior"
-            >
-              &larr;
-            </button>
-            <button
-              @click.stop="nextImage"
-              class="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
-              aria-label="Imagen siguiente"
-            >
-              &rarr;
-            </button>
-            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white text-lg px-4 py-2 rounded-full">
-              Imagen {{ lightbox.currentIndex + 1 }} de {{ adData.pictures.length }}
-            </div>
-          </div>
+        <div v-else class="text-blue-200 italic mt-2">
+          Este anuncio no tiene imágenes
         </div>
       </div>
-
-      <div v-else class="mt-4 text-gray-500">
-        Este anuncio no tiene imágenes
-      </div>
     </div>
 
-    <div v-if="user?.is_pro && bids.length === 0" class="p-8 bg-white rounded-2xl shadow-xl border border-gray-200 text-center">
-      <h3 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">
-        Este anuncio todavía no tiene ofertas
-      </h3>
-      <p class="text-gray-600 mb-6">
-        ¡Sé el primero en hacer una propuesta o chatea con el cliente si tienes alguna duda!
-      </p>
-      <div class="flex flex-col sm:flex-row justify-center gap-4">
-        <button
-          @click="toggleBidGrid"
-          class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition"
-        >
-          <i class="pi pi-plus-circle mr-2"></i> Hacer una oferta
-        </button>
-        <button
-          @click="openChat(adData.user)"
-          class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition"
-        >
-          <i class="pi pi-comments mr-2"></i> Chatear con el cliente
-        </button>
-      </div>
-    </div>
-    <div v-if="bids.length > 0" class="flex flex-col mt-6 sm:flex-row justify-center gap-4">
-      <button
-          @click="toggleBidGrid"
-          class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition"
-        >
-          <i class="pi pi-plus-circle mr-2"></i> Hacer una oferta
-        </button>
-        <button
-          @click="openChat(adData.user)"
-          class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition"
-        >
-          <i class="pi pi-comments mr-2"></i> Chatear con el cliente
-        </button>
-    </div>
-
-<div v-if="showBidGrid" class="mt-6">
-  <div class="overflow-x-auto bg-blue-900 shadow-md rounded-md">
-    <table class="min-w-full text-sm">
-      <tbody>
-        <tr v-if="showNewBidRow" class="border-b">
-          <td>
-            <input v-model="newBid.bid" type="number" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Monto" />
-          </td>
-          <td class="px-6 py-3">
-            <input v-model="newBid.description" type="text" class="px-3 py-2 border border-gray-300 rounded-md" placeholder="Descripción" />
-          </td>
-          <td class="px-6 py-3">
-            <button
-              @click="submitNewBid"
-              class="text-green-500 hover:text-green-700"
-              :disabled="isSubmitting"
-            >
-              Añadir
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="w-full rounded-2xl shadow-xl overflow-hidden border border-white/20 mt-6">
-  <DataTable 
-    :value="bids"
-    :paginator="true" 
-    :rows="10"
-    :rowsPerPageOptions="[5,10,25]"
-    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pujas"
-    stripedRows
-    responsiveLayout="scroll"
-    class="p-datatable-sm shadow-md rounded-md"
-  >
+<div v-if="bids.length > 0" class="w-full rounded-2xl shadow-xl overflow-hidden border border-white/20 mt-6">
+    <DataTable 
+      :value="bids"
+      :paginator="true" 
+      :rows="10"
+      :rowsPerPageOptions="[5,10,25]"
+      paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pujas"
+      stripedRows
+      responsiveLayout="scroll"
+      class="p-datatable-sm shadow-md rounded-md"
+    >
 
         <Column field="user.name" header="Usuario" :sortable="true">
           <template #body="{data}">
@@ -219,14 +129,23 @@
             </div>
           </template>
         </Column>
-
-        <template #emptymessage>
-          <div class="p-4 text-center text-gray-500">
-            No hay pujas registradas para este anuncio
-          </div>
-        </template>
-      </DataTable>
+  </DataTable>
     </div>
+    <div v-else class="p-8 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 text-center">
+  <div class="flex flex-col items-center space-y-4">
+    <div class="w-20 h-20 flex items-center justify-center rounded-full bg-blue-600/20">
+      <i class="pi pi-inbox text-4xl text-blue-300"></i>
+    </div>
+    <h3 class="text-2xl font-semibold text-white">Sin ofertas recibidas aún</h3>
+    <p class="text-blue-200 max-w-md">
+      Tu anuncio está esperando su primera oferta. ¡Los profesionales enviarán una oferta pronto!
+    </p>
+    <RouterLink to="/contact"       class="mt-4 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow hover:from-blue-700 hover:to-purple-700 transition"
+    >
+      Contactar soporte
+    </RouterLink>
+  </div>
+</div>
 
     <Dialog
       v-model:visible="showRatingModal"
@@ -259,7 +178,46 @@
         <span class="text-white text-lg font-semibold">Procesando pago...</span>
       </div>
     </div>
-    
+
+    <div 
+  v-if="lightbox.isOpen" 
+  class="fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center p-4"
+  @click.self="lightbox.isOpen = false"
+>
+  <button
+    @click="lightbox.isOpen = false"
+    class="absolute top-6 right-6 text-white bg-gray-800 text-4xl z-[10000] hover:bg-gray-600 transition-colors focus:outline-none"
+    aria-label="Cerrar lightbox"
+  >
+    &times;
+  </button>
+
+  <div class="relative w-full max-w-6xl h-full flex items-center justify-center">
+    <img 
+      :src="baseImgUrl + adData.pictures[lightbox.currentIndex].path" 
+      class="max-h-[90vh] max-w-full object-contain"
+      :alt="'Imagen ' + (lightbox.currentIndex + 1) + ' de ' + adData.name"
+    >
+    <button
+      @click.stop="prevImage"
+      class="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
+      aria-label="Imagen anterior"
+    >
+      &larr;
+    </button>
+    <button
+      @click.stop="nextImage"
+      class="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
+      aria-label="Imagen siguiente"
+    >
+      &rarr;
+    </button>
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white text-lg px-4 py-2 rounded-full">
+      Imagen {{ lightbox.currentIndex + 1 }} de {{ adData.pictures.length }}
+    </div>
+  </div>
+</div>
+
 
   </div>
 </template>
@@ -318,7 +276,6 @@ export default {
       paidbid: {},
     };
   },
-
   async mounted() {
     window.addEventListener('message', this.receiveMessage);
     await this.fetchCategories();
@@ -333,12 +290,12 @@ export default {
     } else {
       console.log('No hay imágenes en este anuncio');
     }
-  },
+  
 
+  },
   beforeUnmount() {
     window.removeEventListener('message', this.receiveMessage);
   },
-
   methods: {
     async markAsDone(id) {
       try {
@@ -453,7 +410,6 @@ export default {
         const res = await axios.get(`http://127.0.0.1:8000/api/ads/${this.id}`);
         if (res.data.success) {
           this.adData = res.data.data;
-          console.log(this.adData)
         if (this.adData.pictures && this.adData.pictures.length > 0) {
           console.log('URL de imagen:', import.meta.env.VITE_IMG_URL + this.adData.pictures[0].path);
         } else {
@@ -483,9 +439,11 @@ export default {
           this.bids.forEach(bid => {
             console.log(this.bids);
             if (bid.is_paid === 1) {
+              console.log("Puja pagada:", bid);
               this.paidbid = bid;
             }
           });
+          console.log("Pujas obtenidas:", this.bids);
         }
       } catch (err) {
         console.error("Error al obtener pujas:", err);

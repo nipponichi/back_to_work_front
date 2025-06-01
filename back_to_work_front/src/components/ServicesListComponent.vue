@@ -225,6 +225,23 @@
                 </span>
               </template>
             </Column>
+            <Column
+              header="Acciones"
+              headerClass="bg-blue-900/50 text-white font-bold"
+              bodyClass="align-middle px-2 py-3 text-center w-1/12"
+              style="width: 10%"
+            >
+<template #body="slotProps">
+  <button
+    @click="deleteAd(slotProps.data.id)"
+    class="w-8 h-8 flex items-center justify-center rounded-full bg-red-600/20 hover:bg-red-600 group transition cursor-pointer"
+    title="Eliminar anuncio"
+  >
+    <i class="pi pi-trash text-red-500 text-base transition group-hover:text-white"></i>
+  </button>
+</template>
+
+            </Column>
           </DataTable>
         </div>
       </div>
@@ -413,6 +430,24 @@ mounted: async function() {
   }
 },
 methods: {
+  async deleteAd(adId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este anuncio?')) {
+      return;
+    }
+
+    try {
+      const response = await UserService.delete(`ads/${adId}`);
+      if (response.data.success) {
+        this.ads = this.ads.filter(ad => ad.id !== adId);
+        this.toast.success('Anuncio eliminado con éxito');
+      } else {
+        this.toast.error('No se pudo eliminar el anuncio');
+      }
+    } catch (error) {
+      console.error('Error al eliminar el anuncio:', error);
+      this.toast.error('Error al eliminar el anuncio');
+    }
+  },
     handleAdCreated(newAd) {
       console.log(newAd)
       this.ads.unshift(newAd);

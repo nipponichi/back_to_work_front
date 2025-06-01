@@ -15,7 +15,6 @@
 
           <ul class="hidden md:flex space-x-4">
             <li><RouterLink to="/" class="text-white hover:text-blue-300 transition">Inicio</RouterLink></li>
-            <li><RouterLink to="/about" class="text-white hover:text-blue-300 transition">Servicios</RouterLink></li>
             <li><RouterLink to="/service" class="text-white hover:text-blue-300 transition">{{ user?.is_pro ? 'Servicios' : 'Proyectos' }}</RouterLink></li>
             <li><RouterLink to="/contact" class="text-white hover:text-blue-300 transition">Contacto</RouterLink></li>
           </ul>
