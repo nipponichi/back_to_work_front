@@ -6,14 +6,10 @@
   </div>
 
   <div class="relative z-10 max-w-7xl mx-auto bg-blue-950 m-20 pt-6 pb-12 px-12 rounded-2xl">
-      <div class="text-center mb-16">
-        <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
-          Contáctanos
-        </h2>
-        <p class="text-xl text-gray-100 max-w-3xl mx-auto">
-          ¿Tienes alguna pregunta? Escríbenos y te responderemos lo antes posible.
-        </p>
-      </div>
+    <div class="relative mb-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-white inline-block relative z-10"> Contacto </h2>
+      <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-900 rounded-full"></div>
+    </div>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -101,9 +97,8 @@
                   </svg>
                 </div>
                 <div class="ml-4">
-                  <h4 class="text-lg font-semibold text-gray-900">Correo electrónico</h4>
                   <p class="text-gray-600 mt-1">info@weagree.com</p>
-                  <p class="text-gray-500 text-sm mt-2">Respuesta en 24-48 horas</p>
+                  <p class="text-gray-500 text-sm mt-2">Responderemos lo antes posible</p>
                 </div>
               </div>
               
@@ -114,8 +109,7 @@
                   </svg>
                 </div>
                 <div class="ml-4">
-                  <h4 class="text-lg font-semibold text-gray-900">Teléfono</h4>
-                  <p class="text-gray-600 mt-1">+34 123 456 789</p>
+                  <p class="text-gray-600 mt-1">+34 91 597 41 89</p>
                   <p class="text-gray-500 text-sm mt-2">Lunes a Viernes, 9:00 - 18:00</p>
                 </div>
               </div>
@@ -128,8 +122,7 @@
                   </svg>
                 </div>
                 <div class="ml-4">
-                  <h4 class="text-lg font-semibold text-gray-900">Oficina</h4>
-                  <p class="text-gray-600 mt-1">Calle Ejemplo, 123</p>
+                  <p class="text-gray-600 mt-1">Calle Reyes Católicos, 123</p>
                   <p class="text-gray-600">28001 Madrid, España</p>
                 </div>
               </div>

@@ -6,7 +6,7 @@
 
     <main class="relative z-10 pt-8 pb-16 px-4 sm:px-6 lg:px-8">
     <div class="relative mb-6">
-      <h2 class="text-2xl sm:text-3xl font-bold text-white inline-block relative z-10">Servicios</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold text-white inline-block relative z-10">{{ user?.is_pro == 1 ? 'Servicios' : 'Proyectos' }}</h2>
       <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-900 rounded-full"></div>
     </div>
 
@@ -114,7 +114,7 @@
           </button>
         </div>
 
-        <div v-else class="w-full rounded-2xl shadow-xl overflow-hidden border border-white/20">
+        <div class="w-full rounded-2xl shadow-xl overflow-hidden border border-white/20 overflow-x-auto">
           <DataTable
             :value="filteredAds"
             :paginator="true"
@@ -122,7 +122,7 @@
             sortMode="multiple"
             dataKey="id"
             :rowClassName="rowClassName"
-            tableClass="min-w-full table-fixed"
+            tableClass="min-w-full table-auto"
             class="text-white cursor-pointer w-full"
             @row-click="onRowClick"
           >
@@ -131,19 +131,19 @@
               header="Nombre"
               sortable
               headerClass="bg-blue-900/50 text-white font-bold"
-              bodyClass="align-middle px-2 py-3 text-blue-900 font-semibold w-1/4"
-              style="width: 25%"
+              bodyClass="align-middle px-2 py-3 text-blue-900 font-semibold"
             />
 
             <Column
               header="Descripción"
               sortable
-              headerClass="bg-blue-900/50 text-white font-bold hidden sm:table-cell"
-              bodyClass="align-middle px-2 py-3 text-blue-900 truncate hidden sm:table-cell w-1/4"
-              style="width: 25%"
+              headerClass="bg-blue-900/50 text-white font-bold"
+              bodyClass="align-middle px-2 py-3 text-blue-900 max-w-sm truncate"
             >
               <template #body="slotProps">
-                <p class="truncate">{{ slotProps.data.description }}</p>
+                <p class="truncate max-w-sm">
+                  {{ slotProps.data.description }}
+                </p>
               </template>
             </Column>
 
@@ -151,8 +151,7 @@
               header="Categoría"
               sortable
               headerClass="bg-blue-900/50 text-white font-bold"
-              bodyClass="align-middle px-2 py-3 text-blue-900 w-1/6"
-              style="width: 15%"
+              bodyClass="align-middle px-2 py-3 text-blue-900"
             >
               <template #body="slotProps">
                 <span class="inline-block px-4 py-1 rounded-full text-sm font-medium bg-blue-900/50 text-white">
@@ -164,15 +163,16 @@
             <Column
               header="Ubicación"
               sortable
-              headerClass="bg-blue-900/50 text-white font-bold hidden sm:table-cell"
-              bodyClass="align-middle px-2 py-3 text-blue-900 truncate hidden sm:table-cell w-1/6"
-              style="width: 15%"
+              headerClass="bg-blue-900/50 text-white font-bold hidden md:table-cell"
+              bodyClass="align-middle px-2 py-3 text-blue-900 truncate hidden md:table-cell"
             >
               <template #body="slotProps">
                 <div class="flex items-center truncate">
                   <svg class="w-4 h-4 mr-1 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
                   <span>{{ slotProps.data.location }}</span>
                 </div>
@@ -182,9 +182,8 @@
             <Column
               header="Fecha Límite"
               sortable
-              headerClass="bg-blue-900/50 text-white font-bold hidden sm:table-cell"
-              bodyClass="align-middle px-2 py-3 text-blue-900 hidden sm:table-cell w-1/6"
-              style="width: 15%"
+              headerClass="bg-blue-900/50 text-white font-bold hidden md:table-cell"
+              bodyClass="align-middle px-2 py-3 text-blue-900 hidden md:table-cell"
             >
               <template #body="slotProps">
                 <div class="flex flex-col">
@@ -208,42 +207,52 @@
             </Column>
 
             <Column
+              v-if="!user?.is_pro"
               header="Estado"
               sortable
               headerClass="bg-blue-900/50 text-white font-bold"
-              bodyClass="align-middle px-2 py-3 text-center w-1/6"
-              style="width: 15%"
+              bodyClass="align-middle px-2 py-3 text-center"
             >
               <template #body="slotProps">
                 <span
-                  :class="slotProps.data.pro_is_done 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-amber-100 text-amber-800'"
+                  :class="getAdStatusClass(slotProps.data)"
                   class="px-2 py-1 rounded-full text-xs font-semibold"
                 >
-                  {{ slotProps.data.pro_is_done ? 'Completado' : 'Pendiente' }}
+                  {{ getAdStatusLabel(slotProps.data) }}
                 </span>
               </template>
             </Column>
+
             <Column
+              v-if="!user?.is_pro"
               header="Acciones"
               headerClass="bg-blue-900/50 text-white font-bold"
-              bodyClass="align-middle px-2 py-3 text-center w-1/12"
-              style="width: 10%"
+              bodyClass="align-middle px-2 py-3 text-center"
             >
-<template #body="slotProps">
-  <button
-    @click="deleteAd(slotProps.data.id)"
-    class="w-8 h-8 flex items-center justify-center rounded-full bg-red-600/20 hover:bg-red-600 group transition cursor-pointer"
-    title="Eliminar anuncio"
-  >
-    <i class="pi pi-trash text-red-500 text-base transition group-hover:text-white"></i>
-  </button>
-</template>
-
+              <template #body="slotProps">
+                <button
+                  @click="deleteAd(slotProps.data.id)"
+                  :disabled="hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done"
+                  class="w-8 h-8 flex items-center justify-center rounded-full transition cursor-pointer"
+                  :class="{
+                    'bg-gray-400 cursor-not-allowed': hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done,
+                    'bg-red-600/20 hover:bg-red-600 group': !(hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done)
+                  }"
+                  :title="(hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done) ? 'No se puede eliminar este anuncio' : 'Eliminar anuncio'"
+                >
+                  <i class="pi pi-trash"
+                    :class="[
+                      'text-base transition',
+                      hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done
+                        ? 'text-gray-300'
+                        : 'text-red-500 group-hover:text-white'
+                    ]"></i>
+                </button>
+              </template>
             </Column>
           </DataTable>
         </div>
+
       </div>
     </main>
 
@@ -280,7 +289,7 @@
 </div>
 
 <div v-if="openCreateAdModal" class="fixed z-50 inset-0 overflow-y-auto">
-  <div class="flex items-end justify-center max-h-12 pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
     <div class="fixed inset-0 transition-opacity" aria-hidden="true">
       <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
     </div>
@@ -312,6 +321,7 @@
     </div>
   </div>
 </div>
+
 
   
     <div v-if="showRatingModal" class="fixed z-50 inset-0 overflow-y-auto">
@@ -430,6 +440,41 @@ mounted: async function() {
   }
 },
 methods: {
+  getAdStatusLabel(ad) {
+    if (ad.customer_is_done) {
+      return 'Completado';
+    }
+    if (ad.pro_is_done) {
+      return 'En validación';
+    }
+    if (this.hasPaidOffer(ad)) {
+      return 'En curso';
+    }
+    if (ad.ad_offer && ad.ad_offer.length > 0) {
+      return 'En negociación';
+    }
+    return 'Esperando pujas';
+  },
+
+  getAdStatusClass(ad) {
+    if (ad.customer_is_done) {
+      return 'bg-green-200 text-green-900';
+    }
+    if (ad.pro_is_done) {
+      return 'bg-yellow-200 text-yellow-900';
+    }
+    if (this.hasPaidOffer(ad)) {
+      return 'bg-blue-200 text-blue-900';
+    }
+    if (ad.ad_offer && ad.ad_offer.length > 0) {
+      return 'bg-purple-200 text-purple-900';
+    }
+    return 'bg-amber-100 text-amber-800';
+  },
+
+  hasPaidOffer(ad) {
+    return ad.ad_offer && ad.ad_offer.some(offer => offer.is_paid === 1);
+  },
   async deleteAd(adId) {
     if (!confirm('¿Estás seguro de que quieres eliminar este anuncio?')) {
       return;

@@ -49,6 +49,59 @@
       </div>
     </div>
 
+    <div v-if="user?.is_pro" class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+  <button
+    @click="openChat(adData.user)"
+    class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-700 transition-all duration-200"
+  >
+    <i class="pi pi-comments mr-2"></i> Chatear con el cliente
+  </button>
+
+  <button
+    @click="toggleBidGrid"
+    class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
+  >
+    <i class="pi pi-plus-circle mr-2"></i> Hacer una oferta
+  </button>
+</div>
+
+<div v-if="showBidGrid" class="mt-6">
+  <div class="overflow-x-auto bg-blue-900 shadow-md rounded-md">
+    <table class="min-w-full text-sm">
+      <tbody>
+        <tr v-if="showNewBidRow" class="border-b">
+          <td class="px-2 py-2 w-1/3">
+            <input
+              v-model="newBid.bid"
+              type="number"
+              class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
+              placeholder="Monto"
+            />
+          </td>
+          <td class="px-2 py-2 w-1/2">
+            <input
+              v-model="newBid.description"
+              type="text"
+              class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
+              placeholder="Descripción"
+            />
+          </td>
+          <td class="px-2 py-2 w-20 text-center">
+            <button
+              @click="submitNewBid"
+              class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-md text-sm transition"
+              :disabled="isSubmitting"
+            >
+              Añadir
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
 <div v-if="bids.length > 0" class="w-full rounded-2xl shadow-xl overflow-hidden border border-white/20 mt-6">
     <DataTable 
       :value="bids"
@@ -129,23 +182,32 @@
             </div>
           </template>
         </Column>
-  </DataTable>
-    </div>
-    <div v-else class="p-8 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 text-center">
+    </DataTable>
+</div>
+
+<div v-else-if="user?.is_pro" class="mt-6 p-8 bg-blue-900/20 rounded-lg text-center">
+  <p class="text-white text-xl font-semibold mb-2">Sé el primero en hacer una oferta por este proyecto</p>
+  <p class="text-blue-200">Aprovecha la oportunidad de destacar y consigue este trabajo antes que nadie.</p>
+</div>
+
+<div v-else class="p-8 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 text-center mt-6">
   <div class="flex flex-col items-center space-y-4">
     <div class="w-20 h-20 flex items-center justify-center rounded-full bg-blue-600/20">
       <i class="pi pi-inbox text-4xl text-blue-300"></i>
     </div>
-    <h3 class="text-2xl font-semibold text-white">Sin ofertas recibidas aún</h3>
+    <h3 class="text-2xl font-semibold text-white">No tienes ofertas todavía</h3>
     <p class="text-blue-200 max-w-md">
-      Tu anuncio está esperando su primera oferta. ¡Los profesionales enviarán una oferta pronto!
+      ¡Empezarán a llegar muy pronto!
     </p>
-    <RouterLink to="/contact"       class="mt-4 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow hover:from-blue-700 hover:to-purple-700 transition"
+    <RouterLink 
+      to="/contact"
+      class="mt-4 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow hover:from-blue-700 hover:to-purple-700 transition"
     >
       Contactar soporte
     </RouterLink>
   </div>
 </div>
+
 
     <Dialog
       v-model:visible="showRatingModal"
@@ -217,8 +279,6 @@
     </div>
   </div>
 </div>
-
-
   </div>
 </template>
 
@@ -251,7 +311,7 @@ export default {
   },
   data() {
     return {
-      baseImgUrl: import.meta.env.VITE_IMG_URL || 'http://127.0.0.1:8000/storage/',
+      baseImgUrl: import.meta.env.VITE_IMG_URL,
       adData: null,
       bids: [],
       newBid: {
@@ -293,9 +353,11 @@ export default {
   
 
   },
+
   beforeUnmount() {
     window.removeEventListener('message', this.receiveMessage);
   },
+
   methods: {
     async markAsDone(id) {
       try {
@@ -315,6 +377,7 @@ export default {
         this.toast.error("Error al completar la puja");
       }
     },
+
     async fetchCategories() {
       try {
         const response = await userService.get("categories");
@@ -330,14 +393,17 @@ export default {
       this.lightbox.currentIndex = index;
       this.lightbox.isOpen = true;
     },
+
     nextImage() {
       this.lightbox.currentIndex = 
         (this.lightbox.currentIndex + 1) % this.adData.pictures.length;
     },
+
     prevImage() {
       this.lightbox.currentIndex = 
         (this.lightbox.currentIndex - 1 + this.adData.pictures.length) % this.adData.pictures.length;
     },
+
     async fetchCategories() {
       try {
         const res = await axios.get('http://127.0.0.1:8000/api/categories');
@@ -423,6 +489,7 @@ export default {
         console.error("Error al obtener el anuncio:", err);
       }
     },
+
     async fetchUser() {
       try {
         const userStr = localStorage.getItem("user");
@@ -431,6 +498,7 @@ export default {
         console.error("No se pudo obtener el usuario:", err);
       }
     },
+
     async fetchBids() {
       try {
         const res = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
@@ -488,6 +556,7 @@ export default {
         this.isSubmitting = false;
       }
     },
+
     async removeBid(bidId) {
       try {
         const response = await userService.delete(`http://127.0.0.1:8000/api/offers/${bidId}`);
@@ -507,10 +576,12 @@ export default {
       }
       this.showChatModal = true;
     },
+
     openPaymentModal(bid) {
       this.selectedBid = bid;
       this.showPaymentModal = true;
     },
+
     closePaymentModal() {
       this.showPaymentModal = false;
       this.selectedBid = null;
@@ -534,6 +605,7 @@ export default {
     transform: rotate(360deg);
   }
 }
+
 .bg-green-50 {
   background-color: rgba(209, 250, 229, 0.5) !important;
   border-left: 4px solid #10b981 !important;

@@ -1,39 +1,39 @@
 <template>
-  <div class="p-6 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 max-w-3xl mx-auto">
-    <h2 class="text-3xl font-bold text-white mb-8 text-center">
+  <div class="p-4 sm:p-6 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 max-w-full sm:max-w-3xl mx-auto">
+    <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8 text-center">
       Crear Anuncio
     </h2>
 
-    <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-6">
+    <form @submit.prevent="submitForm" enctype="multipart/form-data" class="space-y-5 sm:space-y-6">
 
       <div>
-        <label class="block text-sm font-medium text-white mb-2">Título del Anuncio</label>
+        <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Título del Anuncio</label>
         <input
           type="text"
           v-model="ad.name"
           placeholder="Ej: Necesito un electricista urgente"
-          class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
+          class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
         />
         <p v-if="errors.name" class="mt-1 text-sm text-red-400">{{ errors.name }}</p>
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-white mb-2">Descripción</label>
+        <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Descripción</label>
         <textarea
           v-model="ad.description"
           placeholder="Describe los detalles del proyecto..."
           rows="4"
-          class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
+          class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
         ></textarea>
         <p v-if="errors.description" class="mt-1 text-sm text-red-400">{{ errors.description }}</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
-          <label class="block text-sm font-medium text-white mb-2">Categoría</label>
+          <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Categoría</label>
           <select
             v-model="ad.category_id"
-            class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
+            class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
           >
             <option value="" disabled>Selecciona una categoría</option>
             <option v-for="category in categories" :key="category.id" :value="category.id" class="bg-blue-900 text-white">
@@ -44,10 +44,10 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-white mb-2">Provincia</label>
+          <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Provincia</label>
           <select
             v-model="ad.location"
-            class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
+            class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
           >
             <option value="" disabled>Selecciona una provincia</option>
             <option v-for="province in provinces" :key="province.id" :value="province.name" class="bg-blue-900 text-white">
@@ -59,15 +59,15 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-white mb-2">Fecha de entrega (opcional)</label>
+        <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Fecha de entrega (opcional)</label>
         <input
           type="date"
           v-model="ad.due_date"
-          class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
+          class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
         />
       </div>
 
-      <div class="flex items-center space-x-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0">
         <button
           type="button"
           @click="$refs.fileInput.click()"
@@ -88,10 +88,10 @@
       />
       <p v-if="errors.media" class="mt-1 text-sm text-red-400">{{ errors.media }}</p>
 
-      <div v-if="previews.length" class="mt-4 grid grid-cols-3 sm:grid-cols-4 gap-3">
+      <div v-if="previews.length" class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         <div v-for="(preview, index) in previews" :key="index" class="relative group rounded overflow-hidden border border-white/20">
-          <img v-if="preview.type.startsWith('image')" :src="preview.url" class="w-full h-24 object-cover" />
-          <div v-else class="w-full h-24 bg-white/10 flex items-center justify-center">
+          <img v-if="preview.type.startsWith('image')" :src="preview.url" class="w-full h-24 sm:h-28 object-cover" />
+          <div v-else class="w-full h-24 sm:h-28 bg-white/10 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -110,7 +110,7 @@
       <div class="flex justify-end">
         <button
           type="submit"
-          class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+          class="px-5 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
         >
           Publicar Anuncio
         </button>
