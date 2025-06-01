@@ -1,53 +1,61 @@
 <template>
 <div class="relative">
-  <nav class="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-blue-900/70 via-purple-800/70 to-pink-700/70 backdrop-blur-md shadow-lg">
+  <nav class="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-[#F4EDE4]/80 via-[#E8DCCB]/80 to-[#D6C9B3]/80 backdrop-blur-lg border-b border-[#D6C9B3]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
 
-        <!-- Logo -->
         <div class="flex items-center">
           <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Logo_Williams_F1.png"
-               class="h-10 w-10 mr-3 filter brightness-0 invert"
+               class="h-10 w-10 mr-3 filter grayscale"
                alt="WeAgree Logo">
-          <span class="text-2xl font-bold text-white">
+          <span class="text-2xl font-bold text-[#7A4E2E]">
             WeAgree
           </span>
         </div>
 
-        <!-- Desktop Links -->
-        <ul class="hidden md:flex space-x-4">
-          <li><RouterLink to="/" class="text-white hover:text-blue-300 transition">Inicio</RouterLink></li>
-          <li><RouterLink to="/service" class="text-white hover:text-blue-300 transition">{{ user?.is_pro ? 'Servicios' : 'Proyectos' }}</RouterLink></li>
-          <li><RouterLink to="/contact" class="text-white hover:text-blue-300 transition">Contacto</RouterLink></li>
+        <ul class="hidden md:flex space-x-6">
+          <li>
+            <RouterLink to="/" class="text-[#7A4E2E] hover:text-[#C56E33] transition">
+              Inicio
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/service" class="text-[#7A4E2E] hover:text-[#C56E33] transition">
+              {{ user?.is_pro ? 'Servicios' : 'Proyectos' }}
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/contact" class="text-[#7A4E2E] hover:text-[#C56E33] transition">
+              Contacto
+            </RouterLink>
+          </li>
         </ul>
 
-        <!-- Right Section -->
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-3">
           <template v-if="accessToken">
             <RouterLink v-if="user?.is_pro" to="/work"
-                        class="hidden md:block bg-green-500 hover:bg-green-700 transition py-2 px-4 rounded-full text-white">
+                        class="hidden md:block bg-[#C56E33] hover:bg-[#A35429] transition px-4 py-2 rounded-full text-white text-sm">
               Mis Trabajos
             </RouterLink>
             <button @click="preferences"
-                    class="hidden md:block cursor-pointer bg-transparent hover:text-blue-300 transition text-white font-medium">
+                    class="hidden md:block text-[#7A4E2E] hover:text-[#C56E33] transition font-medium">
               👤 {{ user?.user_name || "Usuario" }}
             </button>
             <button @click="logout"
-                    class="hidden md:block px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition shadow cursor-pointer">
+                    class="hidden md:block px-4 py-2 rounded-full bg-red-400 hover:bg-red-500 text-white text-sm transition">
               Cerrar sesión
             </button>
           </template>
 
           <template v-else>
             <RouterLink to="/login"
-                        class="hidden md:block px-4 py-2 rounded-full bg-white hover:bg-gray-200 text-black transition shadow">
+                        class="hidden md:block px-4 py-2 rounded-full bg-[#7A4E2E] hover:bg-[#C56E33] text-white text-sm transition">
               Acceder
             </RouterLink>
           </template>
 
-          <!-- Mobile menu button -->
           <button @click="isMobileMenuOpen = !isMobileMenuOpen"
-                  class="text-white md:hidden focus:outline-none">
+                  class="text-[#7A4E2E] md:hidden focus:outline-none">
             <svg v-if="!isMobileMenuOpen" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 6h16M4 12h16M4 18h16"/>
@@ -62,58 +70,33 @@
     </div>
 
     <transition name="fade">
-      <div v-if="isMobileMenuOpen" class="md:hidden bg-white/90 backdrop-blur-md shadow-lg rounded-b-lg p-4 space-y-3">
-        <RouterLink to="/" class="block text-gray-800 hover:text-blue-500 transition">Inicio</RouterLink>
-        <RouterLink to="/service" class="block text-gray-800 hover:text-blue-500 transition">{{ user?.is_pro ? 'Servicios' : 'Proyectos' }}</RouterLink>
-        <RouterLink to="/contact" class="block text-gray-800 hover:text-blue-500 transition">Contacto</RouterLink>
+      <div v-if="isMobileMenuOpen" class="md:hidden bg-white/90 backdrop-blur-lg rounded-b-lg p-4 space-y-3 border-t border-[#D6C9B3]">
+        <RouterLink to="/" class="block text-[#7A4E2E] hover:text-[#C56E33] transition">Inicio</RouterLink>
+        <RouterLink to="/service" class="block text-[#7A4E2E] hover:text-[#C56E33] transition">
+          {{ user?.is_pro ? 'Servicios' : 'Proyectos' }}
+        </RouterLink>
+        <RouterLink to="/contact" class="block text-[#7A4E2E] hover:text-[#C56E33] transition">Contacto</RouterLink>
 
         <template v-if="accessToken">
-          <button @click="preferences" class="block w-full text-left px-4 py-2 bg-transparent hover:bg-gray-100 rounded transition text-gray-800">
+          <button @click="preferences" class="block w-full text-left px-4 py-2 bg-transparent hover:bg-[#F4EDE4] rounded transition text-[#7A4E2E]">
             👤 {{ user?.user_name || "Usuario" }}
           </button>
-          <button @click="logout" class="block w-full text-left px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition">
+          <button @click="logout" class="block w-full text-left px-4 py-2 bg-red-400 hover:bg-red-500 text-white rounded transition">
             Cerrar sesión
           </button>
         </template>
         <template v-else>
           <RouterLink to="/login"
-                      class="block w-full text-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded transition">
+                      class="block w-full text-center px-4 py-2 bg-[#7A4E2E] hover:bg-[#C56E33] text-white rounded transition">
             Acceder
           </RouterLink>
         </template>
       </div>
     </transition>
   </nav>
-
-  <div v-if="openUserPreferencesModal" class="fixed z-50 inset-0 overflow-y-auto">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
-      </div>
-
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-      <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
-        <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
-          <h3 class="text-lg leading-6 font-semibold text-white">
-            Preferencias de usuario
-          </h3>
-          <button @click="openUserPreferencesModal = false"
-                  class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-
-        <div class="p-6">
-          <UserPreferencesComponent :user="user" />
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 </template>
+
 
 
 <script>
