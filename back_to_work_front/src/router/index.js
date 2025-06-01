@@ -9,12 +9,14 @@ import LoginFormComponent from "../components/LoginFormComponent.vue";
 import VerifyEmailComponent from "../components/VerifyEmailComponent.vue";
 import ResetPasswordFormComponent from "../components/ResetPasswordFormComponent.vue";
 import WorksView from "../views/WorksView.vue";
+import ResetPasswordView from "../views/ResetPasswordView.vue";
 
 const routes = [
     { path: '/', component: HomeView, name: 'home' },
     { path: '/about', component: AboutView,  name: 'about', meta: { requiresAuth: true }},
+    { path: '/password-reset', component: ResetPasswordView,  name: 'resetPass'},
     { path: '/contact', component: ContactView,  name: 'contact'},
-    { path: '/service', component: ServicesView,  name: 'service'},
+    { path: '/service', component: ServicesView,  name: 'service', meta: { requiresAuth: true }},
     { path: '/login', component: LoginFormComponent,  name: 'login'},
     { path: '/register', component: RegisterFormComponent,  name: 'register'},
     { path: '/verify-email', component: VerifyEmailComponent, 
@@ -39,9 +41,7 @@ router.beforeEach((to, from, next) => {
 
     if (to.meta.requiresAuth && !isAuthenticated) {
       localStorage.setItem("redirectAfterLogin", to.fullPath);
-      localStorage.removeItem("token");
-      localStorage.removeItem("tokenExpiration");
-      localStorage.removeItem("user");
+      localStorage.clear();
       next("/login");
     } else {
       next();

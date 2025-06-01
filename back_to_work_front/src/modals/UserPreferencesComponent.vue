@@ -1,92 +1,92 @@
 <template>
-  <div class="max-w-2xl mx-auto p-8 bg-white rounded-xl shadow-md">
-    <div class="mb-8">
-      <h2 class="text-2xl font-bold text-gray-800">
-        Datos Personales de <span class="text-blue-600 font-medium">{{ user.user_name }}</span>
-      </h2>
-    </div>
+  <div class="p-6 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20">
+    <h2 class="text-3xl font-bold text-white mb-8 text-center">
+      {{ user.user_name || 'Usuario' }}
+    </h2>
 
-    <div class="space-y-5">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+          <label class="block text-sm font-medium text-white mb-2">Nombre</label>
           <input
             type="text"
             v-model="user.name"
             placeholder="Ej: Carlos Ruiz"
-            class="w-full px-4 py-3 h-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+              class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+          <label class="block text-sm font-medium text-white mb-2">Email</label>
           <input
             type="email"
             v-model="user.email"
             placeholder="Ej: ejemplo@email.com"
-            class="w-full px-4 py-3 h-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+              class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
           />
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+          <label class="block text-sm font-medium text-white mb-2">Teléfono</label>
           <input
             type="tel"
             v-model="user.phone"
             placeholder="Ej: 654987321"
-            class="w-full px-4 py-3 h-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+              class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
-          <Select 
-            v-model="user.province" 
-            :options="provinces" 
-            optionLabel="name" 
-            placeholder="Selecciona provincia"
-            class="w-full text-sm border border-gray-300 rounded-lg hover:border-gray-400 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 h-9"
-            panelClass="shadow-lg border border-gray-200 rounded-lg"
-          />
+          <label class="block text-sm font-medium text-white mb-2">Provincia</label>
+          <select
+            v-model="user.province"
+            class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+          >
+            <option disabled value="">Selecciona provincia</option>
+            <option v-for="province in provinces" :key="province.id" :value="province">
+              {{ province.name }}
+            </option>
+          </select>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
-          <div class="relative">
-            <input
-              :type="showPassword ? 'text' : 'password'"
-              v-model="user.password"
-              placeholder="Mínimo 8 caracteres"
-              class="w-full px-4 py-3 h-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 pr-10"
-            />
-          </div>
+          <label class="block text-sm font-medium text-blue-100 mb-2">Contraseña</label>
+          <input
+            :type="showPassword ? 'text' : 'password'"
+            v-model="user.password"
+            placeholder="Mínimo 8 caracteres"
+              class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+          />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Repetir Contraseña</label>
-          <div class="relative">
-            <input
-              :type="showPassword2 ? 'text' : 'password'"
-              v-model="password2"
-              placeholder="Confirma tu contraseña"
-              class="w-full px-4 py-3 h-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 pr-10"
-            />
-          </div>
+          <label class="block text-sm font-medium text-white mb-2">Repetir Contraseña</label>
+          <input
+            :type="showPassword2 ? 'text' : 'password'"
+            v-model="password2"
+            placeholder="Confirma tu contraseña"
+              class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+          />
         </div>
       </div>
     </div>
 
-    <div class="mt-8 flex justify-end">
-      <button @click="updateUser" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium rounded-lg shadow-md hover:from-blue-700 hover:to-blue-600 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 h-12">
+    <div class="mt-10 flex justify-end space-x-4">
+      <button
+        @click="updateUser"
+        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+      >
         Guardar Cambios
       </button>
     </div>
   </div>
 </template>
+
+
   
   <script>
   import UserService from '../services/api/user.service';

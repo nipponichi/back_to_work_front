@@ -1,140 +1,121 @@
 <template>
-  <div class="min-h-screen bg-white pt-44 pb-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md mx-auto bg-gray-200 p-8 rounded-xl shadow-lg border border-gray-100 h-[580px] flex flex-col">
-      <div class="flex flex-col h-full">
+  <div class="relative min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 pt-40">
+    <div class="fixed inset-0 bg-[url('https://appwebel.com/assets/es/img/backgrounds/landing/landing.webp')] bg-cover bg-center opacity-10"></div>
+    <div class="fixed inset-0 bg-blue-950/40"></div>
+
+    <main class="relative z-10 flex justify-center items-center py-20 px-4 sm:px-6 lg:px-8">
+      <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-8 sm:p-10 max-w-xl w-full">
         <div class="flex justify-between mb-8">
           <div v-for="(stepName, index) in steps" :key="index" 
-            class="text-sm font-semibold px-2 pb-1 border-b-2"
-            :class="currentStep === index ? 'text-white bg-blue-500 pt-1 rounded-full' : 'text-gray-400 border-transparent'">
-            {{ stepName }}
+            class="text-sm font-semibold px-3 py-1 rounded-full transition-colors duration-200"
+            :class="currentStep === index ? 'bg-blue-600 text-white shadow' : 'bg-white/20 text-white/70'">
+            Paso {{ index + 1 }}
           </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto">
-          <div v-if="currentStep === 0" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-800">Datos Usuario</h2>
-            <div>
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Username <span class="text-red-500">*</span></label>
-              <input type="text" v-model="form.user_name" placeholder="JohnCobra" class="w-1/2 p-2 ml-2 rounded border border-gray-300 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
-            </div>
-            <div>
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Contraseña <span class="text-red-500">*</span></label>
-              <input type="password" v-model="form.password" placeholder="1234A." class="w-1/2 p-2 ml-2 rounded border border-gray-300 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"  />
-            </div>
-            <div>
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Reintroduce contraseña <span class="text-red-500">*</span></label>
-              <input type="password" v-model="form.password2" placeholder="1234A." class="w-1/2 p-2 ml-2 rounded border border-gray-300 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"  />
-            </div>
-            <div>
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
-              <input type="email" v-model="form.email" placeholder="johndoe@mail.com" class="w-1/2 p-2 ml-2 rounded border border-gray-300 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"  />
+        <div class="space-y-6">
+          <div v-if="currentStep === 0">
+            <h2 class="text-xl font-bold text-white mb-4">Datos Usuario</h2>
+            <div v-for="field in ['user_name', 'password', 'password2', 'email']" :key="field">
+              <label class="block mb-2 text-sm font-medium text-white">{{ field === 'user_name' ? 'Username' : field === 'password2' ? 'Repite Contraseña' : capitalize(field) }} <span class="text-red-400">*</span></label>
+              <input 
+                :type="field.includes('password') ? 'password' : field === 'email' ? 'email' : 'text'"
+                v-model="form[field]" 
+                :placeholder="field === 'user_name' ? 'JohnCobra' : field === 'email' ? 'johndoe@mail.com' : '••••••'" 
+                class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60 focus:ring-2 focus:ring-blue-400 focus:outline-none transition" />
             </div>
           </div>
 
-          <div v-if="currentStep === 1" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-800">Datos Personales</h2>
-            <div>
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Nombre <span class="text-red-500">*</span></label>
-              <input type="text" v-model="form.firstName" placeholder="John" class="w-1/2 p-2 ml-2 rounded border border-gray-300 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
+          <div v-else-if="currentStep === 1">
+            <h2 class="text-xl font-bold text-white mb-4">Datos Personales</h2>
+            <div v-for="field in ['firstName', 'lastName', 'phone']" :key="field">
+              <label class="block mb-2 text-sm font-medium text-white">{{ field === 'firstName' ? 'Nombre' : field === 'lastName' ? 'Apellidos' : 'Teléfono' }} <span v-if="field !== 'phone'" class="text-red-400">*</span></label>
+              <input 
+                type="text"
+                v-model="form[field]" 
+                :placeholder="field === 'firstName' ? 'John' : field === 'lastName' ? 'Doe' : '654987321'" 
+                class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60 focus:ring-2 focus:ring-blue-400 focus:outline-none transition" />
             </div>
             <div>
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Apellidos <span class="text-red-500">*</span></label>
-              <input type="text" v-model="form.lastName" placeholder="Doe" class="w-1/2 p-2 ml-2 rounded border border-gray-300 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"  />
-            </div>
-            <div>
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Phone</label>
-              <input type="tel" v-model="form.phone" placeholder="654987321" class="w-1/2 p-2 ml-2 rounded border border-gray-300 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"  />
-            </div>
-            <div>
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Province <span class="text-red-500">*</span></label>
-              <Select v-model="form.province" editable :options="provinces" optionLabel="name" :optionValue="(province) => province" placeholder="Select a province" class="w-full md:w-56" />
+              <label class="block mb-2 text-sm font-medium text-white">Provincia <span class="text-red-400">*</span></label>
+              <Select 
+                v-model="form.province"
+                :options="provinces"
+                optionLabel="name"
+                placeholder="Selecciona provincia"
+                class="w-full text-black" />
             </div>
           </div>
 
-          <div v-else-if="currentStep === 2" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-800">Preferencias</h2>
-            <div class="flex justify-between">
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Acepto términos y condiciones <span class="text-red-500">*</span></label>
-              <input type="checkbox" v-model="form.acceptTerms" />
+          <div v-else-if="currentStep === 2">
+            <h2 class="text-xl font-bold text-white mb-4">Preferencias</h2>
+            <div class="space-y-2">
+              <label class="flex items-center text-white">
+                <input type="checkbox" v-model="form.acceptTerms" class="mr-2 rounded" />
+                Acepto términos y condiciones <span class="text-red-400 ml-1">*</span>
+              </label>
+              <label class="flex items-center text-white">
+                <input type="checkbox" v-model="form.acceptMarketing" class="mr-2 rounded" />
+                Acepto recibir marketing
+              </label>
+              <label class="flex items-center text-white">
+                <input type="checkbox" v-model="form.is_pro" class="mr-2 rounded" />
+                ¿Eres profesional?
+              </label>
             </div>
-            <div class="flex justify-between">
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">Acepto recibir marketing</label>
-              <input type="checkbox" v-model="form.acceptMarketing" />
-            </div>
-            <div class="flex justify-between">
-              <label class="block mb-2 ml-2 text-sm font-medium text-gray-700">¿Eres profesional?</label>
-              <input type="checkbox" v-model="form.is_pro" />
-            </div>
-            <div class="mb-4">
-              <label class="block text-gray-700 font-medium mb-2">Categorías Pro:</label>
+            <div v-if="form.is_pro" class="mt-4">
+              <label class="block mb-2 text-sm font-medium text-white">Categorías Pro</label>
               <select 
                 v-model="selectedCategory"
                 @change="addCategory"
-                :disabled="!form.is_pro || !categories.length"
-                class="w-full px-3 py-2 bg-white text-sm font-medium text-gray-700 cursor-pointer border rounded mb-2">
+                class="w-full px-3 py-2 rounded bg-white text-sm font-medium text-gray-700 border border-white/20">
                 <option value="" disabled selected>Selecciona categorías</option>
-                <option 
-                  v-for="category in availableCategories" 
-                  :key="category.id" 
-                  :value="category"
-                  style="cursor: pointer;">
+                <option v-for="category in availableCategories" :key="category.id" :value="category">
                   {{ category.category }}
                 </option>
-              </select> 
-              <div class="flex items-center gap-2 overflow-x-auto max-w-full whitespace-nowrap flex-shrink-0 py-2">
+              </select>
+              <div class="flex flex-wrap gap-2 mt-2">
                 <span v-for="(category, index) in form.categories" :key="category.id"
-                  class="flex items-center px-2 py-1 text-sm font-small text-white bg-indigo-500 rounded">
+                  class="flex items-center px-2 py-1 text-sm font-medium bg-indigo-500 text-white rounded">
                   {{ category.category }}
-                  <button @click="removeCategory(index)"
-                    class="ml-2 text-xs text-black bg-indigo-500 hover:text-white focus:outline-none"
-                    :disabled="!form.is_pro">
-                    ✕
-                  </button>
+                  <button @click="removeCategory(index)" class="ml-2 text-xs hover:text-gray-300">✕</button>
                 </span>
               </div>
             </div>
           </div>
 
-          <div v-else-if="currentStep === 3" class="space-y-4">
-            <h2 class="text-xl font-bold text-gray-800">Confirmación</h2>
-            <p>Por favor, revisa tus datos antes de finalizar:</p>
-            <ul class="list-disc pl-5">
+          <div v-else-if="currentStep === 3">
+            <h2 class="text-xl font-bold text-white mb-4">Confirmación</h2>
+            <ul class="list-disc list-inside text-white space-y-1">
               <li>Username: {{ form.user_name }}</li>
               <li>Nombre completo: {{ form.firstName }} {{ form.lastName }}</li>
               <li>Email: {{ form.email }}</li>
-              <li>Teléfono: {{ form.phone ? form.phone : "No hay teléfono seleccionado" }}</li>
+              <li>Teléfono: {{ form.phone || 'No hay teléfono seleccionado' }}</li>
               <li>Provincia: {{ form.province.name }}</li>
-              <li>¿Eres profesional?: {{ form.is_pro ? "Sí" : "No" }}</li>
-              <li>¿Aceptas términos y condiciones?: {{ form.acceptTerms ? "Sí" : "No" }}</li>
-              <li>¿Aceptas recibir marketing?: {{ form.acceptMarketing ? "Sí" : "No" }}</li>
-              <li>Categorías: 
-                <span v-if="form.categories.length > 0">
-                  {{ form.categories.map(c => c.category).join(', ') }}
-                </span>
-                <span v-else>No hay categorías seleccionadas</span>
-              </li>
+              <li>Profesional: {{ form.is_pro ? 'Sí' : 'No' }}</li>
+              <li>Términos: {{ form.acceptTerms ? 'Aceptados' : 'No aceptados' }}</li>
+              <li>Marketing: {{ form.acceptMarketing ? 'Sí' : 'No' }}</li>
+              <li>Categorías: {{ form.categories.length ? form.categories.map(c => c.category).join(', ') : 'No seleccionadas' }}</li>
             </ul>
           </div>
         </div>
-        
-        <div class="mt-auto pt-6 flex border-t border-gray-200"
-          :class="{'justify-between': currentStep > 0, 'justify-end': currentStep === 0}">
+
+        <div class="flex justify-between mt-8">
           <button 
             v-if="currentStep > 0"
-            @click="prevStep" 
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+            @click="prevStep"
+            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded transition">
             Anterior
           </button>
-
           <button 
-            @click="nextStep" 
+            @click="nextStep"
             :disabled="!canProceed"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-            {{ currentStep === steps.length - 1 ? "Finalizar" : "Siguiente" }}
+            class="ml-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition disabled:opacity-50">
+            {{ currentStep === steps.length - 1 ? 'Finalizar' : 'Siguiente' }}
           </button>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
   
@@ -206,6 +187,10 @@ components: {
     },
   },
   methods: {
+    capitalize(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    },
     addCategory() {
       if (this.selectedCategory && !this.form.categories.some(c => c.id === this.selectedCategory.id)) {
         this.form.categories.push(this.selectedCategory);

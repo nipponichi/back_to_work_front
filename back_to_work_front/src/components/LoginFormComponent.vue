@@ -1,49 +1,66 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-      <h2 class="text-2xl font-semibold text-center text-gray-700">Iniciar Sesión</h2>
-      <form @submit.prevent="handleLogin" class="mt-4">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-600">Correo Electrónico</label>
-          <input 
-            v-model="email" 
-            type="email" 
-            class="w-full px-4 py-2 mt-1 border rounded-lg focus:ring focus:ring-blue-300" 
-            required
+  <div class="relative min-h-screen bg-gradient-to-br from-blue-950 to-blue-800">
+    <div class="fixed inset-0 bg-[url('https://appwebel.com/assets/es/img/backgrounds/landing/landing.webp')] bg-cover bg-center opacity-10"></div>
+    <div class="fixed inset-0 bg-blue-950/40"></div>
+
+    <main class="relative z-10 flex items-center justify-center min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+      <div class="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-8">
+        <h2 class="text-3xl font-bold text-center text-white mb-6">Iniciar Sesión</h2>
+
+        <form @submit.prevent="handleLogin" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-blue-200 mb-1">Correo Electrónico</label>
+            <input 
+              v-model="email" 
+              type="email" 
+              class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+              placeholder="tu@email.com"
+              required
+            >
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-blue-200 mb-1">Contraseña</label>
+            <input 
+              v-model="password" 
+              type="password" 
+              class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+              placeholder="********"
+              required
+            >
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
           >
+            Iniciar Sesión
+          </button>
+        </form>
+
+        <p v-if="errorMessage" class="mt-4 text-sm text-red-400 text-center">
+          {{ errorMessage }}
+        </p>
+
+        <div class="mt-6 text-center">
+          <RouterLink to="/password-reset" class="text-blue-300 hover:underline">
+            ¿Olvidaste tu contraseña?
+          </RouterLink>
         </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-600">Contraseña</label>
-          <input 
-            v-model="password" 
-            type="password" 
-            class="w-full px-4 py-2 mt-1 border rounded-lg focus:ring focus:ring-blue-300" 
-            required
-          >
+
+        <div class="mt-2 text-center">
+          <RouterLink to="/register" class="text-blue-300 hover:underline">
+            ¿No tienes cuenta? Regístrate aquí
+          </RouterLink>
         </div>
-        <button 
-          type="submit" 
-          class="w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-        >
-          Iniciar Sesión
-        </button>
-      </form>
-      <p v-if="errorMessage" class="mt-2 text-sm text-red-500 text-center">
-        {{ errorMessage }}
-      </p>
-      <div class="mt-4 text-center">
-        <RouterLink to="/register" class="text-blue-500 hover:underline">
-          📞 ¿No tienes cuenta? Regístrate aquí
-        </RouterLink>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
 <script>
 import AuthService from '../services/api/auth.service'
 import { useToast } from 'vue-toastification';
-
 
 export default {
   data() {
@@ -58,18 +75,14 @@ export default {
   methods: {
     async handleLogin() {
       try {
-        const response = await AuthService.login(this.email, this.password)
+        const response = await AuthService.login(this.email, this.password);
         console.log("Response:", response);
         if (response.data.success) {
-          // 2 horas
-          this.toast.success("Login succesfully")
+          this.toast.success("Inicio de sesión exitoso");
           const tokenExpiration = Date.now() + 2 * 3600 * 1000;
-
           localStorage.setItem("tokenExpiration", tokenExpiration);
           localStorage.setItem("token", response.data.data.accessToken);
-          let accessToken = localStorage.getItem("token");
-
-        localStorage.setItem("user", JSON.stringify(response.data.data.user));
+          localStorage.setItem("user", JSON.stringify(response.data.data.user));
 
           const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
           localStorage.removeItem("redirectAfterLogin");
@@ -79,11 +92,9 @@ export default {
           console.log("Error en el inicio de sesión:", this.errorMessage);
         } 
       } catch (error) {
-        this.toast.error(error.response.data.message);
+        this.toast.error(error.response?.data?.message || "Error al iniciar sesión");
       }
     }
   }
-}
-
 }
 </script>

@@ -1,15 +1,15 @@
 <template>
     <div class="flex items-center justify-center mt-20 bg-white">   
-        <ServicesListComponent />
+        <WorksListComponent />
     </div>
 </template>
 
 <script>
-import ServicesListComponent from '../components/ServicesListComponent.vue';
+import WorksListComponent from '../components/WorksListComponent.vue';
 
 export default {
     components: {
-        ServicesListComponent,
+        WorksListComponent,
     },
     data() {
         return {

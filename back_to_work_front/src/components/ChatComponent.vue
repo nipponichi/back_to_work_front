@@ -5,7 +5,7 @@
         v-for="(message, index) in messages" 
         :key="index" 
         :class="[
-          'mb-3 py-2 px-3 rounded-lg max-w-[70%]', // Más estrecho y compacto
+          'mb-3 py-2 px-3 rounded-lg max-w-[70%]', 
           message.sender_id === senderId 
             ? 'ml-auto bg-amber-200 text-right shadow-sm' 
             : 'mr-auto bg-white text-left shadow-sm'
@@ -47,8 +47,8 @@ export default {
     receiver: Object,
     sender: Object,
     roomId: {
-      type: String,
-      default: () => `chat-123-456`
+      type: Number,
+      default: () => 123
     } 
   },
   data() {
@@ -65,11 +65,12 @@ export default {
     this.senderId = this.sender.id;
     console.log("Sender", this.sender);
     console.log("Receiver", this.receiver);
-    if (this.receiver.is_pro) {
+    if (this.sender?.is_pro) {
       this.chatId = this.receiver.id;
     } else {
-      this.chatId = this.sender.id;
+      this.chatId = this.receiver.id;
     }
+
     this.fetchMessages();
     this.initSocket();
   },
@@ -125,6 +126,7 @@ export default {
     async fetchMessages() {
       try {
         const response = await UserService.show("chats", this.ad_id+"-"+this.chatId);
+        console.log(response)
         if (response.data.success) {
           this.messages = response.data.data;
           this.scrollToBottom();
