@@ -4,7 +4,6 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
 
-        <!-- Logo -->
         <div class="flex items-center">
           <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Logo_Williams_F1.png"
                class="h-10 w-10 mr-3 filter brightness-0 invert"
@@ -14,14 +13,12 @@
           </span>
         </div>
 
-        <!-- Desktop Links -->
         <ul class="hidden md:flex space-x-4">
           <li><RouterLink to="/" class="text-white hover:text-blue-300 transition">Inicio</RouterLink></li>
           <li><RouterLink to="/service" class="text-white hover:text-blue-300 transition">{{ user?.is_pro ? 'Servicios' : 'Proyectos' }}</RouterLink></li>
           <li><RouterLink to="/contact" class="text-white hover:text-blue-300 transition">Contacto</RouterLink></li>
         </ul>
 
-        <!-- Right Section -->
         <div class="flex items-center space-x-2">
           <template v-if="accessToken">
             <RouterLink v-if="user?.is_pro" to="/work"
@@ -45,7 +42,6 @@
             </RouterLink>
           </template>
 
-          <!-- Mobile menu button -->
           <button @click="isMobileMenuOpen = !isMobileMenuOpen"
                   class="text-white md:hidden focus:outline-none">
             <svg v-if="!isMobileMenuOpen" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">

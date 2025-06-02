@@ -71,14 +71,13 @@ export default {
       toast: useToast()
     }
   },
- 
   methods: {
     async handleLogin() {
       try {
         const response = await AuthService.login(this.email, this.password);
-        console.log("Response:", response);
         if (response.data.success) {
           this.toast.success("Inicio de sesión exitoso");
+          
           const tokenExpiration = Date.now() + 2 * 3600 * 1000;
           localStorage.setItem("tokenExpiration", tokenExpiration);
           localStorage.setItem("token", response.data.data.accessToken);
@@ -88,11 +87,13 @@ export default {
           localStorage.removeItem("redirectAfterLogin");
           this.$router.push(redirectPath);
         } else {
-          this.errorMessage = response.data.message;
-          console.log("Error en el inicio de sesión:", this.errorMessage);
-        } 
+          this.errorMessage = response.data.message || "Error en el inicio de sesión";
+          this.toast.error(this.errorMessage);
+        }
       } catch (error) {
-        this.toast.error(error.response?.data?.message || "Error al iniciar sesión");
+        const msg = error.response?.data?.message || "Error al iniciar sesión";
+        this.errorMessage = msg;
+        this.toast.error(msg);
       }
     }
   }

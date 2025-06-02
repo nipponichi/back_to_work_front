@@ -5,11 +5,49 @@
 
     <main class="relative z-10 flex justify-center items-center py-20 px-4 sm:px-6 lg:px-8">
       <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-8 sm:p-10 max-w-xl w-full">
-        <div class="flex justify-between mb-8">
-          <div v-for="(stepName, index) in steps" :key="index" 
-            class="text-sm font-semibold px-3 py-1 rounded-full transition-colors duration-200"
-            :class="currentStep === index ? 'bg-blue-600 text-white shadow' : 'bg-white/20 text-white/70'">
-            Paso {{ index + 1 }}
+        
+        <div class="max-w-xl mx-auto mb-8">
+          <div class="flex pb-3">
+            <div class="flex-1"></div>
+            <template v-for="(step, index) in steps" :key="index">
+              <div class="flex-1">
+                <div 
+                  :class="[
+                    'w-10 h-10 mx-auto rounded-full text-lg flex items-center justify-center',
+                    currentStep > index ? 'bg-green-500 text-white' :
+                    currentStep === index ? 'bg-blue-600 text-white' :
+                    'bg-white border-2 border-gray-300 text-gray-500'
+                  ]"
+                >
+                  <span v-if="currentStep > index">
+                    <i class="fa fa-check"></i>
+                  </span>
+                  <span v-else>
+                    {{ index + 1 }}
+                  </span>
+                </div>
+              </div>
+              <div v-if="index < steps.length - 1" class="w-1/6 flex items-center">
+                <div class="w-full bg-gray-300 rounded h-1">
+                  <div
+                    :style="{ width: currentStep > index ? '100%' : currentStep === index ? '50%' : '0%' }"
+                    :class="[
+                      'h-1 rounded transition-all duration-300',
+                      currentStep > index ? 'bg-green-500' :
+                      currentStep === index ? 'bg-blue-500' :
+                      'bg-gray-300'
+                    ]"
+                  ></div>
+                </div>
+              </div>
+            </template>
+            <div class="flex-1"></div>
+          </div>
+
+          <div class="flex text-xs text-center text-white">
+            <div v-for="(label, index) in stepLabels" :key="index" class="w-1/4">
+              {{ label }}
+            </div>
           </div>
         </div>
 
@@ -114,28 +152,25 @@
             {{ currentStep === steps.length - 1 ? 'Finalizar' : 'Siguiente' }}
           </button>
         </div>
+
       </div>
     </main>
   </div>
 </template>
-  
+
 <script>
 import UserService from '../services/api/user.service';
 import Select from 'primevue/select';
 import { useToast } from 'vue-toastification';
 
 export default {
-components: {
-    Select,
-  },
+  components: { Select },
   data() {
     return {
       selectedCategory: null,
       provinces: [],
       categories: [],
       currentStep: 0,
-      selectedProvince: null,
-      selectedCategory: null,
       form: {
         user_name: "",
         name: "",
@@ -153,15 +188,18 @@ components: {
         categories: []
       },
       steps: ["1", "2", "3", "4"],
+      stepLabels: [
+        "Datos Usuario",
+        "Datos Personales",
+        "Preferencias",
+        "Confirmación"
+      ],
       toast: useToast()
     };
   },
-  components: {   
-    Select,
-  },
   async mounted() {
-    await this.fetchProvinces()
-    await this.fetchCategories()
+    await this.fetchProvinces();
+    await this.fetchCategories();
   },
   computed: {
     canProceed() {
@@ -171,7 +209,7 @@ components: {
           this.form.password === this.form.password2;
       } else if (this.currentStep === 1) {
         return this.form.firstName && this.form.lastName && 
-        this.form.province;
+          this.form.province;
       } else if (this.currentStep === 2) {
         if (this.form.is_pro) {
           return this.form.categories.length > 0;
@@ -197,7 +235,6 @@ components: {
         this.selectedCategory = null;
       }
     },
-    
     removeCategory(index) {
       this.form.categories.splice(index, 1);
     },
@@ -217,10 +254,9 @@ components: {
         console.error('Error fetching categories:', error);
       }
     },
-
     async saveUser() {
       try {
-        this.form.name = `${this.form.firstName} ${this.form.lastName}`
+        this.form.name = `${this.form.firstName} ${this.form.lastName}`;
         if (this.form.province && typeof this.form.province === 'object') {
           this.form.province_id = this.form.province.id;
         }
@@ -236,10 +272,7 @@ components: {
         this.toast.error("Error saving user");
       }
     },
-
     nextStep() {
-      console.log(this.currentStep)
-      console.log(this.steps.length-1)
       if (this.currentStep < this.steps.length - 1) {
         this.currentStep++;
       } else if (this.currentStep === this.steps.length - 1) {
@@ -256,22 +289,11 @@ components: {
     'form.name': function() {
       this.form.name = `${this.form.firstName} ${this.form.lastName}`;
     },
-    
-    'form.province':function() {
-      console.log(this.form.province)
-    },
-
     'form.is_pro': function(newVal) {
       if (!newVal) {
         this.form.categories = [];
       }
-      if (this.currentStep > 3) {
-        this.currentStep = 3;
-      }
-    },
+    }
   },
-  
 };
 </script>
-
-  

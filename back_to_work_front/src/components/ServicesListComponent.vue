@@ -1,16 +1,29 @@
 <template>
-<div class="relative w-full max-w-7xl min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 my-20 rounded-2xl mx-auto">
+<div class="relative w-full max-w-[1600px] min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 my-20 rounded-2xl mx-auto">
+  <div class="flex justify-end mb-4 space-x-2"></div>
 
     <div class="fixed inset-0 bg-[url('https://appwebel.com/assets/es/img/backgrounds/landing/landing.webp')] bg-cover bg-center opacity-10"></div>
     <div class="fixed inset-0 bg-blue-950/40"></div>
 
     <main class="relative z-10 pt-8 pb-16 px-4 sm:px-6 lg:px-8">
-    <div class="relative mb-6">
-      <h2 class="text-2xl sm:text-3xl font-bold text-white inline-block relative z-10">{{ user?.is_pro == 1 ? 'Servicios' : 'Proyectos' }}</h2>
-      <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-900 rounded-full"></div>
-    </div>
+      <div class="relative mb-6">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white inline-block relative z-10">{{ user?.is_pro == 1 ? 'Servicios' : 'Proyectos' }}</h2>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-900 rounded-full"></div>
+      </div>
 
       <div class="max-w-7xl min-w-full">
+      <button
+        @click="switchToCards"
+        :class="['px-4 py-2 mr-2 mb-2 rounded-lg font-semibold transition', viewMode === 'cards' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-100']"
+      >
+      <i class="pi pi-th-large text-blue-300 text-lg"></i>
+      </button>
+      <button
+        @click="switchToList"
+        :class="['px-4 py-2 rounded-lg font-semibold transition', viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-100']"
+      >
+        <i class="pi pi-list text-blue-300 text-lg"></i>
+      </button>
 
         <div v-if="!user?.is_pro || !ads.length === 0" class="bg-white/5 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 sm:p-8 mb-8 flex flex-col sm:flex-row justify-between items-center gap-6">
           <div class="text-center sm:text-left">
@@ -114,238 +127,273 @@
           </button>
         </div>
 
-        <div class="w-full rounded-2xl shadow-xl overflow-hidden border border-white/20 overflow-x-auto">
-          <DataTable
-            :value="filteredAds"
-            :paginator="true"
-            :rows="10"
-            sortMode="multiple"
-            dataKey="id"
-            :rowClassName="rowClassName"
-            tableClass="min-w-full table-auto"
-            class="text-white cursor-pointer w-full"
-            @row-click="onRowClick"
-          >
-            <Column
-              field="name"
-              header="Nombre"
-              sortable
-              headerClass="bg-blue-900/50 text-white font-bold"
-              bodyClass="align-middle px-2 py-3 text-blue-900 font-semibold"
-            />
+        <div>
+            <div v-if="viewMode === 'list'" class="w-full rounded-2xl shadow-xl overflow-hidden border border-white/20 overflow-x-auto">
+              <DataTable
+                :value="filteredAds"
+                :paginator="true"
+                :rows="10"
+                :rowClassName="rowClassName"
+                sortMode="multiple"
+                dataKey="id"
 
-            <Column
-              header="Descripción"
-              sortable
-              headerClass="bg-blue-900/50 text-white font-bold"
-              bodyClass="align-middle px-2 py-3 text-blue-900 max-w-sm truncate"
-            >
-              <template #body="slotProps">
-                <p class="truncate max-w-sm">
-                  {{ slotProps.data.description }}
-                </p>
-              </template>
-            </Column>
+                tableClass="min-w-full table-auto bg-slate-800 text-white"
+                class="w-full cursor-pointer"
+                @row-click="onRowClick"
+              >
+                <Column
+                  field="name"
+                  header="Nombre"
+                  sortable
+                  headerClass="bg-blue-900/50 text-white font-bold"
+                  bodyClass="align-middle px-2 py-3 text-blue-900 font-semibold"
+                />
 
-            <Column
-              header="Categoría"
-              sortable
-              headerClass="bg-blue-900/50 text-white font-bold"
-              bodyClass="align-middle px-2 py-3 text-blue-900"
-            >
-              <template #body="slotProps">
-                <span class="inline-block px-4 py-1 rounded-full text-sm font-medium bg-blue-900/50 text-white">
-                  {{ getCategoryName(slotProps.data.category_id) }}
-                </span>
-              </template>
-            </Column>
+                <Column
+                  header="Descripción"
+                  sortable
+                  headerClass="bg-blue-900/50 text-white font-bold"
+                  bodyClass="align-middle px-2 py-3 text-blue-900 max-w-sm truncate"
+                >
+                  <template #body="slotProps">
+                    <p class="truncate max-w-sm">
+                      {{ slotProps.data.description }}
+                    </p>
+                  </template>
+                </Column>
 
-            <Column
-              header="Ubicación"
-              sortable
-              headerClass="bg-blue-900/50 text-white font-bold hidden md:table-cell"
-              bodyClass="align-middle px-2 py-3 text-blue-900 truncate hidden md:table-cell"
-            >
-              <template #body="slotProps">
-                <div class="flex items-center truncate">
-                  <svg class="w-4 h-4 mr-1 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                  <span>{{ slotProps.data.location }}</span>
-                </div>
-              </template>
-            </Column>
-
-            <Column
-              header="Fecha Límite"
-              sortable
-              headerClass="bg-blue-900/50 text-white font-bold hidden md:table-cell"
-              bodyClass="align-middle px-2 py-3 text-blue-900 hidden md:table-cell"
-            >
-              <template #body="slotProps">
-                <div class="flex flex-col">
-                  <span>{{ formatDate(slotProps.data.due_date) }}</span>
-                  <div class="flex space-x-1 mt-1">
-                    <span
-                      v-if="isDueSoon(slotProps.data.due_date)"
-                      class="px-1 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
-                    >
-                      Próximo
+                <Column
+                  header="Categoría"
+                  sortable
+                  headerClass="bg-blue-900/50 text-white font-bold"
+                  bodyClass="align-middle px-2 py-3 text-blue-900"
+                >
+                  <template #body="slotProps">
+                    <span class="inline-block px-4 py-1 rounded-full text-sm font-medium bg-blue-900/50 text-white">
+                      {{ getCategoryName(slotProps.data.category_id) }}
                     </span>
+                  </template>
+                </Column>
+
+                <Column
+                  header="Ubicación"
+                  sortable
+                  headerClass="bg-blue-900/50 text-white font-bold hidden md:table-cell"
+                  bodyClass="align-middle px-2 py-3 text-blue-900 truncate hidden md:table-cell"
+                >
+                  <template #body="slotProps">
+                    <div class="flex items-center truncate">
+                      <svg class="w-4 h-4 mr-1 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                      <span>{{ slotProps.data.location }}</span>
+                    </div>
+                  </template>
+                </Column>
+
+                <Column
+                  header="Fecha Límite"
+                  sortable
+                  headerClass="bg-blue-900/50 text-white font-bold hidden md:table-cell"
+                  bodyClass="align-middle px-2 py-3 text-blue-900 hidden md:table-cell"
+                >
+                  <template #body="slotProps">
+                    <div class="flex flex-col">
+                      <span>{{ slotProps.data.due_date ? formatDate(slotProps.data.due_date) : "Sin fecha límite" }}</span>
+                      <div class="flex space-x-1 mt-1">
+                        <span
+                          v-if="isDueSoon(slotProps.data.due_date)"
+                          class="px-1 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
+                        >
+                          Próximo
+                        </span>
+                        <span
+                          v-if="isOverdue(slotProps.data.due_date)"
+                          class="px-1 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800"
+                        >
+                          Atrasado
+                        </span>
+                      </div>
+                    </div>
+                  </template>
+                </Column>
+
+                <Column
+                  v-if="!user?.is_pro"
+                  header="Estado"
+                  sortable
+                  headerClass="bg-blue-900/50 text-white font-bold"
+                  bodyClass="align-middle px-2 py-3 text-center"
+                >
+                  <template #body="slotProps">
                     <span
-                      v-if="isOverdue(slotProps.data.due_date)"
-                      class="px-1 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800"
+                      :class="getAdStatusClass(slotProps.data)"
+                      class="px-2 py-1 rounded-full text-xs font-semibold"
                     >
-                      Atrasado
+                      {{ getAdStatusLabel(slotProps.data) }}
                     </span>
+                  </template>
+                </Column>
+
+                <Column
+                  v-if="!user?.is_pro"
+                  header="Acciones"
+                  headerClass="bg-blue-900/50 text-white font-bold"
+                  bodyClass="align-middle px-2 py-3 text-center"
+                >
+                  <template #body="slotProps">
+                    <button
+                      @click="deleteAd(slotProps.data.id)"
+                      :disabled="hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done"
+                      class="w-8 h-8 flex items-center justify-center rounded-full transition cursor-pointer"
+                      :class="{
+                        'bg-gray-400 cursor-not-allowed': hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done,
+                        'bg-red-600/20 hover:bg-red-600 group': !(hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done)
+                      }"
+                      :title="(hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done) ? 'No se puede eliminar este anuncio' : 'Eliminar anuncio'"
+                    >
+                      <i class="pi pi-trash"
+                        :class="[
+                          'text-base transition',
+                          hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done
+                            ? 'text-gray-300'
+                            : 'text-red-500 group-hover:text-white'
+                        ]"></i>
+                    </button>
+                  </template>
+                </Column>
+              </DataTable>
+              </div>
+                <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div
+                    v-for="ad in filteredAds"
+                    :key="ad.id"
+                    class="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-lg border border-white/20 hover:shadow-xl transition relative"
+                  >
+                    <button
+                      v-if="!user.is_pro"
+                      @click="deleteAd(ad.id)"
+                      :disabled="hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done"
+                      class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full transition cursor-pointer"
+                      :class="{
+                        'bg-gray-400 cursor-not-allowed': hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done,
+                        'bg-red-600/20 hover:bg-red-600 group': !(hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done)
+                      }"
+                      :title="(hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done) ? 'No se puede eliminar este anuncio' : 'Eliminar anuncio'"
+                    >
+                      <i class="pi pi-trash"
+                        :class="[
+                          'text-base transition',
+                          hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done
+                            ? 'text-gray-300'
+                            : 'text-red-500 group-hover:text-white'
+                        ]"></i>
+                    </button>
+                    <h3 class="text-lg font-bold text-white mb-2">{{ ad.name }}</h3>
+                    <p class="text-blue-200 mb-2 truncate">{{ ad.description }}</p>
+                    <p class="text-sm text-blue-300 mb-2">{{ getCategoryName(ad.category_id) }}</p>
+                    <p class="text-sm text-blue-300 mb-4">{{ ad.location }}</p>
+                    <button
+                      @click="onRowClick({ data: ad })"
+                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition w-full"
+                    >
+                      Ver detalles
+                    </button>
                   </div>
                 </div>
-              </template>
-            </Column>
 
-            <Column
-              v-if="!user?.is_pro"
-              header="Estado"
-              sortable
-              headerClass="bg-blue-900/50 text-white font-bold"
-              bodyClass="align-middle px-2 py-3 text-center"
-            >
-              <template #body="slotProps">
-                <span
-                  :class="getAdStatusClass(slotProps.data)"
-                  class="px-2 py-1 rounded-full text-xs font-semibold"
-                >
-                  {{ getAdStatusLabel(slotProps.data) }}
-                </span>
-              </template>
-            </Column>
-
-            <Column
-              v-if="!user?.is_pro"
-              header="Acciones"
-              headerClass="bg-blue-900/50 text-white font-bold"
-              bodyClass="align-middle px-2 py-3 text-center"
-            >
-              <template #body="slotProps">
-                <button
-                  @click="deleteAd(slotProps.data.id)"
-                  :disabled="hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done"
-                  class="w-8 h-8 flex items-center justify-center rounded-full transition cursor-pointer"
-                  :class="{
-                    'bg-gray-400 cursor-not-allowed': hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done,
-                    'bg-red-600/20 hover:bg-red-600 group': !(hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done)
-                  }"
-                  :title="(hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done) ? 'No se puede eliminar este anuncio' : 'Eliminar anuncio'"
-                >
-                  <i class="pi pi-trash"
-                    :class="[
-                      'text-base transition',
-                      hasPaidOffer(slotProps.data) || slotProps.data.pro_is_done || slotProps.data.customer_is_done
-                        ? 'text-gray-300'
-                        : 'text-red-500 group-hover:text-white'
-                    ]"></i>
-                </button>
-              </template>
-            </Column>
-          </DataTable>
+            </div>
         </div>
-
-      </div>
     </main>
 
-<div v-if="openAdDetailModal" class="fixed z-50 inset-0 overflow-y-auto">
-  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-      <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
-    </div>
-    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-    <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
-        <h3 class="text-lg leading-6 font-semibold text-white">
-          Detalles del proyecto
-        </h3>
-        <button 
-          @click="openAdDetailModal = false"
-          class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition"
-        >
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
+  <div v-if="openAdDetailModal" class="fixed z-50 inset-0 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
       </div>
-
-      <div class="p-6">
-        <AdDetailComponent  
-          :id="selectedId" 
-          @close-ad-detail="openAdDetailModal = false" 
-          @payment-success="handlePaymentSuccess"
-        />
-      </div>
-    </div>
-  </div>
-</div>
-
-<div v-if="openCreateAdModal" class="fixed z-50 inset-0 overflow-y-auto">
-  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-      <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
-    </div>
-
-    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-    <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
-        <h3 class="text-lg leading-6 font-semibold text-white">
-          Creando nuevo proyecto
-        </h3>
-        <button 
-          @click="openCreateAdModal = false"
-          class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition"
-        >
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button> 
-      </div>
-
-      <div class="p-6">
-        <AdsFormComponent 
-          :categories="categories"
-          @created="handleAdCreated" 
-          @cancel="openCreateAdModal = false"
-        />
-      </div>
-    </div>
-  </div>
-</div>
-
-
-  
-    <div v-if="showRatingModal" class="fixed z-50 inset-0 overflow-y-auto">
-      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+        <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+          <h3 class="text-lg leading-6 font-semibold text-white">
+            Detalles del proyecto
+          </h3>
+          <button 
+            @click="openAdDetailModal = false"
+            class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition"
+          >
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
         </div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div class="px-6 py-4 border-b border-white/20">
-            <h3 class="text-lg leading-6 font-semibold text-white">
-              Rate the Service
-            </h3>
-          </div>
-          <div class="p-6">
-            <AdRatingComponent 
-              :adId="adToRate" 
-              @close="showRatingModal = false" 
-            />
-          </div>
+
+        <div class="p-6">
+          <AdDetailComponent  
+            :id="selectedId" 
+            @close-ad-detail="openAdDetailModal = false" 
+            @payment-success="handlePaymentSuccess"
+          />
         </div>
       </div>
     </div>
   </div>
+
+  <div v-if="openCreateAdModal" class="fixed z-50 inset-0 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+      </div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+        <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+          <h3 class="text-lg leading-6 font-semibold text-white">
+            Creando nuevo proyecto
+          </h3>
+          <button 
+            @click="openCreateAdModal = false"
+            class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition"
+          >
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button> 
+        </div>
+
+        <div class="p-6">
+          <AdsFormComponent 
+            :categories="categories"
+            @created="handleAdCreated" 
+            @cancel="openCreateAdModal = false"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div v-if="showRatingModal" class="fixed z-50 inset-0 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+      </div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="inline-block align-bottom bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="px-6 py-4 border-b border-white/20">
+          <h3 class="text-lg leading-6 font-semibold text-white">
+            Rate the Service
+          </h3>
+        </div>
+        <div class="p-6">
+          <AdRatingComponent 
+            :adId="adToRate" 
+            @close="showRatingModal = false" 
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </template>
 
 <script>
@@ -373,6 +421,7 @@ export default {
   },
   data() {
     return {
+      viewMode: 'cards',
       showAdDetailModal: false,
       searchQuery: '',
       loading: true,
@@ -440,6 +489,14 @@ mounted: async function() {
   }
 },
 methods: {
+  switchToList() {
+    this.viewMode = 'list';
+    console.log('Modo cambiado a:', this.viewMode);
+  },
+  switchToCards() {
+    this.viewMode = 'cards';
+    console.log('Modo cambiado a:', this.viewMode);
+  },
   getAdStatusLabel(ad) {
     if (ad.customer_is_done) {
       return 'Completado';
@@ -514,8 +571,9 @@ methods: {
         this.toast.success('Pago recibido con éxito');
       }, 300);
     },
-    onRowClick(event) {
-      this.selectedId = event.data.id;
+    onRowClick(eventOrAd) {
+      const adId = eventOrAd.data ? eventOrAd.data.id : eventOrAd.id;
+      this.selectedId = adId;
       this.openAdDetailModal = true;
     },
     formatDate(dateString) {
@@ -591,8 +649,25 @@ methods: {
       return dueDate < today;
     },
     rowClassName(rowData) {
-      return rowData.pro_is_done ? 'bg-green-900/10' : '';
+      return 'custom-row-class';
     }
   }
 };
 </script>
+<style scoped>
+::v-deep(.p-paginator) {
+  background-color: #1e293b !important;
+  color: white !important;
+  border-top: 1px solid #334155;
+}
+::v-deep(.p-datatable) {
+  background-color: #1e293b;
+  color: white;
+}
+
+::v-deep(.p-datatable .p-datatable-thead > tr > th),
+::v-deep(.p-datatable .p-datatable-tbody > tr > td) {
+  background-color: #1e293b;
+  color: white;
+}
+</style>
