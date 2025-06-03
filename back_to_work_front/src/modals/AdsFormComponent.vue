@@ -71,8 +71,9 @@
         <button
           type="button"
           @click="$refs.fileInput.click()"
-          class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow hover:from-blue-700 hover:to-purple-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          class="flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
         >
+        <i class="pi pi-plus mr-2 text-blue-300 text-xl"></i>
           Subir archivos
         </button>
         <span class="text-sm text-blue-200">(Máx. 5 fotos y 1 video, opcional)</span>

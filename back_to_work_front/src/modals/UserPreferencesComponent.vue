@@ -38,14 +38,19 @@
           />
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-white mb-2">Provincia</label>
+        <div class="flex-grow lg:max-w-xs">
+          <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Provincia</label>
           <select
             v-model="user.province"
-            class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+            class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
           >
-            <option disabled value="">Selecciona provincia</option>
-            <option v-for="province in provinces" :key="province.id" :value="province">
+            <option disabled value="" class="text-gray-900">Selecciona provincia</option>
+            <option 
+              v-for="province in provinces" 
+              :key="province.id" 
+              :value="province"
+              class="bg-blue-900 text-white"
+            >
               {{ province.name }}
             </option>
           </select>
@@ -85,9 +90,7 @@
     </div>
   </div>
 </template>
-
-
-  
+ 
   <script>
   import UserService from '../services/api/user.service';
   import Select from 'primevue/select';

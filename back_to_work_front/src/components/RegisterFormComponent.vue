@@ -74,15 +74,24 @@
                 :placeholder="field === 'firstName' ? 'John' : field === 'lastName' ? 'Doe' : '654987321'" 
                 class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60 focus:ring-2 focus:ring-blue-400 focus:outline-none transition" />
             </div>
-            <div>
-              <label class="block mb-2 text-sm font-medium text-white">Provincia <span class="text-red-400">*</span></label>
-              <Select 
-                v-model="form.province"
-                :options="provinces"
-                optionLabel="name"
-                placeholder="Selecciona provincia"
-                class="w-full text-black" />
+            <div class="flex-grow lg:max-w-xs">
+              <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Provincia</label>
+              <select 
+                v-model="selectedProvince"
+                class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
+              >
+                <option value="" class="text-gray-900">Toda España</option>
+                <option 
+                  v-for="location in provinces"
+                  :key="location.id"
+                  :value="location.name"
+                  class="bg-blue-900 text-white"
+                >
+                  {{ location.name }}
+                </option>
+              </select>
             </div>
+
           </div>
 
           <div v-else-if="currentStep === 2">

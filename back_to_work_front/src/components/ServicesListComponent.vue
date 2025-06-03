@@ -30,13 +30,12 @@
             <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Publica un anuncio</h1>
             <p class="text-blue-200 max-w-md">Describe tu proyecto y empieza a recibir propuestas de profesionales cualificados hoy mismo.</p>
           </div>
+          
           <button 
             @click="openCreateAdModal = true" 
             class="flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
           >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
+            <i class="pi pi-plus mr-2 text-blue-300 text-xl"></i>
             Crear anuncio
           </button>
         </div>
@@ -57,17 +56,17 @@
           </div>
 
             <div class="flex-grow lg:max-w-xs">
-              <label class="block text-blue-200 text-sm mb-1">Provincia</label>
+              <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Provincia</label>
               <select 
                 v-model="selectedProvince"
-                class="w-full px-3 py-3 bg-white/5 border border-white/20 text-white rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+                class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
               >
                 <option value="" class="text-gray-900">Toda España</option>
                 <option 
                   v-for="location in provinces"
                   :key="location.id"
                   :value="location.name"
-                  class="text-gray-900"
+                  class="bg-blue-900 text-white"
                 >
                   {{ location.name }}
                 </option>
@@ -75,17 +74,17 @@
             </div>
 
             <div class="flex-grow lg:max-w-xs">
-              <label class="block text-blue-200 text-sm mb-1">Categoria</label>
+              <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Categoria</label>
               <select 
                 v-model="selectedCategory"
-                class="w-full px-3 py-3 bg-white/5 border border-white/20 text-white rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+                class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
               >
                 <option value="" class="text-gray-900">Todas las categorías</option>
                 <option 
                   v-for="category in categories"
                   :key="category.id"
                   :value="category.id"
-                  class="text-gray-900"
+                  class="bg-blue-900 text-white"
                 >
                   {{ category.category }}
                 </option>
@@ -112,7 +111,6 @@
           </div>
         </div>
 
-
         <div v-if="ads.length === 0" class="mt-8 bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-6 text-center">
           <h3 class="text-xl sm:text-2xl font-bold text-white mb-2">Aún no has publicado un anuncio</h3>
           <p class="text-blue-200 mb-4">¡Publica tu primer anuncio y empieza a recibir ofertas hoy mismo!</p>
@@ -128,15 +126,14 @@
         </div>
 
         <div>
-            <div v-if="viewMode === 'list'" class="w-full rounded-2xl shadow-xl overflow-hidden border border-white/20 overflow-x-auto">
+            <div v-if="viewMode === 'list'" class="w-full rounded-lg shadow-xl overflow-hidden border border-white/20 overflow-x-auto">
               <DataTable
                 :value="filteredAds"
                 :paginator="true"
                 :rows="10"
                 :rowClassName="rowClassName"
-                sortMode="multiple"
+                sortMode="single"
                 dataKey="id"
-
                 tableClass="min-w-full table-auto bg-slate-800 text-white"
                 class="w-full cursor-pointer"
                 @row-click="onRowClick"
@@ -150,6 +147,7 @@
                 />
 
                 <Column
+                  field="description"
                   header="Descripción"
                   sortable
                   headerClass="bg-blue-900/50 text-white font-bold"
@@ -163,6 +161,7 @@
                 </Column>
 
                 <Column
+                  field="category_id"
                   header="Categoría"
                   sortable
                   headerClass="bg-blue-900/50 text-white font-bold"
@@ -176,6 +175,7 @@
                 </Column>
 
                 <Column
+                  field="location"
                   header="Ubicación"
                   sortable
                   headerClass="bg-blue-900/50 text-white font-bold hidden md:table-cell"
@@ -195,6 +195,7 @@
                 </Column>
 
                 <Column
+                  field="due_date"
                   header="Fecha Límite"
                   sortable
                   headerClass="bg-blue-900/50 text-white font-bold hidden md:table-cell"

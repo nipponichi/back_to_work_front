@@ -102,7 +102,7 @@
 </div>
 
 
-<div v-if="bids.length > 0" class="w-full rounded-2xl shadow-xl overflow-hidden border border-white/20 mt-6">
+<div v-if="bids.length > 0" class="w-full rounded-lg shadow-xl overflow-hidden border border-white/20 mt-6">
     <DataTable 
       :value="bids"
       :paginator="true" 

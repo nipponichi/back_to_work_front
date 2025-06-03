@@ -3,7 +3,27 @@
     <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
       <h2 class="text-xl font-semibold mb-4">Valora este anuncio</h2>
 
-      <!-- Estrellas 0 a 10 -->
+      <div v-if="user?.user_stat?.length" class="mb-6">
+        <h3 class="text-lg font-medium mb-2">Valoraciones anteriores:</h3>
+        <ul class="space-y-2 max-h-48 overflow-y-auto pr-1">
+          <li
+            v-for="(stat, index) in user.user_stat"
+            :key="index"
+            class="bg-gray-100 p-3 rounded-md"
+          >
+            <div class="flex items-center justify-between mb-1">
+              <div class="text-yellow-500 text-sm">
+                <span v-for="i in 10" :key="i">
+                  <span :class="i <= stat.rating ? 'text-yellow-400' : 'text-gray-300'">★</span>
+                </span>
+              </div>
+              <span class="text-sm text-gray-500">{{ formatDate(stat.created_at) }}</span>
+            </div>
+            <p class="text-sm text-gray-700 italic">"{{ stat.review }}"</p>
+          </li>
+        </ul>
+      </div>
+
       <label class="block mb-2 font-medium">Tu valoración (0–10):</label>
       <div class="flex flex-wrap gap-1 mb-4">
         <button
@@ -16,7 +36,6 @@
         </button>
       </div>
 
-      <!-- Comentario -->
       <label class="block mb-2 font-medium">Comentario:</label>
       <textarea
         v-model="review"
@@ -39,7 +58,6 @@
       </div>
     </div>
 
-    <!-- Toast -->
     <div
       v-if="showToast"
       class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-md transition-opacity duration-300"
@@ -51,7 +69,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import userService from '../services/api/user.service'
 
 const props = defineProps({
   adId: {
@@ -65,9 +83,10 @@ const emits = defineEmits(['close', 'rating-submitted'])
 const customerCare = ref(0)
 const review = ref('')
 const submitting = ref(false)
-
 const toastMessage = ref('')
 const showToast = ref(false)
+const userStr = localStorage.getItem('user')
+const user = userStr ? JSON.parse(userStr) : null
 
 const isIncomplete = computed(() =>
   customerCare.value === 0 || review.value.trim() === ''
@@ -81,16 +100,23 @@ const showSuccessToast = (message) => {
   }, 3000)
 }
 
+function formatDate(dateStr) {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
 const submitRating = async () => {
-  if (isIncomplete.value || submitting.value) return;
-  submitting.value = true;
+  if (isIncomplete.value || submitting.value) return
+  submitting.value = true
 
   try {
-    const token = localStorage.getItem('token'); // Ajusta según dónde guardes el token
-    console.log('Token enviado:', token);  // <-- Aquí mostramos el token
-    
+    const token = localStorage.getItem('token')
 
-    await axios.post('http://localhost:8000/api/userstats', {
+    await userService.set('api', {
       ad_id: props.adId,
       customer_care: customerCare.value,
       review: review.value
@@ -98,15 +124,15 @@ const submitRating = async () => {
       headers: {
         Authorization: `Bearer ${token}`
       }
-    });
+    })
 
-    showSuccessToast('¡Valoración enviada con éxito!');
-    emits('rating-submitted');
-    setTimeout(() => emits('close'), 1500);
+    showSuccessToast('¡Valoración enviada con éxito!')
+    emits('rating-submitted')
+    setTimeout(() => emits('close'), 1500)
   } catch (error) {
-    console.error('Error al enviar la valoración:', error);
+    console.error('Error al enviar la valoración:', error)
   } finally {
-    submitting.value = false;
+    submitting.value = false
   }
-};
+}
 </script>

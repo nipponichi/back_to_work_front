@@ -4,7 +4,7 @@ class AuthService {
   async login(email, password) {
     try {
       const response = await api.post('/login', { email, password });
-      
+      console.log(response.data);
       if (response.status === 403) {
         throw new Error('Your account has been blocked');
       }

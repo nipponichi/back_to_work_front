@@ -13,9 +13,19 @@
           </span>
         </div>
 
-        <ul class="hidden md:flex space-x-4">
-          <li><RouterLink to="/" class="text-white hover:text-blue-300 transition">Inicio</RouterLink></li>
+        <ul class="hidden md:flex space-x-4 text-lg">
+          <li><RouterLink to="/" class="text-white  hover:text-blue-300 transition">Inicio</RouterLink></li>
+          	<li class="text-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" class="w-4 h-4 current-fill" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v0m0 7v0m0 7v0m0-13a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+            </li>
           <li><RouterLink to="/service" class="text-white hover:text-blue-300 transition">{{ user?.is_pro ? 'Servicios' : 'Proyectos' }}</RouterLink></li>
+          <li class="text-gray-300 pd-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" class="w-4 h-4 current-fill" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v0m0 7v0m0 7v0m0-13a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </li>
           <li><RouterLink to="/contact" class="text-white hover:text-blue-300 transition">Contacto</RouterLink></li>
         </ul>
 
@@ -25,10 +35,23 @@
                         class="hidden md:block bg-green-500 hover:bg-green-700 transition py-2 px-4 rounded-full text-white">
               Mis Trabajos
             </RouterLink>
-            <button @click="preferences"
-                    class="hidden md:block cursor-pointer bg-transparent hover:text-blue-300 transition text-white font-medium">
-              👤 {{ user?.user_name || "Usuario" }}
-            </button>
+            <div class="flex items-center text-white text-sm leading-none">
+              <button
+                @click="preferences"
+                class="text-white hidden md:inline-flex items-center bg-transparent hover:text-blue-300 transition font-semibold text-base rounded-l-md border border-white/20 px-2 py-1 m-0 cursor-pointer"
+                style="margin-right: 0px; padding-right: 2px;"
+              >
+                👤 {{ user?.user_name || "Usuario" }}
+              </button>
+
+              <button
+                @click="openUserstatsModal = true"
+                class="text-white inline-flex items-center bg-transparent hover:text-blue-300 transition font-medium text-m rounded-r-md border cursor-pointer border-white/20 border-l-0 px-2 py-1 m-0"
+                style="margin-left: 0px; padding-left: 2px;"
+              >
+                ({{ user?.user_stat.length }})
+              </button>
+            </div>
             <button @click="logout"
                     class="hidden md:block px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition shadow cursor-pointer">
               Cerrar sesión
@@ -64,7 +87,7 @@
         <RouterLink to="/contact" class="block text-gray-800 hover:text-blue-500 transition">Contacto</RouterLink>
 
         <template v-if="accessToken">
-          <button @click="preferences" class="block w-full text-left px-4 py-2 bg-transparent hover:bg-gray-100 rounded transition text-gray-800">
+          <button @click="preferences" class="block font-semibold w-full text-left px-4 py-2 bg-transparent hover:bg-gray-100 rounded transition text-gray-800">
             👤 {{ user?.user_name || "Usuario" }}
           </button>
           <button @click="logout" class="block w-full text-left px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition">
@@ -108,6 +131,27 @@
       </div>
     </div>
   </div>
+
+  <div v-if="openUserstatsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
+    <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+      <h3 class="text-lg leading-6 font-semibold text-white">
+        Sobre este usuario
+      </h3>
+      <button @click="openUserstatsModal = false"
+              class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6 max-h-[80vh] overflow-y-auto">
+      <UserRatingComponent :user="user" />
+    </div>
+  </div>
+</div>
+
 </div>
 </template>
 
@@ -116,16 +160,17 @@
 import AuthService from "../services/api/auth.service";
 import { useToast } from 'vue-toastification';
 import UserPreferencesComponent from "../modals/UserPreferencesComponent.vue";
-import Dialog from 'primevue/dialog';
+import UserRatingComponent from "../modals/UserRatingComponent.vue";
 
 export default {
   components: {
     UserPreferencesComponent,
-    Dialog
+    UserRatingComponent
   },
   data() {
     return {
       openUserPreferencesModal: false,
+      openUserstatsModal: false,
       isOpen: false,
       accessToken: null,
       isMobileMenuOpen: false,
@@ -134,6 +179,7 @@ export default {
       toast: useToast()
     };
   },
+
   mounted() {
     this.accessToken = localStorage.getItem("token");
     let userStr = localStorage.getItem("user");
@@ -144,6 +190,7 @@ export default {
   beforeUnmount() {
     document.removeEventListener("click", this.handleClickOutside);
   },
+
   watch: {
     '$route'() {
       this.accessToken = localStorage.getItem("token");
@@ -156,6 +203,7 @@ export default {
       this.user = userStr ? JSON.parse(userStr) : null;
     }
   },
+
   methods: {
     toggleDropdown() {
       this.isOpen = !this.isOpen;

@@ -5,90 +5,91 @@
     <div class="absolute inset-0 bg-blue-950/40"></div>
   </div>
 
-  <div class="relative z-10 max-w-7xl mx-auto bg-blue-950 m-20 pt-6 pb-12 px-12 rounded-2xl">
+<div class="relative z-10 max-w-7xl mx-auto bg-gradient-to-br from-blue-950 to-blue-800 backdrop-blur-md border border-white/20 m-20 pt-6 pb-12 px-12 rounded-2xl shadow-xl">
     <div class="relative mb-6">
       <h2 class="text-2xl sm:text-3xl font-bold text-white inline-block relative z-10"> Contacto </h2>
       <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-900 rounded-full"></div>
     </div>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div class="p-8 sm:p-10">
-            <form @submit.prevent="submitForm">
-              <div class="grid grid-cols-1 gap-6">
-                <div>
-                  <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-                  <input 
-                    type="text" 
-                    id="name" 
-                    v-model="form.name"
-                    required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    placeholder="Tu nombre">
-                </div>
-                
-                <div>
-                  <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    v-model="form.email"
-                    required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    placeholder="tu@email.com">
-                </div>
-                
-                <div>
-                  <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
-                  <select 
-                    id="subject" 
-                    v-model="form.subject"
-                    required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
-                    <option value="" disabled selected>Selecciona un asunto</option>
-                    <option value="general">Consulta general</option>
-                    <option value="support">Soporte técnico</option>
-                    <option value="professional">Registro como profesional</option>
-                    <option value="payment">Problemas con pagos</option>
-                    <option value="other">Otro</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
-                  <textarea 
-                    id="message" 
-                    v-model="form.message"
-                    required
-                    rows="5"
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    placeholder="Escribe tu mensaje aquí..."></textarea>
-                </div>
-                
-                <div class="mt-4">
-                  <button 
-                    type="submit"
-                    :disabled="isSubmitting"
-                    class="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg flex items-center justify-center">
-                    <span v-if="!isSubmitting">Enviar mensaje</span>
-                    <span v-else class="flex items-center">
-                      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Enviando...
-                    </span>
-                  </button>
-                </div>
+      <div class="bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20">
+        <div class="p-8 sm:p-10">
+          <form @submit.prevent="submitForm">
+            <div class="grid grid-cols-1 gap-6">
+              <div>
+                <label for="name" class="block text-sm font-medium text-blue-200 mb-1">Nombre completo</label>
+                <input 
+                  type="text" 
+                  id="name" 
+                  v-model="form.name"
+                  required
+                  class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+                  placeholder="Tu nombre">
               </div>
-            </form>
-          </div>
+              
+              <div>
+                <label for="email" class="block text-sm font-medium text-blue-200 mb-1">Correo electrónico</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  v-model="form.email"
+                  required
+                  class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+                  placeholder="tu@email.com">
+              </div>
+                      
+              <div>
+                <label class="block text-blue-200 text-sm mb-1">Asunto</label>
+                <select 
+                  v-model="form.subject"
+                  class="w-full px-3 py-3 bg-white/5 border border-white/20 text-white rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+                  required
+                >
+                  <option value="" class="text-gray-900">Selecciona un asunto</option>
+                  <option value="general" class="text-gray-900">Consulta general</option>
+                  <option value="support" class="text-gray-900">Soporte técnico</option>
+                  <option value="professional" class="text-gray-900">Registro como profesional</option>
+                  <option value="payment" class="text-gray-900">Problemas con pagos</option>
+                  <option value="other" class="text-gray-900">Otro</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="message" class="block text-sm font-medium text-blue-200 mb-1">Mensaje</label>
+                <textarea 
+                  id="message" 
+                  v-model="form.message"
+                  required
+                  rows="5"
+                  class="w-full resize-none px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+                  placeholder="Escribe tu mensaje aquí..."></textarea>
+              </div>
+              
+              <div class="mt-4">
+                <button 
+                  type="submit"
+                  :disabled="isSubmitting"
+                  class="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg flex items-center justify-center"
+                >
+                  <span v-if="!isSubmitting">Enviar mensaje</span>
+                  <span v-else class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Enviando...
+                  </span>
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
+      </div>
+
         
         <div class="flex flex-col">
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 h-full border border-white/20">
-            <h3 class="text-2xl font-bold text-gray-900 mb-6">Otras formas de contactar</h3>
-            
+          <div class="bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-8 h-full">
+            <h3 class="text-2xl font-bold text-white mb-6">Otras formas de contactar</h3>
             <div class="space-y-6">
               <div class="flex items-start">
                 <div class="flex-shrink-0 bg-blue-100 p-3 rounded-lg">
@@ -97,8 +98,8 @@
                   </svg>
                 </div>
                 <div class="ml-4">
-                  <p class="text-gray-600 mt-1">info@weagree.com</p>
-                  <p class="text-gray-500 text-sm mt-2">Responderemos lo antes posible</p>
+                  <p class="text-gray-200 mt-1">info@weagree.com</p>
+                  <p class="text-gray-100 text-sm mt-2">Responderemos lo antes posible</p>
                 </div>
               </div>
               
@@ -109,8 +110,8 @@
                   </svg>
                 </div>
                 <div class="ml-4">
-                  <p class="text-gray-600 mt-1">+34 91 597 41 89</p>
-                  <p class="text-gray-500 text-sm mt-2">Lunes a Viernes, 9:00 - 18:00</p>
+                  <p class="text-gray-200 mt-1">+34 91 597 41 89</p>
+                  <p class="text-gray-100 text-sm mt-2">Lunes a Viernes, 9:00 - 18:00</p>
                 </div>
               </div>
               
@@ -122,13 +123,13 @@
                   </svg>
                 </div>
                 <div class="ml-4">
-                  <p class="text-gray-600 mt-1">Calle Reyes Católicos, 123</p>
-                  <p class="text-gray-600">28001 Madrid, España</p>
+                  <p class="text-gray-200 mt-1">Calle Reyes Católicos, 123</p>
+                  <p class="text-gray-100">28001 Madrid, España</p>
                 </div>
               </div>
               
               <div class="pt-6">
-                <h4 class="text-lg font-semibold text-gray-900 mb-4">Síguenos en redes</h4>
+                <h4 class="text-lg font-semibold text-white mb-4">Síguenos en redes</h4>
                 <div class="flex space-x-4">
                   <a href="#" class="bg-blue-100 hover:bg-blue-200 p-3 rounded-lg transition-colors duration-200">
                     <svg class="h-6 w-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
