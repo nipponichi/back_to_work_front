@@ -87,9 +87,14 @@
         <RouterLink to="/contact" class="block text-gray-800 hover:text-blue-500 transition">Contacto</RouterLink>
 
         <template v-if="accessToken">
-          <button @click="preferences" class="block font-semibold w-full text-left px-4 py-2 bg-transparent hover:bg-gray-100 rounded transition text-gray-800">
-            👤 {{ user?.user_name || "Usuario" }}
+        <div class="px-4 py-2 rounded transition text-gray-800 font-semibold flex justify-between items-center bg-transparent hover:bg-gray-100">
+          <span>👤 {{ user?.user_name || 'Usuario' }}</span>
+          <button @click="openUserstatsModal = true"
+                  class="text-sm text-blue-600 hover:underline focus:outline-none">
+            {{ user?.user_stat.length }}
           </button>
+        </div>
+
           <button @click="logout" class="block w-full text-left px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition">
             Cerrar sesión
           </button>
