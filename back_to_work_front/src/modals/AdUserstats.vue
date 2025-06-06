@@ -115,6 +115,8 @@ export default {
         this.$toast.error('Error al cargar información de usuarios');
       }
     },
+
+    
     formatDate(dateString) {
         return new Date(dateString).toLocaleDateString('es-ES', {
           year: 'numeric',

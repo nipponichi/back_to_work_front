@@ -259,6 +259,10 @@ export default {
       });
 
       try {
+        console.log('Enviando formulario con los siguientes datos:');
+        for (let [key, value] of formDataToSend.entries()) {
+          console.log(`${key}:`, value);
+        }
         const response = await UserService.set('ads', formDataToSend, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });

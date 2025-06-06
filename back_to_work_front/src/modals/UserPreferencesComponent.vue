@@ -1,5 +1,31 @@
 <template>
   <div class="p-6 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20">
+    <div class="w-full flex justify-center relative">
+      <div class="group relative w-[150px] h-[150px]">
+      <img
+        :src="userImage"
+        @click="addImage"
+        class="cursor-pointer shadow-xl rounded-full border-none object-cover w-full h-full"
+        alt="Foto de perfil"
+      />
+
+      <input
+        type="file"
+        ref="fileInput"
+        accept="image/jpeg, image/jpg, image/png"
+        style="display: none"
+        @change="onFileChange"
+      />
+
+      <div
+        class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full cursor-pointer"
+        @click="addImage"
+      >
+        <i class="pi pi-camera text-white text-2xl"></i>
+      </div>
+      </div>
+
+      </div>
     <h2 class="text-3xl font-bold text-white mb-8 text-center">
       {{ user.user_name || 'Usuario' }}
     </h2>
@@ -118,6 +144,13 @@
         password2: null,
       };
     },
+    computed: {
+      userImage() {
+        return this.user?.image && this.user.image.trim() !== ''
+          ? `${import.meta.env.VITE_IMG_URL}/${this.user.image}`
+          : 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
+      },
+    },
     watch: {
       'user.province': {
         handler(newVal) {
@@ -141,6 +174,40 @@
       }
     },
     methods: {
+      addImage() {
+        this.$refs.fileInput.click();
+      },
+
+      async onFileChange(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+          this.toast.error('Formato no válido. Solo JPG o PNG');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+        for (let [key, value] of formData.entries()) {
+          console.log(`${key}:`, value);
+        }
+        try {
+          const response = await UserService.updateForm('users/updateImage',formData, this.user.id);
+          if (response.data.success) {
+            this.user.image = response.data.image;
+            this.toast.success('Imagen actualizada correctamente');
+            localStorage.setItem('user', JSON.stringify(this.user));
+          } else {
+            this.toast.error('Error actualizando la imagen');
+          }
+        } catch (error) {
+          console.error('Error al subir imagen:', error);
+          this.toast.error('Error al subir la imagen');
+        }
+      },
+
       async fetchProvinces() {
         try {
           const response = await UserService.get("provinces");
@@ -150,6 +217,7 @@
           this.toast.error('Error loading provinces');
         }
       },
+
       async fetchCategories() {
         try {
           const response = await UserService.get("categories");
@@ -159,37 +227,38 @@
         }
       },
       async updateUser() {
-      if (!this.user.password || this.user.password.trim() === '') {
-        this.toast.error('La contraseña no puede estar vacía');
-        return;
-      }
-
-      if (this.user.password !== this.password2) {
-        this.toast.error('Las contraseñas no coinciden');
-        return;
-      }
-
-
-      if (this.user.password.length < 4) {
-        this.toast.error('La contraseña debe tener al menos 4 caracteres');
-        return;
-      }
-      console.log(this.user);
-        
-        try {
-          const response = await UserService.update("users", this.user, this.user.id);
-          if (response.data.success) {
-            this.toast.success('User updated successfully');
-            this.$emit('updateUser', this.user);
-          } else {
-            this.toast.error('Error updating user');
-          }
-        } catch (error) {
-          console.error('Error updating user:', error);
-          this.toast.error('Error updating user');
-        } finally {
-          this.isSubmitting = false;
+        if (!this.user.password || this.user.password.trim() === '') {
+          this.toast.error('La contraseña no puede estar vacía');
+          return;
         }
+
+        if (this.user.password !== this.password2) {
+          this.toast.error('Las contraseñas no coinciden');
+          return;
+        }
+
+
+        if (this.user.password.length < 4) {
+          this.toast.error('La contraseña debe tener al menos 4 caracteres');
+          return;
+        }
+        console.log(this.user);
+          
+          try {
+            const response = await UserService.update("users", this.user, this.user.id);
+            if (response.data.success) {
+              this.toast.success('User updated successfully');
+              localStorage.setItem('user', JSON.stringify(this.user));
+              this.$emit('updateUser', this.user);
+            } else {
+              this.toast.error('Error updating user');
+            }
+          } catch (error) {
+            console.error('Error updating user:', error);
+            this.toast.error('Error updating user');
+          } finally {
+            this.isSubmitting = false;
+          }
       }
     }
   };

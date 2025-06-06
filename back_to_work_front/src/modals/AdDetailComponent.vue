@@ -101,7 +101,6 @@
   </div>
 </div>
 
-
 <div v-if="bids.length > 0" class="w-full rounded-lg shadow-xl overflow-hidden border border-white/20 mt-6">
     <DataTable 
       :value="bids"
@@ -158,7 +157,7 @@
                 v-tooltip="user?.is_pro ? 'Marcar como completado' : 'Confirmar finalización'"
               />
               <Button 
-                v-if="user && data.user && data.user.id === user.id"
+                v-if="user && data.user && data.user.id === user.id && !data.is_paid"
                 icon="pi pi-trash" 
                 class="p-button-text p-button-danger" 
                 @click="removeBid(data.id)"
@@ -185,28 +184,28 @@
     </DataTable>
 </div>
 
-<div v-else-if="user?.is_pro" class="mt-6 p-8 bg-blue-900/20 rounded-lg text-center">
-  <p class="text-white text-xl font-semibold mb-2">Sé el primero en hacer una oferta por este proyecto</p>
-  <p class="text-blue-200">Aprovecha la oportunidad de destacar y consigue este trabajo antes que nadie.</p>
-</div>
-
-<div v-else class="p-8 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 text-center mt-6">
-  <div class="flex flex-col items-center space-y-4">
-    <div class="w-20 h-20 flex items-center justify-center rounded-full bg-blue-600/20">
-      <i class="pi pi-inbox text-4xl text-blue-300"></i>
+    <div v-else-if="user?.is_pro" class="mt-6 p-8 bg-blue-900/20 rounded-lg text-center">
+      <p class="text-white text-xl font-semibold mb-2">Sé el primero en hacer una oferta por este proyecto</p>
+      <p class="text-blue-200">Aprovecha la oportunidad de destacar y consigue este trabajo antes que nadie.</p>
     </div>
-    <h3 class="text-2xl font-semibold text-white">No tienes ofertas todavía</h3>
-    <p class="text-blue-200 max-w-md">
-      ¡Empezarán a llegar muy pronto!
-    </p>
-    <RouterLink 
-      to="/contact"
-      class="mt-4 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow hover:from-blue-700 hover:to-purple-700 transition"
-    >
-      Contactar soporte
-    </RouterLink>
-  </div>
-</div>
+
+    <div v-else class="p-8 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 text-center mt-6">
+      <div class="flex flex-col items-center space-y-4">
+        <div class="w-20 h-20 flex items-center justify-center rounded-full bg-blue-600/20">
+          <i class="pi pi-inbox text-4xl text-blue-300"></i>
+        </div>
+        <h3 class="text-2xl font-semibold text-white">No tienes ofertas todavía</h3>
+        <p class="text-blue-200 max-w-md">
+          ¡Empezarán a llegar muy pronto!
+        </p>
+        <RouterLink 
+          to="/contact"
+          class="mt-4 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow hover:from-blue-700 hover:to-purple-700 transition"
+        >
+          Contactar soporte
+        </RouterLink>
+      </div>
+    </div>
 
 
     <Dialog
@@ -242,46 +241,64 @@
     </div>
 
     <div 
-  v-if="lightbox.isOpen" 
-  class="fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center p-4"
-  @click.self="lightbox.isOpen = false"
->
-  <button
-    @click="lightbox.isOpen = false"
-    class="absolute top-6 right-6 text-white bg-gray-800 text-4xl z-[10000] hover:bg-gray-600 transition-colors focus:outline-none"
-    aria-label="Cerrar lightbox"
-  >
-    &times;
-  </button>
+      v-if="lightbox.isOpen" 
+      class="fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center p-4"
+      @click.self="lightbox.isOpen = false"
+    >
+      <button
+        @click="lightbox.isOpen = false"
+        class="absolute top-6 right-6 text-white bg-gray-800 text-4xl z-[10000] hover:bg-gray-600 transition-colors focus:outline-none"
+        aria-label="Cerrar lightbox"
+      >
+        &times;
+      </button>
 
-  <div class="relative w-full max-w-6xl h-full flex items-center justify-center">
-    <img 
-      :src="baseImgUrl + adData.pictures[lightbox.currentIndex].path" 
-      class="max-h-[90vh] max-w-full object-contain"
-      :alt="'Imagen ' + (lightbox.currentIndex + 1) + ' de ' + adData.name"
-    >
-    <button
-      @click.stop="prevImage"
-      class="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
-      aria-label="Imagen anterior"
-    >
-      &larr;
-    </button>
-    <button
-      @click.stop="nextImage"
-      class="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
-      aria-label="Imagen siguiente"
-    >
-      &rarr;
-    </button>
-    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white text-lg px-4 py-2 rounded-full">
-      Imagen {{ lightbox.currentIndex + 1 }} de {{ adData.pictures.length }}
+      <div class="relative w-full max-w-6xl h-full flex items-center justify-center">
+        <img 
+          :src="baseImgUrl + adData.pictures[lightbox.currentIndex].path" 
+          class="max-h-[90vh] max-w-full object-contain"
+          :alt="'Imagen ' + (lightbox.currentIndex + 1) + ' de ' + adData.name"
+        >
+        <button
+          @click.stop="prevImage"
+          class="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
+          aria-label="Imagen anterior"
+        >
+          &larr;
+        </button>
+        <button
+          @click.stop="nextImage"
+          class="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
+          aria-label="Imagen siguiente"
+        >
+          &rarr;
+        </button>
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white text-lg px-4 py-2 rounded-full">
+          Imagen {{ lightbox.currentIndex + 1 }} de {{ adData.pictures.length }}
+        </div>
+      </div>
+    </div>
+    <div v-if="openAdRatingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
+        <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+          <h3 class="text-lg leading-6 font-semibold text-white">
+            Sobre este usuario
+          </h3>
+          <button @click="openAdRatingModal = false"
+                  class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="p-6 max-h-[80vh] overflow-y-auto">
+          <AdRatingComponent :sender="sender" :adData="adData" :receiver="receiver" @rating-submitted="onRatingSubmitted"/>
+        </div>
+      </div>
     </div>
   </div>
-</div>
-  </div>
 </template>
-
 
 <script>
 import axios from 'axios';
@@ -293,6 +310,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Tooltip from 'primevue/tooltip';
+import AdRatingComponent from './AdRatingComponent.vue';
 
 export default {
   components: {
@@ -301,7 +319,8 @@ export default {
     DataTable,
     Button,
     Column,
-    Tooltip
+    Tooltip,
+    AdRatingComponent
   },
   props: {
     id: {
@@ -332,25 +351,26 @@ export default {
       showPaymentModal: false,
       selectedBid: null,
       isProcessingPayment: false,
+      openAdRatingModal: false,
       categories: [],
       paidbid: {},
+      sender: null,
+      receiver: null
     };
   },
   async mounted() {
+    console.log("AdDetailComponent mounted with id:", this.id);
     window.addEventListener('message', this.receiveMessage);
     await this.fetchCategories();
     await this.fetchAdData();
     await this.fetchUser();
-    console.log("antes de pujas")
     await this.fetchBids();
-
 
     if (this.adData.pictures && this.adData.pictures.length > 0) {
       console.log('URL de imagen:', import.meta.env.VITE_IMG_URL + this.adData.pictures[0].path);
     } else {
       console.log('No hay imágenes en este anuncio');
     }
-  
 
   },
 
@@ -359,15 +379,25 @@ export default {
   },
 
   methods: {
+    onRatingSubmitted() {
+      this.openAdRatingModal = false;
+      this.updateAd(this.adData);
+    },
     async markAsDone(id) {
       try {
         const response = await userService.set("ad/done", {id: id});
         if (response.data.success) {
           if (this.user?.is_pro) {
             this.adData.pro_is_done = 1;
+            this.openAdRatingModal = true;
+            this.sender = this.user;
+            this.receiver = this.adData.user;
             this.toast.success("Has marcado este trabajo como completado. Esperando confirmación del cliente.");
           } else {
             this.adData.customer_is_done = 1;
+            this.sender = this.user;
+            this.receiver = this.bids.find(bid => bid.ad_id === id)?.user;
+            this.openAdRatingModal = true;
             this.toast.success("Has confirmado la finalización del trabajo.");
           }
           await this.fetchBids();
@@ -406,7 +436,7 @@ export default {
 
     async fetchCategories() {
       try {
-        const res = await axios.get('http://127.0.0.1:8000/api/categories');
+        const res = await userService.get('categories');
         if (res.data.success) {
           this.categories = res.data.data;
         }
@@ -456,9 +486,9 @@ export default {
       console.log(bid)
       this.isProcessingPayment = true;
 
-      const externalUrl = import.meta.env.VITE_PAYMENT_API_URL + '/payment';
+      const paymentUrl = import.meta.env.VITE_PAYMENT_API_URL + '/payment';
       if (externalUrl.startsWith('http://localhost')) {
-        const newWindow = window.open(externalUrl, '_blank');
+        const newWindow = window.open(paymentUrl, '_blank');
 
         setTimeout(() => {
           newWindow.postMessage({
@@ -473,9 +503,10 @@ export default {
 
     async fetchAdData() {
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/api/ads/${this.id}`);
+        const res = await userService.show('ads', this.id);
         if (res.data.success) {
           this.adData = res.data.data;
+          console.log("Ad data fetched:", this.adData);
         if (this.adData.pictures && this.adData.pictures.length > 0) {
           console.log('URL de imagen:', import.meta.env.VITE_IMG_URL + this.adData.pictures[0].path);
         } else {
@@ -501,9 +532,10 @@ export default {
 
     async fetchBids() {
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/api/offers/ad/${this.id}`);
+        const res = await userService.show('offers/ad', this.id);
         if (res.data.success) {
           this.bids = res.data.data;
+          console.log(this.bids);
           this.bids.forEach(bid => {
             console.log(this.bids);
             if (bid.is_paid === 1) {
@@ -559,7 +591,7 @@ export default {
 
     async removeBid(bidId) {
       try {
-        const response = await userService.delete(`http://127.0.0.1:8000/api/offers/${bidId}`);
+        const response = await userService.delete('offers', bidId);
         if (response.data.success) {
           this.bids = this.bids.filter(bid => bid.id !== bidId);
           this.toast.success('Puja eliminada con éxito');
@@ -585,6 +617,10 @@ export default {
     closePaymentModal() {
       this.showPaymentModal = false;
       this.selectedBid = null;
+    },
+
+    updateAd(adData) {
+      this.$emit('updateAd', adData);
     }
   }
 };

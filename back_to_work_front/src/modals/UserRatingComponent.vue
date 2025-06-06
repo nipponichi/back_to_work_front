@@ -1,36 +1,45 @@
 <template>
   <div class="bg-blue-950/50 backdrop-blur-md rounded-2xl shadow-xl p-8 w-full max-w-4xl mx-auto border border-white/10 text-white">
-    <div class="flex flex-col sm:flex-row sm:justify-between mb-6">
-      <div>
-        <h2 class="text-2xl font-bold text-white mb-2">
-          Valoraciones de {{ user?.user_name || 'Usuario' }}
-        </h2>
-        <p class="text-sm text-blue-200">
-          Media general:
-          <span class="text-yellow-400 font-bold">{{ averageRating.toFixed(1) }}</span> / 5
-          ({{ user.user_stat.length }} valoraciones)
-        </p>
+<div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-6">
+  <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-blue-800 shadow-md">
+    <img
+      :src="getUserImage(user)"
+      alt="Foto usuario"
+      class="w-full h-full object-cover"
+    />
+  </div>
 
-        <div class="flex space-x-1 mt-2 text-lg">
+    <div class="text-center sm:text-left">
+      <h2 class="text-2xl sm:text-3xl font-bold text-white">
+        {{ user?.user_name || 'Usuario' }}
+      </h2>
+      <p class="text-sm text-blue-200 mt-1">
+        Media general:
+        <span class="text-yellow-400 font-bold text-base">{{ averageRating.toFixed(1) }}</span> / 5
+        <span class="text-white">({{ user.user_stat.length }} valoraciones)</span>
+      </p>
+
+      <div class="flex justify-center sm:justify-start space-x-1 mt-2 text-xl">
+        <span
+          v-for="i in 5"
+          :key="i"
+          class="relative w-6 h-6 inline-block"
+        >
+          <span class="absolute inset-0 text-blue-800 select-none">★</span>
           <span
-            v-for="i in 5"
-            :key="i"
-            class="relative w-5 h-5 inline-block"
-          >
-            <span class="absolute inset-0 text-blue-800 select-none">★</span>
-            <span
-              v-if="i <= Math.floor(averageRating)"
-              class="absolute inset-0 text-yellow-400 select-none"
-            >★</span>
-            <span
-              v-else-if="i - averageRating <= 0.5"
-              class="absolute inset-0 overflow-hidden text-yellow-400 select-none"
-              style="width: 40%; display: inline-block;"
-            >★</span>
-          </span>
-        </div>
+            v-if="i <= Math.floor(averageRating)"
+            class="absolute inset-0 text-yellow-400 select-none"
+          >★</span>
+          <span
+            v-else-if="i - averageRating <= 0.5"
+            class="absolute inset-0 overflow-hidden text-yellow-400 select-none"
+            style="width: 40%; display: inline-block;"
+          >★</span>
+        </span>
       </div>
     </div>
+  </div>
+
 
     <hr class="border-white/20 mb-4" />
 
@@ -54,6 +63,41 @@
             <div v-if="stat.ad?.name" class="text-base text-blue-300 mb-1">
                 <span class="text-white font-semibold">{{ stat.ad.name }}</span>
             </div>
+
+<!--             <div class="mb-1 flex items-center gap-3">
+  <div class="w-8 h-8 rounded-full overflow-hidden">
+    <img
+      :src="getUserImage(stat.reviewer)"
+      alt="Foto usuario"
+      class="w-full h-full object-cover"
+    />
+  </div>
+  <div class="flex flex-wrap items-center text-sm text-white gap-1">
+    <span class="font-semibold">{{ stat.reviewer?.user_name || 'Usuario anónimo' }}</span>
+    <span> (</span>
+    <span class="inline-flex space-x-1 text-lg">
+      <span
+        v-for="i in 5"
+        :key="i"
+        class="relative w-4 h-4 inline-block"
+      >
+        <span class="absolute inset-0 text-blue-800 select-none">★</span>
+        <span
+          v-if="i <= Math.floor(stat.rating)"
+          class="absolute inset-0 text-yellow-400 select-none"
+        >★</span>
+        <span
+          v-else-if="i - stat.rating <= 0.5"
+          class="absolute inset-0 overflow-hidden text-yellow-400 select-none"
+          style="width: 40%; display: inline-block;"
+        >★</span>
+      </span>
+    </span>
+    <span>)</span>
+  </div>
+</div> -->
+
+
             <div class="mb-1">
               <span class="font-semibold text-white">
                 {{ stat.reviewer?.user_name || 'Usuario anónimo' }}
@@ -107,7 +151,8 @@ export default {
   },
   data() {
     return {
-      sortedRatings: []
+      sortedRatings: [],
+      loggedUser: null
     }
   },
   computed: {
@@ -117,41 +162,58 @@ export default {
       return total / this.user.user_stat.length
     }
   },
-async mounted() {
-  try {
-    let userStr = localStorage.getItem("user");
-    this.loggedUser = JSON.parse(userStr);
-    const stats = [...this.user.user_stat]
-
-    for (let stat of stats) {
-      try {
-        const response = await UserService.show('users', stat.pro_id)
-        stat.reviewer = response.data.data
-      } catch (error) {
-        console.warn(`No se pudo cargar el usuario con id ${stat.pro_id}`, error)
-        stat.reviewer = null
-      }
-    }
-
-    for (let stat of stats) {
-      try {
-        const response = await UserService.show('ads', stat.ad_id)
-        stat.ad = response.data.data
-      } catch (error) {
-        console.warn(`No se pudo cargar el anuncio con id ${stat.ad_id}`, error)
-        stat.ad = null
-      }
-    }
-
-    this.sortedRatings = stats
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-      .slice(0, 5)
-
-  } catch (error) {
-    console.error('Error procesando valoraciones:', error)
-  }
-},
+  mounted() {
+    this.initialize()
+    console.log(this.user)
+  },
   methods: {
+    getUserImage(user) {
+      if (!user || !user.image || user.image.trim() === '') {
+        return 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
+      }
+      return `${import.meta.env.VITE_IMG_URL}/${user.image}`;
+    },
+    async initialize() {
+      try {
+        const userStr = localStorage.getItem("user");
+        this.loggedUser = userStr ? JSON.parse(userStr) : null;
+        await this.fetchUserStats()
+      } catch (error) {
+        console.error('Error inicializando componente:', error)
+      }
+    },
+
+    async fetchUserStats() {
+      try {
+        const stats = [...this.user.user_stat];
+
+        await Promise.all(stats.map(async (stat) => {
+          try {
+            const senderRes = await UserService.show('users', stat.sender_id)
+            stat.reviewer = senderRes.data.data
+          } catch (e) {
+            console.warn(`No se pudo cargar el usuario con id ${stat.sender_id}`, e)
+            stat.reviewer = null
+          }
+
+          try {
+            const adRes = await UserService.show('ads', stat.ad_id)
+            stat.ad = adRes.data.data
+          } catch (e) {
+            console.warn(`No se pudo cargar el anuncio con id ${stat.ad_id}`, e)
+            stat.ad = null
+          }
+        }))
+
+        this.sortedRatings = stats
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 5)
+
+      } catch (error) {
+        console.error('Error cargando valoraciones:', error)
+      }
+    },
+
     formatDate(dateStr) {
       const date = new Date(dateStr)
       return date.toLocaleDateString(undefined, {
@@ -162,9 +224,10 @@ async mounted() {
     },
 
     reportReview(stat) {
-        console.log('Reporte enviado para:', stat)
-        alert(`Se ha reportado la reseña de ${stat.reviewer?.user_name || 'anónimo'}.`)
+      console.log('Reporte enviado para:', stat)
+      alert(`Se ha reportado la reseña de ${stat.reviewer?.user_name || 'anónimo'}.`)
     }
   }
 }
 </script>
+

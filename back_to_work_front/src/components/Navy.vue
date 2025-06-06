@@ -41,17 +41,29 @@
                 class="text-white hidden md:inline-flex items-center bg-transparent hover:text-blue-300 transition font-semibold text-base rounded-l-md border border-white/20 px-2 py-1 m-0 cursor-pointer"
                 style="margin-right: 0px; padding-right: 2px;"
               >
-                👤 {{ user?.user_name || "Usuario" }}
-              </button>
-
+                <div class="w-10 h-10 mr-2 rounded-full overflow-hidden">
+                  <img
+                    :src="userImage"
+                    alt="Usuario"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+                <div class="flex flex-col leading-tight">
+                  <span class="font-semibold">{{ user?.user_name || "Usuario" }}</span>
+                  <span class="text-xs text-blue-200" v-if="user?.user_stat?.length">
+                    {{ averageRating.toFixed(1) }} / 5
+                  </span> 
+                </div>
+              </button> 
               <button
                 @click="openUserstatsModal = true"
-                class="text-white inline-flex items-center bg-transparent hover:text-blue-300 transition font-medium text-m rounded-r-md border cursor-pointer border-white/20 border-l-0 px-2 py-1 m-0"
+                class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20"
                 style="margin-left: 0px; padding-left: 2px;"
               >
-                ({{ user?.user_stat.length }})
+                ★ {{ user?.user_stat?.length || 0 }}
               </button>
             </div>
+
             <button @click="logout"
                     class="hidden md:block px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition shadow cursor-pointer">
               Cerrar sesión
@@ -88,7 +100,7 @@
 
         <template v-if="accessToken">
         <div class="px-4 py-2 rounded transition text-gray-800 font-semibold flex justify-between items-center bg-transparent hover:bg-gray-100">
-          <span>👤 {{ user?.user_name || 'Usuario' }}</span>
+          <span><img class="w-6 h-6 inline-block" :src="userImage" alt="Usuario"/> {{ user?.user_name || 'Usuario' }}</span>
           <button @click="openUserstatsModal = true"
                   class="text-sm text-blue-600 hover:underline focus:outline-none">
             {{ user?.user_stat.length }}
@@ -138,24 +150,24 @@
   </div>
 
   <div v-if="openUserstatsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-  <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
-    <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
-      <h3 class="text-lg leading-6 font-semibold text-white">
-        Sobre este usuario
-      </h3>
-      <button @click="openUserstatsModal = false"
-              class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
+    <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+        <h3 class="text-lg leading-6 font-semibold text-white">
+          Sobre este usuario
+        </h3>
+        <button @click="openUserstatsModal = false"
+                class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
 
-    <div class="p-6 max-h-[80vh] overflow-y-auto">
-      <UserRatingComponent :user="user" />
+      <div class="p-6 max-h-[80vh] overflow-y-auto">
+        <UserRatingComponent :user="user" />
+      </div>
     </div>
   </div>
-</div>
 
 </div>
 </template>
@@ -195,7 +207,19 @@ export default {
   beforeUnmount() {
     document.removeEventListener("click", this.handleClickOutside);
   },
-
+  computed: {
+    userImage() {
+      console.log(`${import.meta.env.VITE_IMG_URL}/${this.user.image}`);
+      return this.user.image && this.user.image.trim() !== ''
+        ? `${import.meta.env.VITE_IMG_URL}/${this.user.image}`
+        : 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
+    },
+    averageRating() {
+      if (!this.user.user_stat.length) return 0
+      const total = this.user.user_stat.reduce((sum, s) => sum + s.rating, 0)
+      return total / this.user.user_stat.length
+    }
+  },
   watch: {
     '$route'() {
       this.accessToken = localStorage.getItem("token");

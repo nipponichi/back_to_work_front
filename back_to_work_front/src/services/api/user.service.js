@@ -22,11 +22,23 @@ class UserService {
   }
 
   update(route, data, id) {
-    return api.put(`${route}/${id}`, data);
+    const config = {}
+    
+    if (data instanceof FormData) {
+      config.headers = {
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+
+    return api.put(`${route}/${id}`, data, config)
+
+  }
+  delete(route, data) {
+    return api.delete(route, data, config)
   }
 
-  delete(route, data) {
-    return api.delete(route, data)
+  updateForm(route, data, userId) {
+    return api.post(`${route}/${userId}`, data);
   }
 }
 

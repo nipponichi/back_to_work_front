@@ -1,6 +1,5 @@
 <template>
   <div v-if="route.path !== '/'" class="bg-gray-800 p-4 min-h-54 flex flex-col md:flex-row items-center md:justify-between space-y-4 md:space-y-0">
-    <!-- Links -->
     <ul class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 list-none items-center">
       <li>
         <RouterLink to="/" class="px-5 py-2.5 flex items-center justify-center text-white bg-transparent hover:bg-transparent rounded-lg text-base font-medium transition-all duration-300 border border-white/20 hover:border-transparent shadow-sm hover:shadow-md backdrop-blur-sm">
@@ -8,7 +7,7 @@
         </RouterLink>
       </li>
       <li>
-        <RouterLink to="/servicios" class="px-5 py-2.5 flex items-center justify-center text-white bg-transparent hover:bg-transparent rounded-lg text-base font-medium transition-all duration-300 border border-white/20 hover:border-transparent shadow-sm hover:shadow-md backdrop-blur-sm">
+        <RouterLink to="/service" class="px-5 py-2.5 flex items-center justify-center text-white bg-transparent hover:bg-transparent rounded-lg text-base font-medium transition-all duration-300 border border-white/20 hover:border-transparent shadow-sm hover:shadow-md backdrop-blur-sm">
           Servicios
         </RouterLink>
       </li>
@@ -18,8 +17,6 @@
         </RouterLink>
       </li>
     </ul>
-
-    <!-- Social Icons -->
     <div class="flex space-x-4">
       <a href="https://facebook.com" target="_blank"
          class="text-gray-400 hover:text-blue-500 transform hover:scale-110 transition-transform transition-colors duration-300">

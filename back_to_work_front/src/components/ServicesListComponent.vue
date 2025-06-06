@@ -131,13 +131,43 @@
                 :value="filteredAds"
                 :paginator="true"
                 :rows="10"
-                :rowClassName="rowClassName"
                 sortMode="single"
                 dataKey="id"
                 tableClass="min-w-full table-auto bg-slate-800 text-white"
                 class="w-full cursor-pointer"
                 @row-click="onRowClick"
               >
+                <Column
+                  v-if="user?.is_pro"
+                  field="user_name"
+                  header="Usuario"
+                  sortable
+                  headerClass="bg-blue-900/50 text-white font-bold w-64"
+                  bodyClass="align-middle px-2 py-3 text-white w-64"
+                >
+                  <template #body="{ data }">
+                    <div class="flex items-center gap-3 group">
+                      <img
+                        :src="getUserImage(data.user)"
+                        alt="Usuario"
+                        class="w-14 h-14 rounded-full object-cover"
+                      />
+                      <div class="flex items-center">
+                        <span class="font-medium cursor-default">
+                          {{ data.user.user_name }}
+                        </span>
+                        <button
+                          @click.stop="openUserstats(data.user)"
+                          class="text-xs font-bold text-blue-400 bg-transparent cursor-pointer hover:text-blue-300 hover:underline transition"
+                          title="Ver valoraciones"
+                        >
+                          ({{ data.user.user_stat?.length ?? 0 }})
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                </Column>
+
                 <Column
                   field="name"
                   header="Nombre"
@@ -268,44 +298,102 @@
                 </Column>
               </DataTable>
               </div>
-                <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div
-                    v-for="ad in filteredAds"
-                    :key="ad.id"
-                    class="bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-lg border border-white/20 hover:shadow-xl transition relative"
+              <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div
+                v-for="ad in filteredAds"
+                :key="ad.id"
+                @click="onRowClick({ data: ad })"
+                class="relative group flex flex-col justify-between cursor-pointer h-full rounded-2xl border border-white/10 bg-blue-950 overflow-hidden shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
+              >
+              
+                <div
+                  class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 brightness-75"
+                  :style="{ backgroundImage: `url(${getAdImage(ad.pictures)})` }"
+                ></div>
+
+                <div class="absolute inset-0 bg-black/65 group-hover:bg-black/85 backdrop-blur-sm transition-all duration-300"></div>
+
+                <div class="relative z-10 flex flex-col h-full p-6 sm:p-8 text-white">
+
+                <div v-if="!user?.is_pro" class="mb-4">
+                  <span
+                    :class="[
+                      'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-sm',
+                      getAdStatusClass(ad)
+                    ]"
                   >
-                    <button
-                      v-if="!user.is_pro"
-                      @click="deleteAd(ad.id)"
-                      :disabled="hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done"
-                      class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full transition cursor-pointer"
-                      :class="{
-                        'bg-gray-400 cursor-not-allowed': hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done,
-                        'bg-red-600/20 hover:bg-red-600 group': !(hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done)
-                      }"
-                      :title="(hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done) ? 'No se puede eliminar este anuncio' : 'Eliminar anuncio'"
+                    <i v-if="getAdStatusLabel(ad) === 'Completado'" class="pi pi-check-circle"></i>
+                    <i v-else-if="getAdStatusLabel(ad) === 'En negociación'" class="pi pi-comments"></i>
+                    <i v-else class="pi pi-info-circle"></i>
+                    {{ getAdStatusLabel(ad) }}
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-4 border-b border-white/10 pb-4 mb-4">
+                  <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-600 shadow-md">
+                    <img
+                      :src="getUserImage(ad.user)"
+                      class="w-full h-full object-cover"
+                      alt="Usuario"
+                    />
+                  </div>
+                  <div class="flex flex-col">
+                    <span
+                      class="text-white font-semibold text-base cursor-pointer flex items-center gap-2"
+                      @click.stop="openUserstats(ad.user)"
+                      title="Ver valoraciones"
                     >
-                      <i class="pi pi-trash"
-                        :class="[
-                          'text-base transition',
-                          hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done
-                            ? 'text-gray-300'
-                            : 'text-red-500 group-hover:text-white'
-                        ]"></i>
-                    </button>
-                    <h3 class="text-lg font-bold text-white mb-2">{{ ad.name }}</h3>
-                    <p class="text-blue-200 mb-2 truncate">{{ ad.description }}</p>
-                    <p class="text-sm text-blue-300 mb-2">{{ getCategoryName(ad.category_id) }}</p>
-                    <p class="text-sm text-blue-300 mb-4">{{ ad.location }}</p>
-                    <button
-                      @click="onRowClick({ data: ad })"
-                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition w-full"
-                    >
-                      Ver detalles
-                    </button>
+                      {{ ad.user?.user_name }}
+                      <span class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20">
+                        ★ {{ ad.user.user_stat?.length || 0 }}
+                      </span>
+                    </span>
                   </div>
                 </div>
 
+                <div class="flex-grow">
+                  <h3 class="text-2xl font-extrabold text-white mb-2 truncate leading-tight">
+                    {{ ad.name }}
+                  </h3>
+
+                  <p class="text-base text-blue-100 mb-3 line-clamp-3 min-h-[3.6em]">
+                    {{ ad.description }}
+                  </p>
+
+                  <p class="text-xs inline-block mb-2 px-3 py-1 bg-blue-800/60 text-white rounded-full font-medium">
+                    {{ getCategoryName(ad.category_id) }}
+                  </p>
+
+                  <p class="text-sm text-blue-200 mb-1">
+                    <i class="pi pi-map-marker mr-1 text-blue-400"></i>
+                    {{ ad.location }}
+                  </p>
+
+                  <p class="text-sm text-blue-200 mb-1">
+                    <i class="pi pi-calendar mr-1 text-blue-400"></i>
+                    Fecha límite:
+                    <span class="font-medium">
+                      {{ ad.due_date ? formatDate(ad.due_date) : 'Sin fecha límite' }}
+                    </span>
+                  </p>
+
+                  <div class="min-h-[2rem] mt-2">
+                    <template v-if="isDueSoon(ad.due_date)">
+                      <span class="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                        Próximo
+                      </span>
+                    </template>
+                    <template v-if="isOverdue(ad.due_date)">
+                      <span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                        Atrasado
+                      </span>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            </div>
             </div>
         </div>
     </main>
@@ -336,6 +424,7 @@
             :id="selectedId" 
             @close-ad-detail="openAdDetailModal = false" 
             @payment-success="handlePaymentSuccess"
+            @updateAd="updateAd"
           />
         </div>
       </div>
@@ -394,6 +483,25 @@
       </div>
     </div>
   </div>
+  <div v-if="openUserstatsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+        <h3 class="text-lg leading-6 font-semibold text-white">
+          Sobre este usuario
+        </h3>
+        <button @click="openUserstatsModal = false"
+                class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6 max-h-[80vh] overflow-y-auto">
+        <UserRatingComponent :user="selectedUser" />
+      </div>
+    </div>
+  </div>
 </div>
 </template>
 
@@ -408,9 +516,11 @@ import Dialog from 'primevue/dialog';
 import { useToast } from 'vue-toastification';
 import UserService from '../services/api/user.service';
 import AdRatingComponent from '../modals/AdRatingComponent.vue';
+import UserRatingComponent from '../modals/UserRatingComponent.vue';
 
 export default {
   components: {
+    UserRatingComponent,
     AdDetailComponent,
     AdsFormComponent,
     InputText,
@@ -422,7 +532,9 @@ export default {
   },
   data() {
     return {
-      viewMode: 'cards',
+      openUserstatsModal: false,
+      selectedUser: null,
+      viewMode: this.user?.is_pro ? 'cards' : 'lists',
       showAdDetailModal: false,
       searchQuery: '',
       loading: true,
@@ -445,9 +557,13 @@ export default {
       selectedCategory: '',
       selectedFromDate: '',
       selectedToDate: '',
+      baseImgUrl: import.meta.env.VITE_IMG_URL,
     };
   },
 computed: {
+  onImageError(ad) {
+    console.error('Imagen no cargada para el anuncio:', ad.id, this.getAdImage(ad.pictures));
+  },
   filteredAds() {
     return this.ads.filter(ad => {
       const matchesQuery =
@@ -488,8 +604,40 @@ mounted: async function() {
   } else {
     await this.fetchAds();
   }
+  console.log(this.filteredAds);
 },
+
 methods: {
+  getAdImage(pictures) {
+    const fallback = 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
+    if (!pictures || !pictures.length) return fallback;
+    console.log(pictures);
+    const imagePath = pictures[0].path;
+    console.log('Imagen del anuncio:', this.baseImgUrl+imagePath);
+    return  `${this.baseImgUrl}${imagePath}`;
+  },
+  getUserImage(user) {
+    const fallback = 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
+    if (!user || !user.image) return fallback;
+    console.log(user.image);
+    return `${this.baseImgUrl}/${user.image}`;
+  },
+  openUserstats(user) {
+    this.selectedUser = user;
+    console.log(this.selectedUser);
+    this.openUserstatsModal = true;
+  },
+  updateAd(ad) {
+    const index = this.ads.findIndex(a => a.id === ad.id);
+    if (index !== -1) {
+      this.ads.splice(index, 1, ad);
+      this.toast.success('Anuncio actualizado con éxito');
+    } else {
+      this.ads.unshift(ad);
+      this.toast.success('Anuncio creado con éxito');
+    }
+    this.openAdDetailModal = false;
+  },
   switchToList() {
     this.viewMode = 'list';
     console.log('Modo cambiado a:', this.viewMode);
@@ -560,7 +708,6 @@ methods: {
       try {
         const response = await UserService.get("provinces");
         this.provinces = response.data.data;
-        console.log(this.provinces)
       } catch (error) {
         console.error('Error fetching provinces:', error);
       }
@@ -607,10 +754,11 @@ methods: {
     },
     async fetchAds() {
       try {
-        this.loading = true;
+        this.loading = true;1
         const response = await UserService.get("ads");
         if (response.data.success) {
           this.ads = response.data.data;
+          console.log(this.ads);
         }
       } catch (error) {
         console.error("Error fetching ads:", error);
@@ -649,9 +797,6 @@ methods: {
       const today = new Date();
       return dueDate < today;
     },
-    rowClassName(rowData) {
-      return 'custom-row-class';
-    }
   }
 };
 </script>
@@ -671,4 +816,5 @@ methods: {
   background-color: #1e293b;
   color: white;
 }
+
 </style>
