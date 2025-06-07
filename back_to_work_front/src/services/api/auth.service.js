@@ -19,6 +19,10 @@ class AuthService {
     }
   }
 
+  delete(route, data) {
+    return api.delete(`${route}/${ data }`)
+  }
+
   logout(accessToken) {
     return api.post('/logout', {}, {
       headers: {

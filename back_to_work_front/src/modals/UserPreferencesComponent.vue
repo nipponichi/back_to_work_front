@@ -108,8 +108,14 @@
 
     <div class="mt-10 flex justify-end space-x-4">
       <button
+        @click="deleteUser"
+        class="px-6 py-3 bg-gradient-to-r cursor-pointer from-purple-600 to-red-600 text-white font-semibold rounded-lg shadow-lg hover:from-purple-700 hover:to-red-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+      >
+        Eliminar Cuenta
+      </button>
+      <button
         @click="updateUser"
-        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+        class="px-6 py-3 bg-gradient-to-r cursor-pointer from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
       >
         Guardar Cambios
       </button>
@@ -174,6 +180,11 @@
       }
     },
     methods: {
+      
+      deleteUser() {
+        this.$emit('deleteUser', this.user.id);
+      },
+
       addImage() {
         this.$refs.fileInput.click();
       },

@@ -35,6 +35,10 @@
                         class="hidden md:block bg-green-500 hover:bg-green-700 transition py-2 px-4 rounded-full text-white">
               Mis Trabajos
             </RouterLink>
+            <RouterLink v-if="user.roles[0].name==='admin'" to="/admin"
+                        class="hidden md:block bg-orange-500 hover:bg-orange-700 transition py-2 px-4 rounded-full text-white">
+              Administración
+            </RouterLink>
             <div class="flex items-center text-white text-sm leading-none">
               <button
                 @click="preferences"
@@ -92,7 +96,6 @@
       </div>
     </div>
 
-    <transition name="fade">
       <div v-if="isMobileMenuOpen" class="md:hidden bg-white/90 backdrop-blur-md shadow-lg rounded-b-lg p-4 space-y-3">
         <RouterLink to="/" class="block text-gray-800 hover:text-blue-500 transition">Inicio</RouterLink>
         <RouterLink to="/service" class="block text-gray-800 hover:text-blue-500 transition">{{ user?.is_pro ? 'Servicios' : 'Proyectos' }}</RouterLink>
@@ -118,7 +121,6 @@
           </RouterLink>
         </template>
       </div>
-    </transition>
   </nav>
 
   <div v-if="openUserPreferencesModal" class="fixed z-50 inset-0 overflow-y-auto">
@@ -126,9 +128,7 @@
       <div class="fixed inset-0 transition-opacity" aria-hidden="true">
         <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
       </div>
-
       <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
       <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
         <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
           <h3 class="text-lg leading-6 font-semibold text-white">
@@ -141,9 +141,8 @@
             </svg>
           </button>
         </div>
-
         <div class="p-6">
-          <UserPreferencesComponent :user="user" />
+          <UserPreferencesComponent :user="user" @deleteUser="deleteUser"/>
         </div>
       </div>
     </div>
@@ -210,7 +209,7 @@ export default {
   computed: {
     userImage() {
       console.log(`${import.meta.env.VITE_IMG_URL}/${this.user.image}`);
-      return this.user.image && this.user.image.trim() !== ''
+      return this.user?.image && this.user?.image.trim() !== ''
         ? `${import.meta.env.VITE_IMG_URL}/${this.user.image}`
         : 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
     },
@@ -234,6 +233,23 @@ export default {
   },
 
   methods: {
+    async deleteUser(id) {
+      console.log("Eliminando usuario con ID:", id);
+      try {
+        this.openUserPreferencesModal = false;
+        const response = await AuthService.delete('users', id);
+        console.log("Respuesta de eliminación:", response);
+        if (response.data.success) {
+          this.logout();
+          this.toast.success("Cuenta de usuario eliminada correctamente");
+        } else {
+          this.toast.error("Error al eliminar la cuenta de usuario");
+        }
+      } catch (error) {
+        this.toast.error("Error al eliminar el usuario");
+      }
+
+    },
     toggleDropdown() {
       this.isOpen = !this.isOpen;
     },

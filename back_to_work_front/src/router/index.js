@@ -9,23 +9,27 @@ import LoginFormComponent from "../components/LoginFormComponent.vue";
 import VerifyEmailComponent from "../components/VerifyEmailComponent.vue";
 import ResetPasswordFormComponent from "../components/ResetPasswordFormComponent.vue";
 import WorksView from "../views/WorksView.vue";
+import AdminView from "../views/AdminView.vue";
 import ResetPasswordView from "../views/ResetPasswordView.vue";
 
 const routes = [
     { path: '/', component: HomeView, name: 'home' },
-    { path: '/about', component: AboutView,  name: 'about', meta: { requiresAuth: true }},
-    { path: '/password-reset', component: ResetPasswordView,  name: 'resetPass'},
-    { path: '/contact', component: ContactView,  name: 'contact'},
-    { path: '/service', component: ServicesView,  name: 'service', meta: { requiresAuth: true }},
     { path: '/login', component: LoginFormComponent,  name: 'login'},
     { path: '/register', component: RegisterFormComponent,  name: 'register'},
+    { path: '/contact', component: ContactView,  name: 'contact'},
+    { path: '/password-reset', component: ResetPasswordView,  name: 'resetPass'},
+
     { path: '/verify-email', component: VerifyEmailComponent, 
       props: (route) => ({id: route.query.id, hash: route.query.hash, signature: route.query.signature}),
       name: 'verify-email'},
     { path: '/reset-password', component: ResetPasswordFormComponent,
       props: (route) => ({ token: route.query.token, email: decodeURIComponent(route.query.email)}),
-      name: 'reset-password', meta: {requiresAuth: false }},
-    { path: '/work', component:WorksView, name: 'work'}
+      name: 'reset-password'},
+
+    { path: '/about', component: AboutView,  name: 'about', meta: { requiresAuth: true }},
+    { path: '/service', component: ServicesView,  name: 'service', meta: { requiresAuth: true }},
+    { path: '/work', component:WorksView, name: 'work', meta: { requiresAuth: true }},
+    { path: '/admin', component:AdminView, name: 'admin', meta: { requiresAuth: true }}
 ]
 
 const router = createRouter({

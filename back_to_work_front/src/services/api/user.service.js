@@ -34,7 +34,7 @@ class UserService {
 
   }
   delete(route, data) {
-    return api.delete(route, data, config)
+    return api.delete(`${route}/${data}`)
   }
 
   updateForm(route, data, userId) {

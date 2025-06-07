@@ -9,6 +9,9 @@ import Aura from '@primeuix/themes/aura';
 import 'primeicons/primeicons.css'
 import Tooltip from 'primevue/tooltip';
 import './style.css'
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
 
 
 const app = createApp(App)

@@ -77,7 +77,7 @@ export default {
         const response = await AuthService.login(this.email, this.password);
         if (response.data.success) {
           this.toast.success("Inicio de sesión exitoso");
-          
+          console.log("Login successful:", response.data);
           const tokenExpiration = Date.now() + 2 * 3600 * 1000;
           localStorage.setItem("tokenExpiration", tokenExpiration);
           localStorage.setItem("token", response.data.data.accessToken);
