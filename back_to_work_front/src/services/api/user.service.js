@@ -1,4 +1,5 @@
 import api from '../http-common'
+import toast from '../toast.js'
 
 class UserService {
   get(route) {
