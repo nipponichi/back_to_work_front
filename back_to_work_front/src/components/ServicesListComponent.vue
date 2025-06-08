@@ -162,7 +162,7 @@
                           <span
                             class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20"
                           >
-                            ★ {{ data.user.user_stat?.length || 0 }}
+                            ★ {{ data.user?.user_stat?.length || 0 }}
                           </span>
                         </span>
 
@@ -187,15 +187,26 @@
                     </div>
                   </template>
                 </Column>
-
                 <Column
                   field="name"
                   header="Nombre"
                   sortable
                   headerClass="bg-blue-900/50 text-white font-bold"
                   bodyClass="align-middle px-2 py-3 text-blue-900 font-semibold"
-                />
-
+                >
+                  <template #body="slotProps">
+                    <div class="flex items-center gap-x-2">
+                      <p class="whitespace-nowrap">{{ slotProps.data.name }}</p>
+                      <span
+                        title="Anuncio oculto en espera de validación"
+                        v-if="!slotProps.data.is_verified"
+                        class="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800"
+                      >
+                        En verificación
+                      </span>
+                    </div>
+                  </template>
+                </Column>
                 <Column
                   field="description"
                   header="Descripción"
@@ -316,6 +327,30 @@
                     </button>
                   </template>
                 </Column>
+                <Column
+                  v-if="user?.is_pro"
+                  header="Acciones"
+                  headerClass="font-bold"
+                  bodyClass="align-middle hover:bg-transparent text-center"
+                >
+                  <template #body="slotProps">
+                    <button 
+                      @click="openClaimModal(slotProps.data?.user, slotProps.data?.id)"
+                      class="group p-0 bg-transparent cursor-pointer"
+                      title="Reclamar anuncio"
+                      text
+                      rounded
+                    >
+                      <div
+                        class="w-9 h-9 flex items-center justify-center text-transparent bg-transparent outline transition-all duration-200"
+                      >
+                        <i class="pi pi-exclamation-triangle text-yellow-500 hover:text-yellow-900 text-lg transition-all duration-200" 
+                                                @click="openClaimModal(slotProps.data?.user, slotProps.data?.id)"
+                        ></i>
+                      </div>
+                    </button>
+                  </template>
+                </Column>
               </DataTable>
               </div>
               <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -332,10 +367,37 @@
                 ></div>
 
                 <div class="absolute inset-0 bg-black/65 group-hover:bg-black/85 backdrop-blur-sm transition-all duration-300"></div>
-
+                <button
+                  v-if="!user?.is_pro"
+                  @click.stop="deleteAd(ad.id)"
+                  :disabled="hasPaidOffer(ad) || ad?.pro_is_done || ad?.customer_is_done"
+                  :title="(hasPaidOffer(ad) || ad.pro_is_done || ad.customer_is_done) ? 'No se puede eliminar este anuncio' : 'Eliminar anuncio'"
+                  class="absolute cursor-pointer top-3 right-3 z-20 rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                  :class="{
+                    'bg-gray-400 cursor-not-allowed': hasPaidOffer(ad) || ad?.pro_is_done || ad?.customer_is_done,
+                    'bg-red-600 hover:bg-red-700': !(hasPaidOffer(ad) || ad?.pro_is_done || ad?.customer_is_done)
+                  }"
+                >
+                  <i
+                    class="pi pi-times text-sm"
+                    :class="{
+                      'text-gray-300': hasPaidOffer(ad) || ad?.pro_is_done || ad?.customer_is_done,
+                      'text-white': !(hasPaidOffer(ad) || ad?.pro_is_done || ad?.customer_is_done)
+                    }"
+                  ></i>
+                </button>
                 <div class="relative z-10 flex flex-col h-full p-6 sm:p-8 text-white">
+                  <div v-if="!ad.is_verified" class="mb-4">
+                  <span
+                    title="Anuncio oculto en espera de validación"
+                    class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 uppercase tracking-wide shadow-sm"
+                  >
+                    <i class="pi pi-clock"></i>
+                    En verificación
+                  </span>
+                </div>
 
-                <div v-if="!user?.is_pro" class="mb-4">
+                <div v-if="!user?.is_pro && ad.is_verified" class="mb-4">
                   <span
                     :class="[
                       'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-sm',
@@ -365,7 +427,7 @@
                     >
                       {{ ad.user?.user_name }}
                       <span class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20">
-                        ★ {{ ad.user.user_stat?.length || 0 }}
+                        ★ {{ ad.user?.user_stat?.length || 0 }}
                       </span>
                     </span>
 
@@ -540,6 +602,41 @@
       </div>
     </div>
   </div>
+
+      <Teleport to="body">
+      <div v-if="openClaimsFormModal" class="fixed z-[60] inset-0 overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+          <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+          </div>
+          <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+          <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 
+                      rounded-lg text-left overflow-hidden shadow-xl transform transition-all 
+                      sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+              <h3 class="text-lg leading-6 font-semibold text-white">
+                Crear Reclamación
+              </h3>
+              <button @click="openClaimsFormModal = false"
+                      class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="p-6">
+              <ClaimsFormComponent
+                :receiver="selectedReceiver"
+                :ad_id="selectedAdId"
+                @update:visible="openClaimsFormModal = $event"
+                @claim-created="onClaimCreated"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 </div>
 </template>
 
@@ -549,52 +646,64 @@ import AdsFormComponent from "../modals/AdsFormComponent.vue";
 import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
 import { useToast } from 'vue-toastification';
 import UserService from '../services/api/user.service';
 import AdRatingComponent from '../modals/AdRatingComponent.vue';
 import UserRatingComponent from '../modals/UserRatingComponent.vue';
+import ClaimsFormComponent from '../modals/ClaimsFormComponent.vue';
 
 export default {
   components: {
     UserRatingComponent,
     AdDetailComponent,
     AdsFormComponent,
+    ClaimsFormComponent,
     InputText,
     DataTable,
     Column,
+    Button,
     Tag,
     Dialog,
-    AdRatingComponent
+    AdRatingComponent,
   },
   data() {
     return {
-      openUserstatsModal: false,
-      selectedUser: null,
-      viewMode: 'cards',
+      openClaimsFormModal: false,
       showAdDetailModal: false,
+      openUserstatsModal: false,
+      openCreateAdModal: false,
+      openAdDetailModal: false,
+      showRatingModal: false,
+
+      selectedReceiver: null,
+      selectedAdId: null,
+      selectedProvince: '',
+      selectedCategory: '',
+      selectedFromDate: '',
+      selectedToDate: '',
+      selectedUser: null,
+      
+      viewMode: 'cards',
+
       searchQuery: '',
       loading: true,
       sortField: null,
       sortOrder: null,
+      
       ads: [],
       provinces: [],
       categories: [],
-      openCreateAdModal: false,
-      openAdDetailModal: false,
+
       selectedCategory: null,
       statusFilter: null,
       toast: useToast(),
       selectedId: '',
       user: null,
-      accessToken: null,
-      showRatingModal: false,
       adToRate: null,
-      selectedProvince: '',
-      selectedCategory: '',
-      selectedFromDate: '',
-      selectedToDate: '',
+
       baseImgUrl: import.meta.env.VITE_IMG_URL,
     };
   },
@@ -630,7 +739,6 @@ computed: {
   },
 },
 mounted: async function() {
-  this.accessToken = localStorage.getItem("token");
   let userStr = localStorage.getItem("user");
   this.user = JSON.parse(userStr);
   await this.fetchCategories();
@@ -646,10 +754,19 @@ mounted: async function() {
 },
 
 methods: {
+  openClaimModal(receiver, adId) {
+    this.selectedReceiver = receiver;
+    this.selectedAdId = adId;
+    this.openClaimsFormModal = true;
+  },
+  onClaimCreated() {
+    this.openClaimsFormModal = false;
+    this.fetchClaims?.();
+  },
   averageRating(user) {
     if (!user?.user_stat?.length) return 0
-    const total = user.user_stat.reduce((sum, s) => sum + s.rating, 0)
-    return total / user.user_stat.length
+    const total = user?.user_stat.reduce((sum, s) => sum + s.rating, 0)
+    return total / user?.user_stat.length
   },
   getAdImage(pictures) {
     const fallback = 'https://cdn-icons-png.freepik.com/512/7445/7445622.png';
@@ -659,8 +776,8 @@ methods: {
   },
   getUserImage(user) {
     const fallback = 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
-    if (!user || !user.image) return fallback;
-    return `${this.baseImgUrl}/${user.image}`;
+    if (!user || !user?.image) return fallback;
+    return `${this.baseImgUrl}/${user?.image}`;
   },
   openUserstats(user) {
     this.selectedUser = user;
@@ -725,7 +842,7 @@ methods: {
     }
 
     try {
-      const response = await UserService.delete(`ads/${adId}`);
+      const response = await UserService.delete('ads' , adId);
       if (response.data.success) {
         this.ads = this.ads.filter(ad => ad.id !== adId);
         this.toast.success('Anuncio eliminado con éxito');
@@ -737,6 +854,7 @@ methods: {
       this.toast.error('Error al eliminar el anuncio');
     }
   },
+
     handleAdCreated(newAd) {
       console.log(newAd)
       this.ads.unshift(newAd);
@@ -808,7 +926,7 @@ methods: {
     async fetchMyAds() {
       try {
         this.loading = true;
-        const response = await UserService.show("getAdsByUser", this.user.id);
+        const response = await UserService.show("getAdsByUser", this.user?.id);
         if (response.data.success) {
           this.ads = response.data.data;
           console.log(this.ads)

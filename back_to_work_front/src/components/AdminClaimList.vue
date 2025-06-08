@@ -21,7 +21,7 @@
         <template #body="slotProps">
           <span v-if="slotProps.data.ad">[Anuncio] ({{ slotProps.data.ad.id }})</span>
           <span v-else-if="slotProps.data.bid">[Oferta] ({{ slotProps.data.bid.id }})</span>
-          <span v-else-if="slotProps.data.userStat">[Valoración] ({{ slotProps.data.userStat.id }})</span>
+          <span v-else-if="slotProps.data.user_stat">[Valoración] ({{ slotProps.data.user_stat.id }})</span>
         </template>
       </Column>
 
@@ -46,9 +46,18 @@
         <template #body="slotProps">
           <Button icon="pi pi-pencil" class="p-button p-button-sm mr-2" @click="editClaim(slotProps.data)" />
           <Button icon="pi pi-trash" class="p-button p-button-danger p-button-sm mr-2" @click="deleteClaim(slotProps.data.id)" />
+          <Button icon="pi pi-eye" class="p-button-info p-button-sm mr-2" @click="viewImages(slotProps.data)" v-if="slotProps.data.images?.length" />
         </template>
       </Column>
     </DataTable>
+
+    <Dialog v-model:visible="imagesDialogVisible" header="Imágenes de la Reclamación" :modal="true" class="w-[40rem]">
+      <div class="flex flex-wrap gap-4 justify-start text-black">
+        <div v-for="(img, i) in selectedClaimImages" :key="i" class="w-32 h-32 border border-gray-300 rounded overflow-hidden">
+          <img :src="getImageUrl(img)" class="w-full h-full object-cover" />
+        </div>
+      </div>
+    </Dialog>
 
     <Dialog v-model:visible="editDialogVisible" header="Editar Reclamación" :modal="true" class="w-[30rem]">
       <div class="flex flex-col gap-4 text-black">
@@ -100,8 +109,11 @@ export default {
     return {
       claims: [],
       selectedClaim: {},
+      selectedClaimImages: [],
       editDialogVisible: false,
-      statuses: ['pending', 'in_review', 'waiting_user', 'resolved', 'rejected', 'escalated']
+      imagesDialogVisible: false,
+      statuses: ['pending', 'in_review', 'waiting_user', 'resolved', 'rejected', 'escalated'],
+      baseImgUrl: import.meta.env.VITE_IMG_URL
     };
   },
   async mounted() {
@@ -114,8 +126,6 @@ export default {
           return 'bg-yellow-500';
         case 'in_review':
           return 'bg-blue-500';
-        case 'waiting_user':
-          return 'bg-indigo-500';
         case 'resolved':
           return 'bg-green-600';
         case 'rejected':
@@ -133,7 +143,15 @@ export default {
         toast.error('Error al cargar las reclamaciones');
       }
     },
-
+    viewImages(claim) {
+      this.selectedClaimImages = claim.images || [];
+      this.imagesDialogVisible = true;
+    },
+    getImageUrl(path) {
+      if (!path) return '';
+      console.log(this.baseImgUrl)
+      return `${this.baseImgUrl + '/' + path}`;
+    },
     editClaim(claim) {
       this.selectedClaim = { ...claim };
       this.editDialogVisible = true;

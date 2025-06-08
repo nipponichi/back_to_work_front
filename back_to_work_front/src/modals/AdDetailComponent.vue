@@ -146,20 +146,21 @@
                 v-if="data.is_paid"
                 icon="pi pi-exclamation-triangle"
                 class="p-button-text p-button-warn"
-                @click="reportWork(data.id)"
-                v-tooltip="'Reportar problema'"
+                @click="openClaim(data?.id, data?.user)"
+                title="'Reportar problema'"
               />
               <Button
                 v-if="data.is_paid && ((user?.is_pro && adData.pro_is_done !== 1) || (!user?.is_pro && adData.pro_is_done === 1 && adData.customer_is_done !== 1))"
                 icon="pi pi-check"
                 class="p-button-text p-button-success hover:bg-green-100"
                 @click="markAsDone(adData.id)"
-                v-tooltip="user?.is_pro ? 'Marcar como completado' : 'Confirmar finalización'"
+                title="user?.is_pro ? 'Marcar como completado' : 'Confirmar finalización'"
               />
               <Button 
                 v-if="user && data.user && data.user.id === user.id && !data.is_paid"
                 icon="pi pi-trash" 
-                class="p-button-text p-button-danger" 
+                class="p-button-text p-button-danger"
+                title="Eliminar oferta"
                 @click="removeBid(data.id)"
               />
               <Button
@@ -167,7 +168,7 @@
                 icon="pi pi-comment" 
                 class="p-button-text p-button-danger" 
                 @click="openChat(data.user)"
-                v-tooltip="'Iniciar chat'"
+                title="Iniciar chat"
               />
               <Button 
                 v-if="!user.is_pro && !paidbid.is_paid"
@@ -207,7 +208,6 @@
       </div>
     </div>
 
-
     <Dialog
       v-model:visible="showRatingModal"
       header="Valora este anuncio"
@@ -240,44 +240,49 @@
       </div>
     </div>
 
-    <div 
-      v-if="lightbox.isOpen" 
-      class="fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center p-4"
-      @click.self="lightbox.isOpen = false"
-    >
-      <button
-        @click="lightbox.isOpen = false"
-        class="absolute top-6 right-6 text-white bg-gray-800 text-4xl z-[10000] hover:bg-gray-600 transition-colors focus:outline-none"
-        aria-label="Cerrar lightbox"
+    <Teleport to="body">
+      <div 
+        v-if="lightbox.isOpen" 
+        class="fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center p-4"
+        @click.self="lightbox.isOpen = false"
       >
-        &times;
-      </button>
+        <button
+          @click="lightbox.isOpen = false"
+          class="absolute top-6 right-6 text-white bg-gray-800 text-4xl z-[10000] hover:bg-gray-600 transition-colors focus:outline-none"
+          aria-label="Cerrar lightbox"
+        >
+          &times;
+        </button>
 
-      <div class="relative w-full max-w-6xl h-full flex items-center justify-center">
-        <img 
-          :src="baseImgUrl + adData.pictures[lightbox.currentIndex].path" 
-          class="max-h-[90vh] max-w-full object-contain"
-          :alt="'Imagen ' + (lightbox.currentIndex + 1) + ' de ' + adData.name"
-        >
-        <button
-          @click.stop="prevImage"
-          class="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
-          aria-label="Imagen anterior"
-        >
-          &larr;
-        </button>
-        <button
-          @click.stop="nextImage"
-          class="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
-          aria-label="Imagen siguiente"
-        >
-          &rarr;
-        </button>
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white text-lg px-4 py-2 rounded-full">
-          Imagen {{ lightbox.currentIndex + 1 }} de {{ adData.pictures.length }}
+        <div class="relative w-full max-w-6xl h-full flex items-center justify-center">
+          <img 
+            :src="baseImgUrl + adData.pictures[lightbox.currentIndex].path" 
+            class="max-h-[90vh] max-w-full object-contain"
+            :alt="'Imagen ' + (lightbox.currentIndex + 1) + ' de ' + adData.name"
+          />
+          
+          <button
+            @click.stop="prevImage"
+            class="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
+            aria-label="Imagen anterior"
+          >
+            &larr;
+          </button>
+          <button
+            @click.stop="nextImage"
+            class="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 hover:bg-gray-700 text-white text-2xl font-bold rounded-full w-12 h-12 flex items-center justify-center transition-all"
+            aria-label="Imagen siguiente"
+          >
+            &rarr;
+          </button>
+
+          <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white text-lg px-4 py-2 rounded-full">
+            Imagen {{ lightbox.currentIndex + 1 }} de {{ adData.pictures.length }}
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
+
     <div v-if="openAdRatingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
         <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
@@ -297,6 +302,40 @@
         </div>
       </div>
     </div>
+          <Teleport to="body">
+      <div v-if="openClaimModal" class="fixed z-[60] inset-0 overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+          <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+          </div>
+          <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+          <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 
+                      rounded-lg text-left overflow-hidden shadow-xl transform transition-all 
+                      sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+              <h3 class="text-lg leading-6 font-semibold text-white">
+                Crear Reclamación
+              </h3>
+              <button @click="openClaimModal = false"
+                      class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="p-6">
+              <ClaimsFormComponent
+                :receiver="selectedReceiver"
+                :bid_id="selectedBidId"
+                @update:visible="openClaimModal = $event"
+                @claim-created="onClaimCreated"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -311,6 +350,7 @@ import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Tooltip from 'primevue/tooltip';
 import AdRatingComponent from './AdRatingComponent.vue';
+import ClaimsFormComponent from './ClaimsFormComponent.vue';
 
 export default {
   components: {
@@ -320,7 +360,8 @@ export default {
     Button,
     Column,
     Tooltip,
-    AdRatingComponent
+    AdRatingComponent,
+    ClaimsFormComponent
   },
   props: {
     id: {
@@ -352,10 +393,13 @@ export default {
       selectedBid: null,
       isProcessingPayment: false,
       openAdRatingModal: false,
+      openClaimModal: false,
       categories: [],
       paidbid: {},
       sender: null,
-      receiver: null
+      receiver: null,
+      selectedReceiver: null,
+      selectedBidId: null
     };
   },
   async mounted() {
@@ -379,6 +423,14 @@ export default {
   },
 
   methods: {
+    openClaim(bidId, user) {
+      console.log(user)
+      console.log(bidId)
+      this.selectedBidId = bidId
+      this.selectedReceiver = user
+      this.openClaimModal = true
+
+    },
     onRatingSubmitted() {
       this.openAdRatingModal = false;
       this.updateAd(this.adData);

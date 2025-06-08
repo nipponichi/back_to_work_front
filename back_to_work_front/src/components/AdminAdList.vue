@@ -178,7 +178,7 @@ export default {
       selectedAd: {},
       editDialogVisible: false,
       currentImageIndex: 0,
-      baseImgUrl: import.meta.env.VITE_IMG_URL || 'http://localhost:8000/storage/'
+      baseImgUrl: import.meta.env.VITE_IMG_URL
     };
   },
   mounted() {
@@ -273,7 +273,6 @@ export default {
         }
     },
 
-
     async handleImageUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -292,19 +291,19 @@ export default {
     },
     
     async verifyAd(id) {
-    try {
-        const response = await UserService.show('ads/verify', id);
+        try {
+            const response = await UserService.show('ads/verify', id);
 
-        if (response.data.success) {
-        const ad = this.ads.find(ad => ad.id === id);
-        if (ad) {
-            ad.is_verified = !ad.is_verified;
-            toast.success(`Anuncio ${ad.is_verified ? 'verificado' : 'marcado como no verificado'} correctamente`);
+            if (response.data.success) {
+            const ad = this.ads.find(ad => ad.id === id);
+            if (ad) {
+                ad.is_verified = !ad.is_verified;
+                toast.success(`Anuncio ${ad.is_verified ? 'verificado' : 'marcado como no verificado'} correctamente`);
+            }
+            }
+        } catch (error) {
+            toast.error('Error al cambiar el estado de verificación');
         }
-        }
-    } catch (error) {
-        toast.error('Error al cambiar el estado de verificación');
-    }
     }
 
 

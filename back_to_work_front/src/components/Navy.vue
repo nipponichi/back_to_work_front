@@ -27,51 +27,70 @@
             </svg>
           </li>
           <li><RouterLink to="/contact" class="text-white hover:text-blue-300 transition">Contacto</RouterLink></li>
+          	<li v-if="user?.roles?.some(role => role.name === 'admin')" class="text-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" class="w-4 h-4 current-fill" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v0m0 7v0m0 7v0m0-13a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+            </li>
+          <li>
+            <RouterLink
+              v-if="user?.roles?.some(role => role.name === 'admin')"
+              to="/admin"
+              class="block text-white hover:text-blue-300 transition"
+            >
+              Admin
+            </RouterLink>
+          </li>
         </ul>
 
         <div class="flex items-center space-x-2">
           <template v-if="accessToken">
-            <RouterLink v-if="user?.is_pro" to="/work"
-                        class="hidden md:block bg-green-500 hover:bg-green-700 transition py-2 px-4 rounded-full text-white">
-              Mis Trabajos
-            </RouterLink>
-            <RouterLink v-if="user.roles[0].name==='admin'" to="/admin"
-                        class="hidden md:block bg-orange-500 hover:bg-orange-700 transition py-2 px-4 rounded-full text-white">
-              Administración
-            </RouterLink>
-            <div class="flex items-center text-white text-sm leading-none">
+            <div class="relative" ref="userMenuDropdown">
               <button
-                @click="preferences"
+                @click="showUserMenu = !showUserMenu"
                 class="text-white hidden md:inline-flex items-center bg-transparent hover:text-blue-300 transition font-semibold text-base rounded-l-md border border-white/20 px-2 py-1 m-0 cursor-pointer"
-                style="margin-right: 0px; padding-right: 2px;"
               >
                 <div class="w-10 h-10 mr-2 rounded-full overflow-hidden">
-                  <img
-                    :src="userImage"
-                    alt="Usuario"
-                    class="w-full h-full object-cover"
-                  />
+                  <img :src="userImage" alt="Usuario" class="w-full h-full object-cover" />
                 </div>
-                <div class="flex flex-col leading-tight">
-                  <span class="font-semibold">{{ user?.user_name || "Usuario" }}</span>
-                  <span class="text-xs text-blue-200" v-if="user?.user_stat?.length">
-                    {{ averageRating.toFixed(1) }} / 5
-                  </span> 
-                </div>
-              </button> 
-              <button
-                @click="openUserstatsModal = true"
-                class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20"
-                style="margin-left: 0px; padding-left: 2px;"
-              >
-                ★ {{ user?.user_stat?.length || 0 }}
-              </button>
-            </div>
 
-            <button @click="logout"
-                    class="hidden md:block px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition shadow cursor-pointer">
-              Cerrar sesión
-            </button>
+                <div class="flex flex-col leading-tight text-left">
+                  <span
+                    class="text-white font-semibold text-base cursor-pointer flex items-center gap-2"
+                    @click.stop="openUserstatsModal = true"
+                    title="Ver valoraciones"
+                  >
+                    {{ user?.user_name }}
+                    <span class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20">
+                      ★ {{ user?.user_stat?.length || 0 }}
+                    </span>
+                  </span>
+
+                  <span
+                    v-if="user?.user_stat?.length"
+                    class="text-xs mt-1"
+                    :class="{
+                      'text-red-400': averageRating < 3,
+                      'text-amber-400': averageRating >= 3 && averageRating < 4,
+                      'text-green-400': averageRating >= 4
+                    }"
+                  >
+                    Feedback {{ averageRating.toFixed(1) }} / 5
+                  </span>
+                  <span v-else class="text-[0.65rem] text-blue-200 mt-1 italic">
+                    Sin valoraciones
+                  </span>
+                </div>
+              </button>
+              <div
+                v-if="showUserMenu"
+                class="absolute right-0 mt-2 w-56 bg-white/10 backdrop-blur-lg text-white border border-white/20 rounded-xl shadow-lg z-50"
+              >
+                <button @click="editProfile" class="block w-full text-left px-4 py-2 hover:bg-white/20 transition">Perfil</button>
+                <button @click="viewIncidences" class="block w-full text-left px-4 py-2 hover:bg-white/20 transition">Incidencias</button>
+                <button @click="logout" class="block w-full text-left px-4 py-2 hover:bg-white/20 transition text-red-300">Cerrar sesión</button>
+              </div>
+            </div>
           </template>
 
           <template v-else>
@@ -100,6 +119,13 @@
         <RouterLink to="/" class="block text-gray-800 hover:text-blue-500 transition">Inicio</RouterLink>
         <RouterLink to="/service" class="block text-gray-800 hover:text-blue-500 transition">{{ user?.is_pro ? 'Servicios' : 'Proyectos' }}</RouterLink>
         <RouterLink to="/contact" class="block text-gray-800 hover:text-blue-500 transition">Contacto</RouterLink>
+        <RouterLink
+          v-if="user?.roles?.some(role => role.name === 'admin')"
+          to="/admin"
+          class="block text-white hover:text-blue-300 transition"
+        >
+          Admin
+        </RouterLink>
 
         <template v-if="accessToken">
         <div class="px-4 py-2 rounded transition text-gray-800 font-semibold flex justify-between items-center bg-transparent hover:bg-gray-100">
@@ -168,31 +194,60 @@
     </div>
   </div>
 
+    <div v-if="openClaimsModal" class="fixed z-50 inset-0 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+      </div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full">
+        <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+          <h3 class="text-lg leading-6 font-semibold text-white">
+            Incidencias y reclamaciones
+          </h3>
+          <button @click="openClaimsModal = false"
+                  class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="p-6">
+          <ClaimsComponent />
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 </template>
 
 
 <script>
 import AuthService from "../services/api/auth.service";
-import { useToast } from 'vue-toastification';
+import Toast from '../services/toast';
 import UserPreferencesComponent from "../modals/UserPreferencesComponent.vue";
 import UserRatingComponent from "../modals/UserRatingComponent.vue";
+import ClaimsComponent from "../modals/ClaimsComponent.vue";
 
 export default {
   components: {
     UserPreferencesComponent,
-    UserRatingComponent
+    UserRatingComponent,
+    ClaimsComponent,
+    Toast
   },
   data() {
     return {
       openUserPreferencesModal: false,
       openUserstatsModal: false,
+      openClaimsModal: false,
       isOpen: false,
       accessToken: null,
       isMobileMenuOpen: false,
       user: null,
       dropdownMenu: null,
-      toast: useToast()
+      showUserMenu: false
     };
   },
 
@@ -201,10 +256,10 @@ export default {
     let userStr = localStorage.getItem("user");
     this.user = JSON.parse(userStr);
     console.log(this.user);
-    document.addEventListener("click", this.handleClickOutside);
+    document.addEventListener("click", this.handleUserMenuClickOutside);
   },
   beforeUnmount() {
-    document.removeEventListener("click", this.handleClickOutside);
+    document.removeEventListener("click", this.handleUserMenuClickOutside);
   },
   computed: {
     userImage() {
@@ -233,6 +288,20 @@ export default {
   },
 
   methods: {
+    handleUserMenuClickOutside(event) {
+      const dropdown = this.$refs.userMenuDropdown;
+      if (dropdown && !dropdown.contains(event.target)) {
+        this.showUserMenu = false;
+      }
+    },
+    editProfile() {
+      this.openUserPreferencesModal = true,
+      this.showUserMenu = false;
+    },
+    viewIncidences() {
+      this.openClaimsModal = true
+      this.showUserMenu = false;
+    },
     async deleteUser(id) {
       console.log("Eliminando usuario con ID:", id);
       try {
@@ -241,27 +310,16 @@ export default {
         console.log("Respuesta de eliminación:", response);
         if (response.data.success) {
           this.logout();
-          this.toast.success("Cuenta de usuario eliminada correctamente");
+          Toast.success("Cuenta de usuario eliminada correctamente");
         } else {
-          this.toast.error("Error al eliminar la cuenta de usuario");
+          Toast.error("Error al eliminar la cuenta de usuario");
         }
       } catch (error) {
-        this.toast.error("Error al eliminar el usuario");
+        Toast.error("Error al eliminar el usuario");
       }
-
-    },
-    toggleDropdown() {
-      this.isOpen = !this.isOpen;
-    },
-    handleClickOutside(event) {
-      if (this.$refs.dropdownMenu && !this.$refs.dropdownMenu.contains(event.target)) {
-        this.isOpen = false;
-      }
-    },
-    closeDropdown() {
-      this.isOpen = false;
     },
     async logout() {
+      this.showUserMenu = false;
       const response = await AuthService.logout(this.accessToken);
       if (response.data.success) {
         localStorage.removeItem("token");
@@ -271,16 +329,9 @@ export default {
         this.user = null;
 
         this.$router.push("/login");
-        this.toast.success("Logout exitoso");
+        Toast.success("Logout exitoso");
       } else {
-        this.toast.error("Error al cerrar sesión");
-      }
-    },
-    handleAboutClick() {
-      if (this.user && this.user.is_admin) {
-        this.$router.push("/about");
-      } else {
-        this.toast.error("Acceso denegado: Solo administradores.");
+        Toast.error("Error al cerrar sesión");
       }
     },
     async preferences() {
