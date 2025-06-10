@@ -297,10 +297,6 @@ export default {
       this.userImageUrl = URL.createObjectURL(file);
     },
 
-    userImage() {
-      return this.userImageUrl || 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
-    },
-
     capitalize(str) {
       if (!str) return '';
       return str.charAt(0).toUpperCase() + str.slice(1);

@@ -50,58 +50,56 @@
     </div>
 
     <div v-if="user?.is_pro" class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
-  <button
-    @click="openChat(adData.user)"
-    class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-700 transition-all duration-200"
-  >
-    <i class="pi pi-comments mr-2"></i> Chatear con el cliente
-  </button>
-
-  <button
-    @click="toggleBidGrid"
-    class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
-  >
-    <i class="pi pi-plus-circle mr-2"></i> Hacer una oferta
-  </button>
-</div>
-
-  <div v-if="showBidGrid" class="mt-6">
-    <div class="overflow-x-auto bg-blue-900 shadow-md rounded-md">
-      <table class="min-w-full text-sm">
-        <tbody>
-          <tr v-if="showNewBidRow" class="border-b">
-            <td class="px-2 py-2 w-1/3">
-              <input
-                v-model="newBid.bid"
-                type="number"
-                class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
-                placeholder="Monto"
-              />
-            </td>
-            <td class="px-2 py-2 w-1/2">
-              <input
-                v-model="newBid.description"
-                type="text"
-                class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
-                placeholder="Descripción"
-              />
-            </td>
-            <td class="px-2 py-2 w-20 text-center">
-              <button
-                @click="submitNewBid"
-                class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-md text-sm transition"
-                :disabled="isSubmitting"
-              >
-                Añadir
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <button
+        @click="openChat(adData.user)"
+        class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-700 transition-all duration-200"
+      >
+        <i class="pi pi-comments mr-2"></i> Chatear con el cliente
+      </button>
+      <button @click="toggleBidGrid"
+        class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
+      >
+        <i class="pi pi-plus-circle mr-2"></i> Hacer una oferta
+      </button>
     </div>
-  </div>
 
-  <div v-if="bids.length > 0" class="w-full rounded-lg shadow-xl overflow-hidden border border-white/20 mt-6">
+    <div v-if="showBidGrid" class="mt-6">
+      <div class="overflow-x-auto bg-blue-900 shadow-md rounded-md">
+        <table class="min-w-full text-sm">
+          <tbody>
+            <tr v-if="showNewBidRow" class="border-b">
+              <td class="px-2 py-2 w-1/3">
+                <input
+                  v-model="newBid.bid"
+                  type="number"
+                  class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
+                  placeholder="Monto"
+                />
+              </td>
+              <td class="px-2 py-2 w-1/2">
+                <input
+                  v-model="newBid.description"
+                  type="text"
+                  class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
+                  placeholder="Descripción"
+                />
+              </td>
+              <td class="px-2 py-2 w-20 text-center">
+                <button
+                  @click="submitNewBid"
+                  class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-md text-sm transition"
+                  :disabled="isSubmitting"
+                >
+                  Añadir
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div v-if="bids.length > 0" class="w-full rounded-lg shadow-xl overflow-hidden border border-white/20 mt-6">
       <DataTable 
         :value="bids"
         :paginator="true" 
@@ -113,7 +111,6 @@
         responsiveLayout="scroll"
         class="p-datatable-sm shadow-md rounded-md"
       >
-
           <Column field="user.name" header="Usuario" :sortable="true">
             <template #body="{data}">
               <span :class="{'font-semibold': data.is_paid}">
@@ -150,7 +147,7 @@
                   title="Reportar problema"
                 />
                 <Button
-                  v-if="data.is_paid && ((user?.is_pro && adData.pro_is_done !== 1) || (!user?.is_pro && adData.pro_is_done === 1 && adData.customer_is_done !== 1))"
+                  v-if="data.is_paid && ((user?.is_pro && adData.pro_is_done) || (!user?.is_pro && adData.pro_is_done && !adData.customer_is_done))"
                   icon="pi pi-check"
                   class="p-button-text p-button-success hover:bg-green-100"
                   @click="markAsDone(adData.id)"
@@ -184,7 +181,7 @@
             </template>
           </Column>
       </DataTable>
-  </div>
+    </div>
 
     <div v-else-if="user?.is_pro" class="mt-6 p-8 bg-blue-900/20 rounded-lg text-center">
       <p class="text-white text-xl font-semibold mb-2">Sé el primero en hacer una oferta por este proyecto</p>
@@ -549,11 +546,12 @@ export default {
     },
 
     goToPayment(bid) {
-      console.log(bid)
+      console.log(bid);
       this.isProcessingPayment = true;
-
       const paymentUrl = import.meta.env.VITE_PAYMENT_API_URL + '/payment';
-      if (externalUrl.startsWith('http://localhost')) {
+      console.log(paymentUrl);
+
+      if (paymentUrl.startsWith('http://localhost')) {
         const newWindow = window.open(paymentUrl, '_blank');
 
         setTimeout(() => {

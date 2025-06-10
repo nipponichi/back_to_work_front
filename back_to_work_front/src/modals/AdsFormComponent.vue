@@ -117,20 +117,22 @@
         </button>
       </div>
     </form>
-    <div v-if="showVerificationDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-      <div class="bg-gradient-to-br from-blue-950 to-blue-800 text-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 text-center border border-white/20">
-        <h3 class="text-xl font-bold mb-4">Anuncio enviado para revisión</h3>
-        <p class="mb-6 text-blue-200">
-          Tu anuncio ha sido enviado correctamente y será revisado por un administrador en la mayor brevedad posible. Estará oculto para otros usuarios hasta que sea aprobado.
-        </p>
-        <button
-          @click="showVerificationDialog = false"
-          class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-        >
-          Entendido
-        </button>
+    <Teleport to="body">
+      <div v-if="showVerificationDialog" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div class="bg-gradient-to-br from-blue-950 to-blue-800 text-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 text-center border border-white/20">
+            <h3 class="text-xl font-bold mb-4">Anuncio enviado para revisión</h3>
+            <p class="mb-6 text-blue-200">
+              Tu anuncio ha sido enviado correctamente y será revisado por un administrador en la mayor brevedad posible. Estará oculto para otros usuarios hasta que sea aprobado.
+            </p>
+            <button
+              @click="showVerificationDialog = false"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+            >
+              Entendido
+            </button>
+          </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
