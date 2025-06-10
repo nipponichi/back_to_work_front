@@ -5,19 +5,23 @@
     <DataTable :value="claims" dataKey="id" paginator :rows="10" class="p-datatable-sm">
       <Column field="id" header="ID" sortable />
 
-      <Column header="Remitente (ID)">
+      <Column field="user_name" header="Remitente (ID)"
+      sortable>
         <template #body="slotProps">
           {{ slotProps.data.sender?.user_name }} ({{ slotProps.data.sender?.id }})
         </template>
       </Column>
 
-      <Column header="Destinatario (ID)">
+      <Column header="Destinatario (ID)"
+      field="user_name"
+      sortable>
         <template #body="slotProps">
           {{ slotProps.data.receiver?.user_name }} ({{ slotProps.data.receiver?.id }})
         </template>
       </Column>
 
-      <Column header="Origen (ID)">
+      <Column header="Origen (ID)"
+      sortable>
         <template #body="slotProps">
           <span v-if="slotProps.data.ad">[Anuncio] ({{ slotProps.data.ad.id }})</span>
           <span v-else-if="slotProps.data.bid">[Oferta] ({{ slotProps.data.bid.id }})</span>
@@ -25,7 +29,7 @@
         </template>
       </Column>
 
-      <Column field="reason" header="Motivo" />
+      <Column field="reason" sortable header="Motivo" />
       <Column header="Estado" sortable>
         <template #body="slotProps">
           <span
@@ -36,7 +40,7 @@
           </span>
         </template>
       </Column>
-      <Column header="Fecha">
+      <Column header="Fecha" field="created_at" sortable>
         <template #body="slotProps">
           {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
         </template>

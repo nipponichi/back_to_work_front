@@ -2,13 +2,13 @@
 <div class="relative w-full max-w-[1600px] min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 my-20 rounded-2xl mx-auto">
   <div class="flex justify-end mb-4 space-x-2"></div>
 
-    <div class="fixed inset-0 bg-[url('https://appwebel.com/assets/es/img/backgrounds/landing/landing.webp')] bg-cover bg-center opacity-10"></div>
-    <div class="fixed inset-0 bg-blue-950/40"></div>
+    <div class="fixed inset-0 bg-[url('https://appwebel.com/assets/es/img/backgrounds/landing/landing.webp')] bg-cover bg-center opacity-40 blur-sm"></div>
+    <div class="fixed inset-0 bg-blue-900/50"></div>
 
     <main class="relative z-10 pt-8 pb-16 px-4 sm:px-6 lg:px-8">
       <div class="relative mb-6">
         <h2 class="text-2xl sm:text-3xl font-bold text-white inline-block relative z-10">{{ user?.is_pro == 1 ? 'Servicios' : 'Proyectos' }}</h2>
-        <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-900 rounded-full"></div>
+        <div class="h-1 w-full bg-blue-800 rounded-full"></div>
       </div>
 
       <div class="max-w-7xl min-w-full">
@@ -126,7 +126,7 @@
         </div>
 
         <div>
-            <div v-if="viewMode === 'list'" class="w-full rounded-lg shadow-xl overflow-hidden border border-white/20 overflow-x-auto">
+          <div v-if="viewMode === 'list'" class="w-full rounded-lg shadow-xl overflow-hidden border border-white/20 overflow-x-auto">
               <DataTable
                 :value="filteredAds"
                 :paginator="true"
@@ -341,32 +341,26 @@
                       text
                       rounded
                     >
-                      <div
-                        class="w-9 h-9 flex items-center justify-center text-transparent bg-transparent outline transition-all duration-200"
-                      >
+                      <div class="w-9 h-9 flex items-center justify-center text-transparent bg-transparent outline transition-all duration-200">
                         <i class="pi pi-exclamation-triangle text-yellow-500 hover:text-yellow-900 text-lg transition-all duration-200" 
-                                                @click="openClaimModal(slotProps.data?.user, slotProps.data?.id)"
+                          @click="openClaimModal(slotProps.data?.user, slotProps.data?.id)"
                         ></i>
                       </div>
                     </button>
                   </template>
                 </Column>
               </DataTable>
-              </div>
-              <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div
-                v-for="ad in filteredAds"
-                :key="ad.id"
-                @click="onRowClick({ data: ad })"
-                class="relative group flex flex-col justify-between cursor-pointer h-full rounded-2xl border border-white/10 bg-blue-950 overflow-hidden shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
+            </div>
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div v-for="ad in filteredAds" :key="ad.id" @click="onRowClick({ data: ad })"
+                class="relative group flex flex-col justify-between cursor-pointer h-full rounded-2xl outline outline-1 outline-white/10 bg-blue-950 overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:outline-white/0"
               >
-              
                 <div
                   class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 brightness-75"
                   :style="{ backgroundImage: `url(${getAdImage(ad.pictures)})` }"
                 ></div>
 
-                <div class="absolute inset-0 bg-black/65 group-hover:bg-black/85 backdrop-blur-sm transition-all duration-300"></div>
+                <div class="absolute inset-0 bg-black/45 group-hover:bg-black/55 backdrop-blur-sm transition-all duration-300"></div>
                 <button
                   v-if="!user?.is_pro"
                   @click.stop="deleteAd(ad.id)"
@@ -492,127 +486,125 @@
                 </div>
               </div>
             </div>
-
-            </div>
-            </div>
+          </div>
         </div>
+      </div>
     </main>
 
-  <div v-if="openAdDetailModal" class="fixed z-50 inset-0 overflow-y-auto">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+    <div v-if="openAdDetailModal" class="fixed z-50 inset-0 overflow-y-auto">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+          <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+            <h3 class="text-lg leading-6 font-semibold text-white">
+              Detalles del proyecto
+            </h3>
+            <button 
+              @click="openAdDetailModal = false"
+              class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition"
+            >
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="p-6">
+            <AdDetailComponent  
+              :id="selectedId" 
+              @close-ad-detail="openAdDetailModal = false" 
+              @payment-success="handlePaymentSuccess"
+              @updateAd="updateAd"
+            />
+          </div>
+        </div>
       </div>
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-      <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+    </div>
+
+    <div v-if="openCreateAdModal" class="fixed z-50 inset-0 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+          <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+            <h3 class="text-lg leading-6 font-semibold text-white">
+              Creando nuevo proyecto
+            </h3>
+            <button 
+              @click="openCreateAdModal = false"
+              class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition"
+            >
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button> 
+          </div>
+
+          <div class="p-6">
+            <AdsFormComponent 
+              :categories="categories"
+              @created="handleAdCreated" 
+              @cancel="openCreateAdModal = false"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="showRatingModal" class="fixed z-50 inset-0 overflow-y-auto">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="px-6 py-4 border-b border-white/20">
+            <h3 class="text-lg leading-6 font-semibold text-white">
+              Valora el servicio
+            </h3>
+          </div>
+          <div class="p-6">
+            <AdRatingComponent 
+              :adId="adToRate" 
+              @close="showRatingModal = false" 
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="openUserstatsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
         <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
           <h3 class="text-lg leading-6 font-semibold text-white">
-            Detalles del proyecto
+            Sobre este usuario
           </h3>
-          <button 
-            @click="openAdDetailModal = false"
-            class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition"
-          >
+          <button @click="openUserstatsModal = false"
+                  class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
         </div>
-
-        <div class="p-6">
-          <AdDetailComponent  
-            :id="selectedId" 
-            @close-ad-detail="openAdDetailModal = false" 
-            @payment-success="handlePaymentSuccess"
-            @updateAd="updateAd"
-          />
+        <div class="p-6 max-h-[80vh] overflow-y-auto">
+          <UserRatingComponent :user="selectedUser" />
         </div>
       </div>
     </div>
-  </div>
 
-  <div v-if="openCreateAdModal" class="fixed z-50 inset-0 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
-      </div>
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-      <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
-        <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
-          <h3 class="text-lg leading-6 font-semibold text-white">
-            Creando nuevo proyecto
-          </h3>
-          <button 
-            @click="openCreateAdModal = false"
-            class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition"
-          >
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button> 
-        </div>
-
-        <div class="p-6">
-          <AdsFormComponent 
-            :categories="categories"
-            @created="handleAdCreated" 
-            @cancel="openCreateAdModal = false"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-  <div v-if="showRatingModal" class="fixed z-50 inset-0 overflow-y-auto">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
-      </div>
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-      <div class="inline-block align-bottom bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-        <div class="px-6 py-4 border-b border-white/20">
-          <h3 class="text-lg leading-6 font-semibold text-white">
-            Rate the Service
-          </h3>
-        </div>
-        <div class="p-6">
-          <AdRatingComponent 
-            :adId="adToRate" 
-            @close="showRatingModal = false" 
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-  <div v-if="openUserstatsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
-        <h3 class="text-lg leading-6 font-semibold text-white">
-          Sobre este usuario
-        </h3>
-        <button @click="openUserstatsModal = false"
-                class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="p-6 max-h-[80vh] overflow-y-auto">
-        <UserRatingComponent :user="selectedUser" />
-      </div>
-    </div>
-  </div>
-
-      <Teleport to="body">
+    <Teleport to="body">
       <div v-if="openClaimsFormModal" class="fixed z-[60] inset-0 overflow-y-auto">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block">
           <div class="fixed inset-0 transition-opacity" aria-hidden="true">
             <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
           </div>
           <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
           <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 
                       rounded-lg text-left overflow-hidden shadow-xl transform transition-all 
-                      sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full">
+                      sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
             <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
               <h3 class="text-lg leading-6 font-semibold text-white">
                 Crear Reclamación
@@ -624,7 +616,6 @@
                 </svg>
               </button>
             </div>
-
             <div class="p-6">
               <ClaimsFormComponent
                 :receiver="selectedReceiver"
@@ -738,19 +729,18 @@ computed: {
     });
   },
 },
-mounted: async function() {
+async mounted () {
   let userStr = localStorage.getItem("user");
   this.user = JSON.parse(userStr);
   await this.fetchCategories();
   await this.fetchProvinces();
 
   if (!this.user?.is_pro && (!this.ads || this.ads.length === 0)) {
-    console.log(this.user)
     await this.fetchMyAds();
   } else {
     await this.fetchAds();
   }
-  console.log(this.filteredAds);
+
 },
 
 methods: {
@@ -836,6 +826,7 @@ methods: {
   hasPaidOffer(ad) {
     return ad.ad_offer && ad.ad_offer.some(offer => offer.is_paid === 1);
   },
+
   async deleteAd(adId) {
     if (!confirm('¿Estás seguro de que quieres eliminar este anuncio?')) {
       return;
@@ -860,6 +851,7 @@ methods: {
       this.ads.unshift(newAd);
       this.openCreateAdModal = false;
     },
+
     async fetchProvinces() {
       try {
         const response = await UserService.get("provinces");
@@ -868,6 +860,7 @@ methods: {
         console.error('Error fetching provinces:', error);
       }
     },
+
     handlePaymentSuccess({ adId }) {
       this.openAdDetailModal = false;
       this.adToRate = adId;
@@ -875,28 +868,34 @@ methods: {
         this.toast.success('Pago recibido con éxito');
       }, 300);
     },
+
     onRowClick(eventOrAd) {
       const adId = eventOrAd.data ? eventOrAd.data.id : eventOrAd.id;
       this.selectedId = adId;
       this.openAdDetailModal = true;
     },
+
     formatDate(dateString) {
       if (!dateString) return '';
       const options = { year: 'numeric', month: 'short', day: 'numeric' };
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
+
     getCategoryName(categoryId) {
       const category = this.categories.find(cat => cat.id === categoryId);
       return category ? category.category : 'Uncategorized';
     },
+
     handleFilterChange(filters) {
       this.selectedCategory = filters.category;
       this.statusFilter = filters.status;
     },
+
     onSort(event) {
       this.sortField = event.sortField;
       this.sortOrder = event.sortOrder;
     },
+
     async fetchCategories() {
       try {
         const response = await UserService.get("categories");
@@ -908,6 +907,7 @@ methods: {
         this.toast.error("Error al cargar las categorías");
       }
     },
+
     async fetchAds() {
       try {
         this.loading = true;1
@@ -923,6 +923,7 @@ methods: {
         this.loading = false;
       }
     },
+
     async fetchMyAds() {
       try {
         this.loading = true;
@@ -947,30 +948,31 @@ methods: {
       const diffDays = diffTime / (1000 * 60 * 60 * 24);
       return diffDays > 0 && diffDays <= 3;
     },
+
     isOverdue(dateString) {
       if (!dateString) return false;
       const dueDate = new Date(dateString);
       const today = new Date();
       return dueDate < today;
     },
+
   }
 };
 </script>
 <style scoped>
-::v-deep(.p-paginator) {
-  background-color: #1e293b !important;
-  color: white !important;
-  border-top: 1px solid #334155;
-}
-::v-deep(.p-datatable) {
-  background-color: #1e293b;
-  color: white;
-}
+  ::v-deep(.p-paginator) {
+    background-color: #1e293b !important;
+    color: white !important;
+    border-top: 1px solid #334155;
+  }
+  ::v-deep(.p-datatable) {
+    background-color: #1e293b;
+    color: white;
+  }
 
-::v-deep(.p-datatable .p-datatable-thead > tr > th),
-::v-deep(.p-datatable .p-datatable-tbody > tr > td) {
-  background-color: #1e293b;
-  color: white;
-}
-
+  ::v-deep(.p-datatable .p-datatable-thead > tr > th),
+  ::v-deep(.p-datatable .p-datatable-tbody > tr > td) {
+    background-color: #1e293b;
+    color: white;
+  }
 </style>

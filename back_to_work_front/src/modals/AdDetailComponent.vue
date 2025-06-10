@@ -65,125 +65,126 @@
   </button>
 </div>
 
-<div v-if="showBidGrid" class="mt-6">
-  <div class="overflow-x-auto bg-blue-900 shadow-md rounded-md">
-    <table class="min-w-full text-sm">
-      <tbody>
-        <tr v-if="showNewBidRow" class="border-b">
-          <td class="px-2 py-2 w-1/3">
-            <input
-              v-model="newBid.bid"
-              type="number"
-              class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
-              placeholder="Monto"
-            />
-          </td>
-          <td class="px-2 py-2 w-1/2">
-            <input
-              v-model="newBid.description"
-              type="text"
-              class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
-              placeholder="Descripción"
-            />
-          </td>
-          <td class="px-2 py-2 w-20 text-center">
-            <button
-              @click="submitNewBid"
-              class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-md text-sm transition"
-              :disabled="isSubmitting"
-            >
-              Añadir
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div v-if="showBidGrid" class="mt-6">
+    <div class="overflow-x-auto bg-blue-900 shadow-md rounded-md">
+      <table class="min-w-full text-sm">
+        <tbody>
+          <tr v-if="showNewBidRow" class="border-b">
+            <td class="px-2 py-2 w-1/3">
+              <input
+                v-model="newBid.bid"
+                type="number"
+                class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
+                placeholder="Monto"
+              />
+            </td>
+            <td class="px-2 py-2 w-1/2">
+              <input
+                v-model="newBid.description"
+                type="text"
+                class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
+                placeholder="Descripción"
+              />
+            </td>
+            <td class="px-2 py-2 w-20 text-center">
+              <button
+                @click="submitNewBid"
+                class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-md text-sm transition"
+                :disabled="isSubmitting"
+              >
+                Añadir
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
 
-<div v-if="bids.length > 0" class="w-full rounded-lg shadow-xl overflow-hidden border border-white/20 mt-6">
-    <DataTable 
-      :value="bids"
-      :paginator="true" 
-      :rows="10"
-      :rowsPerPageOptions="[5,10,25]"
-      paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pujas"
-      stripedRows
-      responsiveLayout="scroll"
-      class="p-datatable-sm shadow-md rounded-md"
-    >
+  <div v-if="bids.length > 0" class="w-full rounded-lg shadow-xl overflow-hidden border border-white/20 mt-6">
+      <DataTable 
+        :value="bids"
+        :paginator="true" 
+        :rows="10"
+        :rowsPerPageOptions="[5,10,25]"
+        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} pujas"
+        stripedRows
+        responsiveLayout="scroll"
+        class="p-datatable-sm shadow-md rounded-md"
+      >
 
-        <Column field="user.name" header="Usuario" :sortable="true">
-          <template #body="{data}">
-            <span :class="{'font-semibold': data.is_paid}">
-              {{ data.user?.name || 'Desconocido' }}
-            </span>
-          </template>
-        </Column>
-        
-        <Column field="bid" header="Monto" :sortable="true">
-          <template #body="{data}">
-            <span>
-              {{ data.bid }} €
-              <i v-if="data.is_paid" class="pi pi-check-circle ml-2"></i>
-            </span>
-          </template>
-        </Column>
-        
-        <Column field="description" header="Descripción" :sortable="true">
-          <template #body="{data}">
-            <span>
-              {{ data.description }}
-            </span>
-          </template>
-        </Column>
-        
-        <Column header="Acciones" headerStyle="display:flex; justify-content: center;" bodyClass="text-center">
-          <template #body="{data}">
-            <div class="flex items-center justify-center space-x-2">
-              <Button
-                v-if="data.is_paid"
-                icon="pi pi-exclamation-triangle"
-                class="p-button-text p-button-warn"
-                @click="openClaim(data?.id, data?.user)"
-                title="'Reportar problema'"
-              />
-              <Button
-                v-if="data.is_paid && ((user?.is_pro && adData.pro_is_done !== 1) || (!user?.is_pro && adData.pro_is_done === 1 && adData.customer_is_done !== 1))"
-                icon="pi pi-check"
-                class="p-button-text p-button-success hover:bg-green-100"
-                @click="markAsDone(adData.id)"
-                title="user?.is_pro ? 'Marcar como completado' : 'Confirmar finalización'"
-              />
-              <Button 
-                v-if="user && data.user && data.user.id === user.id && !data.is_paid"
-                icon="pi pi-trash" 
-                class="p-button-text p-button-danger"
-                title="Eliminar oferta"
-                @click="removeBid(data.id)"
-              />
-              <Button
-                v-if="(user && data.user && data.user.id === user.id) || (!user.is_pro && (paidbid.id === data.id || !paidbid.id))"
-                icon="pi pi-comment" 
-                class="p-button-text p-button-danger" 
-                @click="openChat(data.user)"
-                title="Iniciar chat"
-              />
-              <Button 
-                v-if="!user.is_pro && !paidbid.is_paid"
-                icon="pi pi-money-bill" 
-                class="p-button-text p-button-danger" 
-                @click="goToPayment(data)"
-              />
-              <span v-if="data.is_paid" class="px-2 py-1 bg-green-100 text-green-800 text-sm rounded-full">
-                Pagada
+          <Column field="user.name" header="Usuario" :sortable="true">
+            <template #body="{data}">
+              <span :class="{'font-semibold': data.is_paid}">
+                {{ data.user?.name || 'Desconocido' }}
               </span>
-            </div>
-          </template>
-        </Column>
-    </DataTable>
-</div>
+            </template>
+          </Column>
+          
+          <Column field="bid" header="Monto" :sortable="true">
+            <template #body="{data}">
+              <span>
+                {{ data.bid }} €
+                <i v-if="data.is_paid" class="pi pi-check-circle ml-2"></i>
+              </span>
+            </template>
+          </Column>
+          
+          <Column field="description" header="Descripción" :sortable="true">
+            <template #body="{data}">
+              <span>
+                {{ data.description }}
+              </span>
+            </template>
+          </Column>
+          
+          <Column header="Acciones" headerStyle="display:flex; justify-content: center;" bodyClass="text-center">
+            <template #body="{data}">
+              <div class="flex items-center justify-center space-x-2">
+                <Button
+                  v-if="data.is_paid"
+                  icon="pi pi-exclamation-triangle"
+                  class="p-button-text p-button-warn"
+                  @click="openClaim(data?.id, data?.user)"
+                  title="Reportar problema"
+                />
+                <Button
+                  v-if="data.is_paid && ((user?.is_pro && adData.pro_is_done !== 1) || (!user?.is_pro && adData.pro_is_done === 1 && adData.customer_is_done !== 1))"
+                  icon="pi pi-check"
+                  class="p-button-text p-button-success hover:bg-green-100"
+                  @click="markAsDone(adData.id)"
+                  :title="user?.is_pro ? 'Marcar como completado' : 'Confirmar finalización'"
+                />
+                <Button 
+                  v-if="user && data.user && data.user.id === user.id && !data.is_paid"
+                  icon="pi pi-trash" 
+                  class="p-button-text p-button-danger"
+                  title="Eliminar oferta"
+                  @click="removeBid(data.id)"
+                />
+                <Button
+                  v-if="(user && data.user && data.user.id === user.id) || (!user.is_pro && (paidbid.id === data.id || !paidbid.id))"
+                  icon="pi pi-comment" 
+                  class="p-button-text p-button-danger" 
+                  @click="openChat(data.user)"
+                  title="Iniciar chat"
+                />
+                <Button 
+                  v-if="!user.is_pro && !paidbid.is_paid"
+                  icon="pi pi-money-bill" 
+                  class="p-button-text p-button-danger"
+                  title="Enviar pago"
+                  @click="goToPayment(data)"
+                />
+                <span v-if="data.is_paid" class="px-2 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                  Pagada
+                </span>
+              </div>
+            </template>
+          </Column>
+      </DataTable>
+  </div>
 
     <div v-else-if="user?.is_pro" class="mt-6 p-8 bg-blue-900/20 rounded-lg text-center">
       <p class="text-white text-xl font-semibold mb-2">Sé el primero en hacer una oferta por este proyecto</p>
@@ -217,21 +218,34 @@
       contentClass="p-4"
     />
 
-    <Dialog      
-      v-model:visible="showChatModal"
-      :header="`Chat con ${selectedReceiver?.user_name}`"
-      :modal="true"
-      :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
-      headerClass="border-b border-gray-200 p-4 font-semibold text-lg"
-      contentClass="p-4"
-    >
-      <ChatComponent 
-        :ad_id="id"
-        :sender="user"
-        :receiver="selectedReceiver"
-        :roomId="chat-123-456" 
-      />
-    </Dialog>
+    <Teleport to="body">
+      <div v-if="showChatModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-md mx-4">
+
+          <div class="flex justify-between items-center px-4 border-b border-white/20">
+            <h3 class="text-lg font-semibold text-white">
+              Chat con {{ selectedReceiver?.user_name }}
+            </h3>
+            <button @click="showChatModal = false"
+                    class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="p-4 max-h-[80vh] overflow-y-auto">
+            <ChatComponent 
+              :ad_id="id"
+              :sender="user"
+              :receiver="selectedReceiver"
+              :roomId="chat-123-456" 
+            />
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
 
     <div v-if="isProcessingPayment" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div class="flex flex-col items-center space-y-4">
@@ -302,7 +316,7 @@
         </div>
       </div>
     </div>
-          <Teleport to="body">
+    <Teleport to="body">
       <div v-if="openClaimModal" class="fixed z-[60] inset-0 overflow-y-auto">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <div class="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -311,7 +325,7 @@
           <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
           <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 
                       rounded-lg text-left overflow-hidden shadow-xl transform transition-all 
-                      sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full">
+                      sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
             <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
               <h3 class="text-lg leading-6 font-semibold text-white">
                 Crear Reclamación

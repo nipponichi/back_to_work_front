@@ -1,22 +1,23 @@
 <template>
-  <div class="w-96 border border-gray-300 p-4 rounded-lg shadow-md bg-amber-50">
-    <div class="h-60 overflow-y-auto border-b border-gray-300 mb-4 p-2">
+  <div class="w-full max-w-xl border border-white/20 p-4 rounded-2xl shadow-lg bg-gradient-to-br from-blue-950 to-blue-800 text-white">
+    <div class="h-96 overflow-y-auto border-b border-white/10 mb-4 p-2 bg-blue-900/30 rounded-md">
       <div 
         v-for="(message, index) in messages" 
         :key="index" 
         :class="[
-          'mb-3 py-2 px-3 rounded-lg max-w-[70%]', 
-          message.sender_id === senderId 
-            ? 'ml-auto bg-amber-200 text-right shadow-sm' 
-            : 'mr-auto bg-white text-left shadow-sm'
+          'mb-3 py-2 px-3 rounded-lg max-w-[70%]',
+          message.sender_id === senderId
+            ? 'ml-auto bg-blue-600/70 text-right text-white shadow'
+            : 'mr-auto bg-blue-900/50 text-left text-white shadow'
         ]"
       >
         <div class="text-xs font-semibold mb-1" 
-            :class="message.sender_id === senderId ? 'text-amber-700' : 'text-gray-600'">
+          :class="message.sender_id === senderId ? 'text-blue-200' : 'text-blue-300'">
           {{ message.sender_id === senderId ? 'Tú' : receiver?.user_name }}
         </div>
-        <div class="text-gray-800 text-sm">{{ message.message }}</div>
-      </div>
+        <div class="text-gray-200 text-sm">{{ message?.message }}</div>
+        <div class="text-xs text-blue-300 mt-1">{{ new Date(message?.created_at).toLocaleTimeString() }}</div>
+      </div>  
     </div>
     
     <div class="flex items-center space-x-2">
@@ -24,11 +25,11 @@
         v-model="newMessage"
         @keyup.enter="sendMessage"
         placeholder="Escribe un mensaje..."
-        class="flex-1 px-3 py-2 border border-amber-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+        class="flex-1 px-3 py-2 border border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-950 text-white placeholder-blue-200"
       />
       <button
         @click="sendMessage"
-        class="bg-amber-500 text-white px-4 py-2 rounded-md hover:bg-amber-600 transition disabled:bg-amber-300"
+        class="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold px-4 py-2 rounded-md hover:from-blue-600 hover:to-blue-700 transition disabled:opacity-50"
         :disabled="!newMessage.trim()"
       >
         Enviar
@@ -154,19 +155,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.h-60::-webkit-scrollbar {
-  width: 6px;
-}
-.h-60::-webkit-scrollbar-track {
-  background: #fef6e6;
-}
-.h-60::-webkit-scrollbar-thumb {
-  background: #d97706;
-  border-radius: 3px;
-}
-.h-60::-webkit-scrollbar-thumb:hover {
-  background: #b45309;
-}
-</style>

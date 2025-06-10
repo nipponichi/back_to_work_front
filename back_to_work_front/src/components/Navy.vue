@@ -4,7 +4,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
 
-        <div class="flex items-center">
+        <div class="flex items-center cursor-pointer" @click="$router.push('/')">
           <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Logo_Williams_F1.png"
                class="h-10 w-10 mr-3 filter brightness-0 invert"
                alt="WeAgree Logo">
@@ -84,11 +84,32 @@
               </button>
               <div
                 v-if="showUserMenu"
-                class="absolute right-0 mt-2 w-56 bg-white/10 backdrop-blur-lg text-white border border-white/20 rounded-xl shadow-lg z-50"
+                class="absolute right-0 mt-2 w-56 bg-gradient-to-br from-blue-950 to-blue-900 backdrop-blur-lg text-white border border-white/20 shadow-lg z-50"
               >
-                <button @click="editProfile" class="block w-full text-left px-4 py-2 hover:bg-white/20 transition">Perfil</button>
-                <button @click="viewIncidences" class="block w-full text-left px-4 py-2 hover:bg-white/20 transition">Incidencias</button>
-                <button @click="logout" class="block w-full text-left px-4 py-2 hover:bg-white/20 transition text-red-300">Cerrar sesión</button>
+                <button
+                  @click="$router.push('/work')"
+                  class="block w-full text-left px-4 py-2 hover:bg-gray-300/60 hover:text-white transition font-semibold"
+                >
+                  Mis trabajos
+                </button>
+                <button
+                  @click="editProfile"
+                  class="block w-full text-left px-4 py-2 hover:bg-gray-300/60 hover:text-white transition"
+                >
+                  Perfil
+                </button>
+                <button
+                  @click="viewIncidences"
+                  class="block w-full text-left px-4 py-2  hover:bg-gray-300/60 hover:text-white transition"
+                >
+                  Incidencias
+                </button>
+                <button
+                  @click="logout"
+                  class="block w-full text-left px-4 py-2  hover:bg-gray-300/60 hover:text-white transition text-red-400 font-semibold"
+                >
+                  Cerrar sesión
+                </button>
               </div>
             </div>
           </template>

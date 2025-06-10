@@ -74,7 +74,7 @@
           <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
           <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 
                       rounded-lg text-left overflow-hidden shadow-xl transform transition-all 
-                      sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full">
+                      sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
             <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
               <h3 class="text-lg leading-6 font-semibold text-white">
                 Crear Reclamación

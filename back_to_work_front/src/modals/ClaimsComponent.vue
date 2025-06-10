@@ -103,3 +103,20 @@ import Column from 'primevue/column';
     }
  }
 </script>
+<style scoped>
+  ::v-deep(.p-paginator) {
+    background-color: #1e293b !important;
+    color: white !important;
+    border-top: 1px solid #334155;
+  }
+  ::v-deep(.p-datatable) {
+    background-color: #1e293b;
+    color: white;
+  }
+
+  ::v-deep(.p-datatable .p-datatable-thead > tr > th),
+  ::v-deep(.p-datatable .p-datatable-tbody > tr > td) {
+    background-color: #1e293b;
+    color: white;
+  }
+</style>

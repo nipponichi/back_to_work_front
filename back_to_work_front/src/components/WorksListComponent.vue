@@ -2,13 +2,13 @@
 <div class="relative w-full max-w-[1600px] min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 my-20 rounded-2xl mx-auto">
   <div class="flex justify-end mb-4 space-x-2"></div>
 
-    <div class="fixed inset-0 bg-[url('https://appwebel.com/assets/es/img/backgrounds/landing/landing.webp')] bg-cover bg-center opacity-10"></div>
-    <div class="fixed inset-0 bg-blue-950/40"></div>
+    <div class="fixed inset-0 bg-[url('https://appwebel.com/assets/es/img/backgrounds/landing/landing.webp')] bg-cover bg-center opacity-40 blur-sm"></div>
+    <div class="fixed inset-0 bg-blue-900/50"></div>
 
     <main class="relative z-10 pt-8 pb-16 px-4 sm:px-6 lg:px-8">
       <div class="relative mb-6">
-        <h2 class="text-2xl sm:text-3xl font-bold text-white inline-block relative z-10">{{ user?.is_pro == 1 ? 'Servicios' : 'Proyectos' }}</h2>
-        <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-900 rounded-full"></div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white inline-block relative z-10"> Proyectos </h2>
+        <div class="w-full h-1 bg-blue-800 rounded-full"></div>
       </div>
 
       <div class="max-w-7xl min-w-full">
@@ -293,11 +293,18 @@
               </DataTable>
               </div>
                 <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                 <div
-                  v-for="ad in filteredAds"
-                  :key="ad.id"
-                  class="relative group flex flex-col justify-between h-full rounded-2xl border border-white/20 bg-gradient-to-br from-blue-950/80 to-blue-900/70 p-6 shadow-lg hover:shadow-2xl transition-all"
-                >
+                  <div v-for="ad in filteredAds" :key="ad.id" @click="onRowClick(ad)"
+                    class="relative group flex p-6 flex-col justify-between cursor-pointer h-full rounded-2xl outline outline-1 outline-white/10 bg-blue-950 overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:outline-white/0"
+                  >
+
+                  <div
+                    class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 brightness-75"
+                    :style="{ backgroundImage: `url(${getAdImage(ad.pictures)})` }"
+                  ></div>
+
+                <div class="absolute inset-0 bg-black/60 group-hover:bg-black/75 backdrop-blur-sm transition-all duration-300"></div>
+
+                <div class="relative z-10">
                   <div v-if="!user?.is_pro" class="mb-4">
                     <span
                       :class="[
@@ -320,7 +327,7 @@
                     <div class="flex flex-col">
                       <span
                         class="text-white font-semibold text-base cursor-pointer flex items-center gap-2"
-                        @click="openUserstats(ad.user)"
+                        @click.stop="openUserstats(ad.user)"
                         title="Ver valoraciones"
                       >
                         {{ ad.user.user_name }}
@@ -339,9 +346,7 @@
                       {{ ad.description }}
                     </p>
 
-                    <p
-                      class="text-xs inline-block mb-2 px-3 py-1 bg-blue-800/50 text-white rounded-full font-medium"
-                    >
+                    <p class="text-xs inline-block mb-2 px-3 py-1 bg-blue-800/50 text-white rounded-full font-medium">
                       {{ getCategoryName(ad.category_id) }}
                     </p>
 
@@ -360,28 +365,20 @@
 
                     <div class="min-h-[2rem] mt-1 mb-4">
                       <template v-if="isDueSoon(ad.due_date)">
-                        <span
-                          class="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800"
-                        >
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
                           Próximo
                         </span>
                       </template>
                       <template v-if="isOverdue(ad.due_date)">
-                        <span
-                          class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800"
-                        >
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
                           Atrasado
                         </span>
                       </template>
                     </div>
                   </div>
-                  <button
-                    @click="onRowClick({ data: ad })"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition shadow hover:shadow-lg"
-                  >
-                    Ver detalles
-                  </button>
                 </div>
+              </div>
+
               </div>
             </div>
         </div>
@@ -530,6 +527,7 @@ export default {
       sortField: null,
       sortOrder: null,
       ads: [],
+      user: null,
       categories: [],
       openCreateAdModal: false,
       openAdDetailModal: false,
@@ -542,6 +540,7 @@ export default {
       showRatingModal: false,
       adToRate: null,
       selectedUser: null,
+      baseImgUrl: import.meta.env.VITE_IMG_URL,
     };
   },
   computed: {
@@ -558,11 +557,18 @@ export default {
     this.accessToken = localStorage.getItem("token");
     let userStr = localStorage.getItem("user");
     this.user = JSON.parse(userStr);
+    console.log(this.user)
     this.fetchCategories();
     this.fetchMyAds();
       
   },
   methods: {
+    getAdImage(pictures) {
+      const fallback = 'https://cdn-icons-png.freepik.com/512/7445/7445622.png';
+      if (!pictures || !pictures.length) return fallback;
+      const imagePath = pictures[0].path;
+      return  `${this.baseImgUrl}${imagePath}`;
+    },
     openUserstats(user) {
       this.selectedUser = user;
       console.log(this.selectedUser);
@@ -605,8 +611,8 @@ export default {
       }, 300);
     },
     onRowClick(ad) {
-      console.log('Row clicked:', ad);
-      this.selectedId = ad.data.id;
+      console.log(ad)
+      this.selectedId = ad.data ? ad.data.id : ad.id
       this.openAdDetailModal = true;
     },
     formatDate(dateString) {

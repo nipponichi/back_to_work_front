@@ -1,6 +1,7 @@
 <template>
   <div class="space-y-4 text-white">
-    <!-- Campo Motivo -->
+    <div class="bg-blue-800 h-1">
+    </div>
     <div>
       <label class="block text-sm font-semibold mb-1">Motivo</label>
       <textarea v-model="form.reason" rows="4" class="w-full rounded bg-white/10 border border-white/20 text-white p-2"></textarea>
