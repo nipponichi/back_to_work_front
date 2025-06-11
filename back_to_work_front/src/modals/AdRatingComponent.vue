@@ -116,8 +116,7 @@ export default {
           receiver_id: this.receiver.id,
           review: this.review,
         })
-
-        this.toast.success('¡Valoración enviada con éxito!')
+        this.user?.is_pro ? this.toast.success('¡Valoración enviada con éxito!') : ''
         this.$emit('rating-submitted')
         setTimeout(() => this.$emit('close'), 1500)
       } catch (error) {

@@ -12,18 +12,21 @@
       </div>
 
       <div class="max-w-7xl min-w-full">
-      <button
-        @click="switchToCards"
-        :class="['px-4 py-2 mr-2 mb-2 rounded-lg font-semibold transition', viewMode === 'cards' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-100']"
-      >
-      <i class="pi pi-th-large text-blue-300 text-lg"></i>
-      </button>
-      <button
-        @click="switchToList"
-        :class="['px-4 py-2 rounded-lg font-semibold transition', viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-100']"
-      >
-        <i class="pi pi-list text-blue-300 text-lg"></i>
-      </button>
+        <div v-if="!isMobile">
+          <button
+            @click="switchToCards"
+            :class="['px-4 py-2 mr-2 mb-2 rounded-lg font-semibold transition', viewMode === 'cards' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-100']"
+          >
+          <i class="pi pi-th-large text-blue-300 text-lg"></i>
+          </button>
+          <button
+            @click="switchToList"
+            :class="['px-4 py-2 rounded-lg font-semibold transition', viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-100']"
+          >
+            <i class="pi pi-list text-blue-300 text-lg"></i>
+          </button>
+        </div>
+
 
         <div v-if="!user?.is_pro || !ads.length === 0" class="bg-white/5 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 sm:p-8 mb-8 flex flex-col sm:flex-row justify-between items-center gap-6">
           <div class="text-center sm:text-left">
@@ -424,7 +427,6 @@
                         ★ {{ ad.user?.user_stat?.length || 0 }}
                       </span>
                     </span>
-
                     <span
                       v-if="ad.user?.user_stat?.length"
                       class="text-xs mt-1"
@@ -676,8 +678,10 @@ export default {
       selectedFromDate: '',
       selectedToDate: '',
       selectedUser: null,
+      selectedCategory: null,
       
       viewMode: 'cards',
+      isMobile: false,
 
       searchQuery: '',
       loading: true,
@@ -688,12 +692,13 @@ export default {
       provinces: [],
       categories: [],
 
-      selectedCategory: null,
+
       statusFilter: null,
       toast: useToast(),
       selectedId: '',
       user: null,
       adToRate: null,
+
 
       baseImgUrl: import.meta.env.VITE_IMG_URL,
     };
@@ -730,6 +735,7 @@ computed: {
   },
 },
 async mounted () {
+  window.addEventListener('resize', this.checkMobile);
   let userStr = localStorage.getItem("user");
   this.user = JSON.parse(userStr);
   await this.fetchCategories();
@@ -742,38 +748,52 @@ async mounted () {
   }
 
 },
-
+beforeUnmount() {
+  window.removeEventListener('resize', this.checkMobile);
+},
 methods: {
+  checkMobile() {
+    this.isMobile = window.innerWidth < 640;
+    if (this.isMobile && this.viewMode !== 'cards') {
+      this.viewMode = 'cards';
+    }
+  },
   openClaimModal(receiver, adId) {
     this.selectedReceiver = receiver;
     this.selectedAdId = adId;
     this.openClaimsFormModal = true;
   },
+
   onClaimCreated() {
     this.openClaimsFormModal = false;
     this.fetchClaims?.();
   },
+
   averageRating(user) {
     if (!user?.user_stat?.length) return 0
     const total = user?.user_stat.reduce((sum, s) => sum + s.rating, 0)
     return total / user?.user_stat.length
   },
+
   getAdImage(pictures) {
     const fallback = 'https://cdn-icons-png.freepik.com/512/7445/7445622.png';
     if (!pictures || !pictures.length) return fallback;
     const imagePath = pictures[0].path;
     return  `${this.baseImgUrl}${imagePath}`;
   },
+
   getUserImage(user) {
     const fallback = 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
     if (!user || !user?.image) return fallback;
     return `${this.baseImgUrl}/${user?.image}`;
   },
+
   openUserstats(user) {
     this.selectedUser = user;
     console.log(this.selectedUser);
     this.openUserstatsModal = true;
   },
+
   updateAd(ad) {
     const index = this.ads.findIndex(a => a.id === ad.id);
     if (index !== -1) {
@@ -785,12 +805,15 @@ methods: {
     }
     this.openAdDetailModal = false;
   },
+
   switchToList() {
-    this.viewMode = 'list';
+    if (!this.isMobile) this.viewMode = 'list';
   },
+
   switchToCards() {
     this.viewMode = 'cards';
   },
+
   getAdStatusLabel(ad) {
     if (ad.customer_is_done) {
       return 'Completado';
@@ -836,6 +859,7 @@ methods: {
       const response = await UserService.delete('ads' , adId);
       if (response.data.success) {
         this.ads = this.ads.filter(ad => ad.id !== adId);
+        console.log(this.ads)
         this.toast.success('Anuncio eliminado con éxito');
       } else {
         this.toast.error('No se pudo eliminar el anuncio');
@@ -846,115 +870,115 @@ methods: {
     }
   },
 
-    handleAdCreated(newAd) {
-      console.log(newAd)
-      this.ads.unshift(newAd);
-      this.openCreateAdModal = false;
-    },
+  handleAdCreated(newAd) {
+    console.log(newAd)
+    this.ads.unshift(newAd);
+    this.openCreateAdModal = false;
+  },
 
-    async fetchProvinces() {
-      try {
-        const response = await UserService.get("provinces");
-        this.provinces = response.data.data;
-      } catch (error) {
-        console.error('Error fetching provinces:', error);
+  async fetchProvinces() {
+    try {
+      const response = await UserService.get("provinces");
+      this.provinces = response.data.data;
+    } catch (error) {
+      console.error('Error fetching provinces:', error);
+    }
+  },
+
+  handlePaymentSuccess({ adId }) {
+    this.openAdDetailModal = false;
+    this.adToRate = adId;
+    setTimeout(() => {
+      this.toast.success('Pago recibido con éxito');
+    }, 300);
+  },
+
+  onRowClick(eventOrAd) {
+    const adId = eventOrAd.data ? eventOrAd.data.id : eventOrAd.id;
+    this.selectedId = adId;
+    this.openAdDetailModal = true;
+  },
+
+  formatDate(dateString) {
+    if (!dateString) return '';
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  },
+
+  getCategoryName(categoryId) {
+    const category = this.categories.find(cat => cat.id === categoryId);
+    return category ? category.category : 'Uncategorized';
+  },
+
+  handleFilterChange(filters) {
+    this.selectedCategory = filters.category;
+    this.statusFilter = filters.status;
+  },
+
+  onSort(event) {
+    this.sortField = event.sortField;
+    this.sortOrder = event.sortOrder;
+  },
+
+  async fetchCategories() {
+    try {
+      const response = await UserService.get("categories");
+      if (response.data.success) {
+        this.categories = response.data.data;
       }
-    },
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      this.toast.error("Error al cargar las categorías");
+    }
+  },
 
-    handlePaymentSuccess({ adId }) {
-      this.openAdDetailModal = false;
-      this.adToRate = adId;
-      setTimeout(() => {
-        this.toast.success('Pago recibido con éxito');
-      }, 300);
-    },
-
-    onRowClick(eventOrAd) {
-      const adId = eventOrAd.data ? eventOrAd.data.id : eventOrAd.id;
-      this.selectedId = adId;
-      this.openAdDetailModal = true;
-    },
-
-    formatDate(dateString) {
-      if (!dateString) return '';
-      const options = { year: 'numeric', month: 'short', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    },
-
-    getCategoryName(categoryId) {
-      const category = this.categories.find(cat => cat.id === categoryId);
-      return category ? category.category : 'Uncategorized';
-    },
-
-    handleFilterChange(filters) {
-      this.selectedCategory = filters.category;
-      this.statusFilter = filters.status;
-    },
-
-    onSort(event) {
-      this.sortField = event.sortField;
-      this.sortOrder = event.sortOrder;
-    },
-
-    async fetchCategories() {
-      try {
-        const response = await UserService.get("categories");
-        if (response.data.success) {
-          this.categories = response.data.data;
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        this.toast.error("Error al cargar las categorías");
+  async fetchAds() {
+    try {
+      this.loading = true;1
+      const response = await UserService.get("ads");
+      if (response.data.success) {
+        this.ads = response.data.data;
+        console.log(this.ads);
       }
-    },
+    } catch (error) {
+      console.error("Error fetching ads:", error);
+      this.toast.error("Error al cargar los anuncios");
+    } finally {
+      this.loading = false;
+    }
+  },
 
-    async fetchAds() {
-      try {
-        this.loading = true;1
-        const response = await UserService.get("ads");
-        if (response.data.success) {
-          this.ads = response.data.data;
-          console.log(this.ads);
-        }
-      } catch (error) {
-        console.error("Error fetching ads:", error);
-        this.toast.error("Error al cargar los anuncios");
-      } finally {
-        this.loading = false;
+  async fetchMyAds() {
+    try {
+      this.loading = true;
+      const response = await UserService.show("getAdsByUser", this.user?.id);
+      if (response.data.success) {
+        this.ads = response.data.data;
+        console.log(this.ads)
       }
-    },
+    } catch (error) {
+      console.error("Error fetching user ads:", error);
+      this.toast.error("Error al cargar tus anuncios");
+    } finally {
+      this.loading = false;
+    }
+  },
 
-    async fetchMyAds() {
-      try {
-        this.loading = true;
-        const response = await UserService.show("getAdsByUser", this.user?.id);
-        if (response.data.success) {
-          this.ads = response.data.data;
-          console.log(this.ads)
-        }
-      } catch (error) {
-        console.error("Error fetching user ads:", error);
-        this.toast.error("Error al cargar tus anuncios");
-      } finally {
-        this.loading = false;
-      }
-    },
+  isDueSoon(dateString) {
+    if (!dateString) return false;
+    const dueDate = new Date(dateString);
+    const today = new Date();
+    const diffTime = dueDate - today;
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+    return diffDays > 0 && diffDays <= 3;
+  },
 
-    isDueSoon(dateString) {
-      if (!dateString) return false;
-      const dueDate = new Date(dateString);
-      const today = new Date();
-      const diffTime = dueDate - today;
-      const diffDays = diffTime / (1000 * 60 * 60 * 24);
-      return diffDays > 0 && diffDays <= 3;
-    },
-
-    isOverdue(dateString) {
-      if (!dateString) return false;
-      const dueDate = new Date(dateString);
-      const today = new Date();
-      return dueDate < today;
-    },
+  isOverdue(dateString) {
+    if (!dateString) return false;
+    const dueDate = new Date(dateString);
+    const today = new Date();
+    return dueDate < today;
+  },
 
   }
 };

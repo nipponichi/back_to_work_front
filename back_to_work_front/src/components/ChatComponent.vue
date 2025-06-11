@@ -1,38 +1,38 @@
 <template>
-  <div class="w-full max-w-xl border border-white/20 p-4 rounded-2xl shadow-lg bg-gradient-to-br from-blue-950 to-blue-800 text-white">
-    <div class="h-96 overflow-y-auto border-b border-white/10 mb-4 p-2 bg-blue-900/30 rounded-md">
-      <div 
-        v-for="(message, index) in messages" 
-        :key="index" 
-        :class="[
-          'mb-3 py-2 px-3 rounded-lg max-w-[70%]',
-          message.sender_id === senderId
-            ? 'ml-auto bg-blue-600/70 text-right text-white shadow'
-            : 'mr-auto bg-blue-900/50 text-left text-white shadow'
-        ]"
-      >
-        <div class="text-xs font-semibold mb-1" 
-          :class="message.sender_id === senderId ? 'text-blue-200' : 'text-blue-300'">
-          {{ message.sender_id === senderId ? 'Tú' : receiver?.user_name }}
-        </div>
-        <div class="text-gray-200 text-sm">{{ message?.message }}</div>
-        <div class="text-xs text-blue-300 mt-1">{{ new Date(message?.created_at).toLocaleTimeString() }}</div>
-      </div>  
+  <div class="fixed top-0 right-0 w-[400px] h-screen bg-blue-900/90 flex flex-col z-50">
+
+    <div class="flex items-center space-x-4 p-4 border-b border-white/10 bg-gradient-to-r from-blue-950 to-blue-800 shadow-lg">
+      <img :src="getUserImage(receiver)" alt="Avatar" class="w-20 h-20 rounded-full border border-white/20 object-cover" />
+      <h2 class="text-white font-semibold text-2xl">Chat con {{ receiver.user_name }}</h2>
     </div>
-    
-    <div class="flex items-center space-x-2">
+    <div ref="chatContainer" class="flex-1 overflow-y-auto p-5 bg-blue-900/30">
+      <div class="flex flex-col gap-2">
+        <div v-for="(message, index) in messages" :key="index"
+          :class="['mb-3 py-2 px-3 rounded-lg max-w-[70%]',
+            message.sender_id === senderId ? 'ml-auto bg-blue-600/70 text-right text-white shadow' : 'mr-auto bg-blue-700/50 text-left text-white shadow']">
+          <div class="text-xs font-semibold mb-1" :class="[message.sender_id === senderId ? 'text-blue-200 text-right' : 'text-blue-300 text-left']">
+            {{ message.sender_id === senderId ? 'Tú' : receiver?.user_name }}
+          </div>
+          <div class="text-gray-200 text-sm" :class="message.sender_id === senderId ? 'mr-2 text-right' : 'ml-2 text-left'">
+            {{ message?.message }}
+          </div>
+          <div class="text-xs text-blue-300 mt-1">{{ formatTime(message?.created_at) }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-4 border-t border-white/10 bg-blue-900/30 flex items-center space-x-2">
       <input
         v-model="newMessage"
         @keyup.enter="sendMessage"
         placeholder="Escribe un mensaje..."
-        class="flex-1 px-3 py-2 border border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-950 text-white placeholder-blue-200"
+        class="flex-1 px-3 py-6 border border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-950 text-white placeholder-blue-200"
       />
       <button
         @click="sendMessage"
         class="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold px-4 py-2 rounded-md hover:from-blue-600 hover:to-blue-700 transition disabled:opacity-50"
         :disabled="!newMessage.trim()"
       >
-        Enviar
+        <i class="pi pi-send py-4"></i>
       </button>
     </div>
   </div>
@@ -60,6 +60,7 @@ export default {
       senderId: null,
       is_read: false,
       chatId: null,
+      baseImgUrl: import.meta.env.VITE_IMG_URL,
     };
   },
   mounted() {
@@ -71,11 +72,15 @@ export default {
     } else {
       this.chatId = this.receiver.id;
     }
-
     this.fetchMessages();
     this.initSocket();
   },
   methods: {
+    getUserImage(user) {
+      const fallback = 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
+      if (!user || !user?.image) return fallback;
+      return `${this.baseImgUrl}/${user?.image}`;
+    },
     initSocket() {
       this.socket = io(import.meta.env.VITE_CHAT_API_URL, {
         path: '/socket.io',
@@ -143,8 +148,10 @@ export default {
 
     scrollToBottom() {
       this.$nextTick(() => {
-        const container = this.$el.querySelector(".h-60");
-        if (container) container.scrollTop = container.scrollHeight;
+        const container = this.$refs.chatContainer;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
       });
     }
   },

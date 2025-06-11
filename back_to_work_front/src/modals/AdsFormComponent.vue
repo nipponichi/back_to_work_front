@@ -163,6 +163,7 @@ export default {
     if (userStr) {
       this.user = JSON.parse(userStr);
     }
+    console.log(this.user)
   },
   computed: {
     hasVideo() {
@@ -287,7 +288,11 @@ export default {
           this.showVerificationDialog = true;
           setTimeout(() => {
             this.showVerificationDialog = false;
-            this.$emit('created', response.data.data);
+            const ad = {
+              ...response.data.data,
+              user: this.user,
+            };
+            this.$emit('created', ad);
           }, 7000);
         } else {
           this.toast.error('Hubo un problema al crear el anuncio');

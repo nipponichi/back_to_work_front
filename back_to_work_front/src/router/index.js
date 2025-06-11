@@ -11,6 +11,7 @@ import ResetPasswordFormComponent from "../components/ResetPasswordFormComponent
 import WorksView from "../views/WorksView.vue";
 import AdminView from "../views/AdminView.vue";
 import ResetPasswordView from "../views/ResetPasswordView.vue";
+import PaymentSuccess from "../components/PaymentSuccess.vue";
 
 const routes = [
     { path: '/', component: HomeView, name: 'home' },
@@ -25,11 +26,11 @@ const routes = [
     { path: '/reset-password', component: ResetPasswordFormComponent,
       props: (route) => ({ token: route.query.token, email: decodeURIComponent(route.query.email)}),
       name: 'reset-password'},
-
     { path: '/about', component: AboutView,  name: 'about', meta: { requiresAuth: true }},
     { path: '/service', component: ServicesView,  name: 'service', meta: { requiresAuth: true }},
     { path: '/work', component:WorksView, name: 'work', meta: { requiresAuth: true }},
-    { path: '/admin', component:AdminView, name: 'admin', meta: { requiresAuth: true }}
+    { path: '/admin', component:AdminView, name: 'admin', meta: { requiresAuth: true }},
+    { path: '/payment-success', component:PaymentSuccess, name: 'payment', meta: { requiresAuth: true }}
 ]
 
 const router = createRouter({

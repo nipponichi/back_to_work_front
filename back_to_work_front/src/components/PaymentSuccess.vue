@@ -7,19 +7,19 @@
       <div class="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-8 text-center">
 
         <div v-if="loading" class="text-blue-200 text-lg">
-          Verificando tu email...
+          Confirmando tu pago...
         </div>
 
         <div v-if="success" class="space-y-4">
-          <h2 class="text-2xl font-bold text-green-400">¡Email verificado!</h2>
-          <p class="text-blue-100">Tu dirección de email ha sido verificada correctamente.</p>
+          <h2 class="text-2xl font-bold text-green-400">¡Pago realizado con éxito!</h2>
+          <p class="text-blue-100">Tu puja ha sido marcada como pagada.</p>
         </div>
 
         <div v-if="error" class="space-y-4">
-          <h2 class="text-2xl font-bold text-red-400">Error en la verificación</h2>
+          <h2 class="text-2xl font-bold text-red-400">Error al confirmar el pago</h2>
           <p class="text-blue-100">{{ errorMessage }}</p>
           <button 
-            @click="retryVerification"
+            @click="retryConfirmation"
             class="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
           >
             Reintentar
@@ -33,58 +33,54 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import UserService from '../services/api/user.service';
+import { useRoute } from 'vue-router'
+import axios from 'axios'
 
 export default {
-  props: {
-    id: String,
-    hash: String,
-    signature: String
-  },
-  setup(props) {
+  setup() {
     const loading = ref(true)
     const success = ref(false)
     const error = ref(false)
     const errorMessage = ref('')
-    const router = useRouter()
     const route = useRoute()
 
-    const verifyEmail = async () => {
+    const confirmPayment = async () => {
+      const bidId = route.query.bid_id
+
+      if (!bidId) {
+        error.value = true
+        errorMessage.value = 'No se proporcionó un ID de puja válido.'
+        loading.value = false
+        return
+      }
+
       try {
-        const response = await UserService.set('verify-email', {
-          id: props.id || route.query.id,
-          hash: props.hash || route.query.hash,
-          signature: props.signature || route.query.signature
-        })
-        
+        const response = await axios.post(`http://localhost:8000/api/offers/${bidId}/mark-paid`)
+
         if (response.data.success) {
           success.value = true
-          setTimeout(() => {
-            router.push('/login')
-          }, 2000)
         } else {
-          throw new Error(response.data.message || 'Error desconocido')
+          throw new Error(response.data.message || 'No se pudo confirmar el pago')
         }
       } catch (err) {
         error.value = true
-        errorMessage.value = err.response?.data?.message || err.message || 'Error al verificar el email'
+        errorMessage.value = err.response?.data?.message || err.message || 'Error desconocido'
       } finally {
         loading.value = false
       }
     }
 
-    const retryVerification = () => {
+    const retryConfirmation = () => {
       loading.value = true
       error.value = false
-      verifyEmail()
+      confirmPayment()
     }
 
     onMounted(() => {
-      verifyEmail()
+      confirmPayment()
     })
 
-    return { loading, success, error, errorMessage, retryVerification }
+    return { loading, success, error, errorMessage, retryConfirmation }
   }
 }
 </script>

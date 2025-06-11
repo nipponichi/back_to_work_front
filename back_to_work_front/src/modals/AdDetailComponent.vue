@@ -6,12 +6,47 @@
     <span v-else-if="adData?.pro_is_done === 1 && adData?.customer_is_done === 1" class="text-green-600">
       <i class="pi pi-check-circle"></i> Trabajo completado
     </span>
-
-    <div v-if="adData" class="p-8 space-y-4">
+    <div class="flex items-center gap-4 border-b border-white/10 pb-4 mb-4">
+      <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-600 shadow-md">
+        <img
+          :src="getUserImage(adData?.user)"
+          class="w-full h-full object-cover"
+          alt="Usuario"
+        />
+      </div>
+      <div class="flex flex-col">
+        <span
+          class="text-white font-semibold text-base cursor-pointer flex items-center gap-2"
+          @click.stop="openUserstats(adData?.user)"
+          title="Ver valoraciones"
+        >
+          {{ adData?.user?.user_name }}
+          <span class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20">
+            ★ {{ adData?.user?.user_stat?.length || 0 }}
+          </span>
+        </span>
+        <span
+          v-if="adData?.user?.user_stat?.length"
+          class="text-xs mt-1"
+          :class="{
+            'text-red-400': averageRating(adData?.user) < 3,
+            'text-amber-400': averageRating(adData?.user) >= 3 && averageRating(adData?.user) < 4,
+            'text-green-400': averageRating(adData?.user) >= 4
+          }"
+        >
+          Feedback {{ averageRating(adData?.user).toFixed(1) }} / 5
+        </span>
+        <span
+          v-else
+          class="text-xs text-blue-200 mt-1 italic"
+        >
+          Aún no tiene valoraciones
+        </span>
+      </div>
+    </div>
+    <div v-if="adData" class="p-8 space-y-6">
       <h2 class="text-3xl font-bold text-center text-white">{{ adData.name }}</h2>
-
       <p class="text-center text-blue-200 text-base">{{ adData.description }}</p>
-
       <div class="flex flex-col sm:flex-row justify-center gap-4 mt-3">
         <div class="flex-1 px-3 py-2 bg-white/10 rounded-md text-center">
           <p class="text-blue-300 text-xs uppercase tracking-wide">Categoría</p>
@@ -22,33 +57,23 @@
           <p class="text-white text-sm font-medium">{{ adData.location }}</p>
         </div>
       </div>
-
-      <div class="mt-5">
-
-        <div v-if="adData?.pictures?.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          <div
-            v-for="(picture, index) in adData.pictures"
-            :key="picture.id"
-            class="relative group rounded-lg overflow-hidden border border-white/20"
-          >
-            <img
-              :src="baseImgUrl + picture.path"
-              :alt="'Imagen ' + (index + 1) + ' - ' + adData.name"
-              class="w-full h-28 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer rounded-xl"
-              @click="openLightbox(index)"
-            />
-            <span class="absolute top-1 left-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
-              {{ index + 1 }}/{{ adData.pictures.length }}
-            </span>
-          </div>
-        </div>
-
-        <div v-else class="text-blue-200 italic mt-2">
-          Este anuncio no tiene imágenes
+      <div v-if="adData?.pictures?.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div v-for="(picture, index) in adData.pictures" :key="picture.id"
+          class="relative group rounded-lg overflow-hidden border border-white/20"
+        >
+          <img :src="baseImgUrl + picture.path" :alt="'Imagen ' + (index + 1) + ' - ' + adData.name"
+            class="w-full h-28 object-cover hover:scale-105 transition-transform duration-300 cursor-pointer rounded-xl"
+            @click="openLightbox(index)"
+          />
+          <span class="absolute top-1 left-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
+            {{ index + 1 }}/{{ adData.pictures.length }}
+          </span>
         </div>
       </div>
+      <div v-else class="text-blue-200 italic mt-2">
+        Este anuncio no tiene imágenes
+      </div>
     </div>
-
     <div v-if="user?.is_pro" class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
       <button
         @click="openChat(adData.user)"
@@ -62,7 +87,6 @@
         <i class="pi pi-plus-circle mr-2"></i> Hacer una oferta
       </button>
     </div>
-
     <div v-if="showBidGrid" class="mt-6">
       <div class="overflow-x-auto bg-blue-900 shadow-md rounded-md">
         <table class="min-w-full text-sm">
@@ -111,7 +135,7 @@
         responsiveLayout="scroll"
         class="p-datatable-sm shadow-md rounded-md"
       >
-          <Column field="user.name" header="Usuario" :sortable="true">
+          <Column field="user_name" header="Usuario" :sortable="true">
             <template #body="{data}">
               <span :class="{'font-semibold': data.is_paid}">
                 {{ data.user?.name || 'Desconocido' }}
@@ -147,7 +171,7 @@
                   title="Reportar problema"
                 />
                 <Button
-                  v-if="data.is_paid && ((user?.is_pro && adData.pro_is_done) || (!user?.is_pro && adData.pro_is_done && !adData.customer_is_done))"
+                  v-if="data?.is_paid && ((user?.is_pro && !adData?.pro_is_done) || (!user?.is_pro && adData?.pro_is_done && !adData?.customer_is_done))"
                   icon="pi pi-check"
                   class="p-button-text p-button-success hover:bg-green-100"
                   @click="markAsDone(adData.id)"
@@ -187,7 +211,6 @@
       <p class="text-white text-xl font-semibold mb-2">Sé el primero en hacer una oferta por este proyecto</p>
       <p class="text-blue-200">Aprovecha la oportunidad de destacar y consigue este trabajo antes que nadie.</p>
     </div>
-
     <div v-else class="p-8 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 text-center mt-6">
       <div class="flex flex-col items-center space-y-4">
         <div class="w-20 h-20 flex items-center justify-center rounded-full bg-blue-600/20">
@@ -206,43 +229,29 @@
       </div>
     </div>
 
-    <Dialog
-      v-model:visible="showRatingModal"
-      header="Valora este anuncio"
-      :modal="true"
-      :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
-      headerClass="border-b border-gray-200 p-4 font-semibold text-lg"
-      contentClass="p-4"
-    />
-
     <Teleport to="body">
-      <div v-if="showChatModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div
+        v-if="showChatModal"
+        class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-l-xl shadow-xl flex flex-col transition-all duration-300"
+        style="pointer-events: auto"
+      >
+        <div class="flex justify-between items-center px-4 py-3 border-b border-white/10">
+          <button @click="showChatModal = false"
+                  class="text-red-500 hover:text-red-700 tex-2xl font-bold bg-transparent cursor-pointer focus:outline-none transition">
+        <i class="pi pi-caret-right py-4"></i>
+          </button>
+        </div>
 
-          <div class="flex justify-between items-center px-4 border-b border-white/20">
-            <h3 class="text-lg font-semibold text-white">
-              Chat con {{ selectedReceiver?.user_name }}
-            </h3>
-            <button @click="showChatModal = false"
-                    class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-
-          <div class="p-4 max-h-[80vh] overflow-y-auto">
-            <ChatComponent 
-              :ad_id="id"
-              :sender="user"
-              :receiver="selectedReceiver"
-              :roomId="chat-123-456" 
-            />
-          </div>
+        <div class="p-4 overflow-y-auto flex-1">
+          <ChatComponent 
+            :ad_id="id"
+            :sender="user"
+            :receiver="selectedReceiver"
+            :roomId="chat-123-456" 
+          />
         </div>
       </div>
     </Teleport>
-
 
     <div v-if="isProcessingPayment" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div class="flex flex-col items-center space-y-4">
@@ -294,25 +303,27 @@
       </div>
     </Teleport>
 
-    <div v-if="openAdRatingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
-        <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
-          <h3 class="text-lg leading-6 font-semibold text-white">
-            Sobre este usuario
-          </h3>
-          <button @click="openAdRatingModal = false"
-                  class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-
-        <div class="p-6 max-h-[80vh] overflow-y-auto">
-          <AdRatingComponent :sender="sender" :adData="adData" :receiver="receiver" @rating-submitted="onRatingSubmitted"/>
+    <Teleport to="body">
+      <div v-if="openAdRatingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
+          <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+            <h3 class="text-lg leading-6 font-semibold text-white">
+              Sobre este usuario
+            </h3>
+            <button @click="openAdRatingModal = false"
+                    class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <div class="p-6 max-h-[80vh] overflow-y-auto">
+            <AdRatingComponent :sender="sender" :adData="adData" :receiver="receiver" @rating-submitted="onRatingSubmitted"/>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
+
     <Teleport to="body">
       <div v-if="openClaimModal" class="fixed z-[60] inset-0 overflow-y-auto">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -347,6 +358,28 @@
         </div>
       </div>
     </Teleport>
+
+    <Teleport to="body">
+      <div v-if="openUserstatsModal" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black bg-opacity-70 z-40"></div>
+        <div class="relative z-50 bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
+          <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+            <h3 class="text-lg leading-6 font-semibold text-white">
+              Sobre este usuario
+            </h3>
+            <button @click="openUserstatsModal = false"
+                    class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <div class="p-6 max-h-[80vh] overflow-y-auto">
+            <UserRatingComponent :user="selectedUser" />
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -362,6 +395,8 @@ import Button from 'primevue/button';
 import Tooltip from 'primevue/tooltip';
 import AdRatingComponent from './AdRatingComponent.vue';
 import ClaimsFormComponent from './ClaimsFormComponent.vue';
+import PaymentForm from '../components/PaymentForm.vue'
+import UserRatingComponent from '../modals/UserRatingComponent.vue';
 
 export default {
   components: {
@@ -372,7 +407,9 @@ export default {
     Column,
     Tooltip,
     AdRatingComponent,
-    ClaimsFormComponent
+    ClaimsFormComponent,
+    PaymentForm,
+    UserRatingComponent
   },
   props: {
     id: {
@@ -409,8 +446,10 @@ export default {
       paidbid: {},
       sender: null,
       receiver: null,
-      selectedReceiver: null,
-      selectedBidId: null
+      openUserstatsModal: false,
+      selectedUser: null,
+      selectedBidId: null,
+      baseImgUrl: import.meta.env.VITE_IMG_URL,
     };
   },
   async mounted() {
@@ -434,6 +473,24 @@ export default {
   },
 
   methods: {
+    openUserstats(user) {
+      this.selectedUser = user;
+      console.log(this.selectedUser);
+      this.openUserstatsModal = true;
+    },
+
+    averageRating(user) {
+      if (!user?.user_stat?.length) return 0
+      const total = user?.user_stat.reduce((sum, s) => sum + s.rating, 0)
+      return total / user?.user_stat.length
+    },
+
+    getUserImage(user) {
+      const fallback = 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
+      if (!user || !user?.image) return fallback;
+      return `${this.baseImgUrl}/${user?.image}`;
+    },
+
     openClaim(bidId, user) {
       console.log(user)
       console.log(bidId)
@@ -451,13 +508,13 @@ export default {
         const response = await userService.set("ad/done", {id: id});
         if (response.data.success) {
           if (this.user?.is_pro) {
-            this.adData.pro_is_done = 1;
+            this.adData.pro_is_done = true;
             this.openAdRatingModal = true;
             this.sender = this.user;
             this.receiver = this.adData.user;
             this.toast.success("Has marcado este trabajo como completado. Esperando confirmación del cliente.");
           } else {
-            this.adData.customer_is_done = 1;
+            this.adData.customer_is_done = true;
             this.sender = this.user;
             this.receiver = this.bids.find(bid => bid.ad_id === id)?.user;
             this.openAdRatingModal = true;
@@ -545,23 +602,21 @@ export default {
       }
     },
 
-    goToPayment(bid) {
-      console.log(bid);
+    async goToPayment(bid) {
       this.isProcessingPayment = true;
-      const paymentUrl = import.meta.env.VITE_PAYMENT_API_URL + '/payment';
-      console.log(paymentUrl);
 
-      if (paymentUrl.startsWith('http://localhost')) {
-        const newWindow = window.open(paymentUrl, '_blank');
+      try {
+        const response = await userService.set('checkout', {
+          amount: bid.bid * 100,
+          bid_id: bid.id
+        });
 
-        setTimeout(() => {
-          newWindow.postMessage({
-            bid: {
-              id: bid.id,
-              amount: bid.bid
-            }
-          }, import.meta.env.VITE_PAYMENT_API_URL);
-        }, 500);
+        window.location.href = response.data.url;
+      } catch (error) {
+        console.error('Error creando sesión de pago:', error);
+        this.toast.error('Error al iniciar el pago');
+      } finally {
+        this.isProcessingPayment = false;
       }
     },
 
@@ -570,15 +625,8 @@ export default {
         const res = await userService.show('ads', this.id);
         if (res.data.success) {
           this.adData = res.data.data;
-          console.log("Ad data fetched:", this.adData);
-        if (this.adData.pictures && this.adData.pictures.length > 0) {
-          console.log('URL de imagen:', import.meta.env.VITE_IMG_URL + this.adData.pictures[0].path);
-        } else {
-          console.log('No hay imágenes en este anuncio');
-        }
-
+          console.log("Ad data:", this.adData);
           this.adData.category_name = this.getCategoryName(this.adData.category_id);
-          console.log("Anuncio obtenido:", this.adData);
         }
       } catch (err) {
         console.error("Error al obtener el anuncio:", err);
@@ -589,6 +637,7 @@ export default {
       try {
         const userStr = localStorage.getItem("user");
         this.user = JSON.parse(userStr);
+        console.log(this.user)
       } catch (err) {
         console.error("No se pudo obtener el usuario:", err);
       }
@@ -602,12 +651,11 @@ export default {
           console.log(this.bids);
           this.bids.forEach(bid => {
             console.log(this.bids);
-            if (bid.is_paid === 1) {
+            if (bid.is_paid) {
               console.log("Puja pagada:", bid);
               this.paidbid = bid;
             }
           });
-          console.log("Pujas obtenidas:", this.bids);
         }
       } catch (err) {
         console.error("Error al obtener pujas:", err);

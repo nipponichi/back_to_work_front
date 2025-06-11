@@ -86,7 +86,7 @@
                 v-if="showUserMenu"
                 class="absolute right-0 mt-2 w-56 bg-gradient-to-br from-blue-950 to-blue-900 backdrop-blur-lg text-white border border-white/20 shadow-lg z-50"
               >
-                <button
+                <button v-if="user?.is_pro"
                   @click="$router.push('/work')"
                   class="block w-full text-left px-4 py-2 hover:bg-gray-300/60 hover:text-white transition font-semibold"
                 >
