@@ -134,8 +134,9 @@ export default {
       return total / this.user.user_stat.length
     }
   },
-  mounted() {
-    this.initialize()
+  async mounted() {
+    await this.initialize()
+    await this.fetchUserStats()
   },
   methods: {
     getUserImage(user) {
@@ -148,7 +149,7 @@ export default {
       try {
         const userStr = localStorage.getItem("user");
         this.loggedUser = userStr ? JSON.parse(userStr) : null;
-        await this.fetchUserStats()
+
       } catch (error) {
         console.error('Error inicializando componente:', error)
       }
