@@ -564,6 +564,7 @@ export default {
       ads: [],
       user: null,
       categories: [],
+      provinces: [],
       openCreateAdModal: false,
       openAdDetailModal: false,
       selectedCategory: null,
@@ -580,23 +581,53 @@ export default {
   },
   computed: {
     filteredAds() {
-      if (!this.searchQuery) return this.ads;
-      return this.ads.filter(ad =>
-        ad.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        ad.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        ad.location.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    }
+      return this.ads.filter(ad => {
+        const matchesQuery =
+          !this.searchQuery ||
+          ad.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          ad.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          ad.location.toLowerCase().includes(this.searchQuery.toLowerCase());
+
+        const matchesLocation =
+          !this.selectedProvince ||
+          ad.location?.trim().toLowerCase() === this.selectedProvince.trim().toLowerCase();
+
+        const matchesCategory =
+          !this.selectedCategory || ad.category_id === this.selectedCategory;
+
+        let matchesDueDate = true;
+        if (this.selectedFromDate) {
+          matchesDueDate = ad.due_date && new Date(ad.due_date) >= new Date(this.selectedFromDate);
+        }
+        if (matchesDueDate && this.selectedToDate) {
+          matchesDueDate = ad.due_date && new Date(ad.due_date) <= new Date(this.selectedToDate);
+        }
+
+        return matchesQuery && matchesLocation && matchesCategory && matchesDueDate;
+      });
+    },
   },
-  mounted() {
+  
+  async mounted() {
     this.accessToken = localStorage.getItem("token");
     let userStr = localStorage.getItem("user");
     this.user = JSON.parse(userStr);
-    this.fetchCategories();
-    this.fetchMyAds();
-      
+    await this.fetchCategories();
+    await this.fetchProvinces();
+    await this.fetchMyAds(); 
   },
+  
   methods: {
+    async fetchProvinces() {
+      try {
+        const response = await UserService.get("provinces");
+        this.provinces = response.data.data;
+        console.log(this.provinces)
+      } catch (error) {
+        console.error('Error fetching provinces:', error);
+      }
+    },
+
     updateAd(ad) {
       const index = this.ads.findIndex(a => a.id === ad.id);
       if (index !== -1) {

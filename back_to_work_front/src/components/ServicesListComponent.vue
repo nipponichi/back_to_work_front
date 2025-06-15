@@ -716,8 +716,6 @@ computed: {
 
       const matchesLocation =
         !this.selectedProvince || ad.location === this.selectedProvince;
-
-
       const matchesCategory =
         !this.selectedCategory || ad.category_id === this.selectedCategory;
 
@@ -737,6 +735,7 @@ async mounted () {
   window.addEventListener('resize', this.checkMobile);
   let userStr = localStorage.getItem("user");
   this.user = JSON.parse(userStr);
+  console.log(this.user)
   await this.fetchCategories();
   await this.fetchProvinces();
 
@@ -750,6 +749,24 @@ async mounted () {
 beforeUnmount() {
   window.removeEventListener('resize', this.checkMobile);
 },
+watch: {
+    user: {
+      handler(newUser) {
+        if (newUser?.is_pro) {
+          if (newUser.categories?.length > 0) {
+            this.selectedCategory = newUser.categories[0].id;
+          }
+          
+          if (newUser.provinces?.name) {
+            this.selectedProvince = newUser.provinces.name;
+          }
+        }
+      },
+      immediate: true,
+      deep: true,
+    }
+},
+
 methods: {
   checkMobile() {
     this.isMobile = window.innerWidth < 640;
