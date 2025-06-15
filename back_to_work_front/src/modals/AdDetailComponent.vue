@@ -253,12 +253,14 @@
       </div>
     </Teleport>
 
-    <div v-if="isProcessingPayment" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div class="flex flex-col items-center space-y-4">
-        <div class="spinner"></div>
-        <span class="text-white text-lg font-semibold">Procesando pago...</span>
+    <Teleport to="body">
+      <div v-if="isProcessingPayment" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="flex flex-col items-center space-y-4">
+          <div class="spinner"></div>
+          <span class="text-white text-lg font-semibold">Procesando pago...</span>
+        </div>
       </div>
-    </div>
+    </Teleport>
 
     <Teleport to="body">
       <div 

@@ -32,55 +32,57 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import axios from 'axios'
+import userService from '../services/api/user.service'
 
 export default {
-  setup() {
-    const loading = ref(true)
-    const success = ref(false)
-    const error = ref(false)
-    const errorMessage = ref('')
-    const route = useRoute()
+  data() {
+    return {
+      loading: true,
+      success: false,
+      error: false,
+      errorMessage: '',
+    }
+  },
+  methods: {
+    async confirmPayment() {
+      const bidId = this.$route.query.bid_id
 
-    const confirmPayment = async () => {
-      const bidId = route.query.bid_id
+      
 
       if (!bidId) {
-        error.value = true
-        errorMessage.value = 'No se proporcionó un ID de puja válido.'
-        loading.value = false
+        this.error = true
+        this.errorMessage = 'No se proporcionó un ID de puja válido.'
+        this.loading = false
         return
       }
 
       try {
-        const response = await axios.post(`http://localhost:8000/api/offers/${bidId}/mark-paid`)
+        const response = await userService.show('offers/mark-paid', bidId)
 
         if (response.data.success) {
-          success.value = true
+          this.success = response.data.success
+          setTimeout(() => {
+            this.$router.push('/service')
+          }, 2500)
         } else {
           throw new Error(response.data.message || 'No se pudo confirmar el pago')
         }
       } catch (err) {
-        error.value = true
-        errorMessage.value = err.response?.data?.message || err.message || 'Error desconocido'
+        this.error = true
+        this.errorMessage = err.response?.data?.message || err.message || 'Error desconocido'
       } finally {
-        loading.value = false
+        this.loading = false
       }
+    },
+    retryConfirmation() {
+      this.loading = true
+      this.error = false
+      this.confirmPayment()
     }
-
-    const retryConfirmation = () => {
-      loading.value = true
-      error.value = false
-      confirmPayment()
-    }
-
-    onMounted(() => {
-      confirmPayment()
-    })
-
-    return { loading, success, error, errorMessage, retryConfirmation }
+  },
+  mounted() {
+    this.confirmPayment()
   }
 }
 </script>
+
