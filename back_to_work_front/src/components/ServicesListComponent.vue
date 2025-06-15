@@ -646,6 +646,7 @@ import UserService from '../services/api/user.service';
 import AdRatingComponent from '../modals/AdRatingComponent.vue';
 import UserRatingComponent from '../modals/UserRatingComponent.vue';
 import ClaimsFormComponent from '../modals/ClaimsFormComponent.vue';
+import swalService from '../services/swal.js'
 
 export default {
   components: {
@@ -876,17 +877,17 @@ methods: {
   },
 
   async deleteAd(adId) {
-    if (!confirm('¿Estás seguro de que quieres eliminar este anuncio?')) {
-      return;
-    }
 
     try {
-      const response = await UserService.delete('ads' , adId);
-      if (response.data.success) {
-        this.ads = this.ads.filter(ad => ad.id !== adId);
-        this.toast.success('Anuncio eliminado con éxito');
-      } else {
-        this.toast.error('No se pudo eliminar el anuncio');
+    const confirm = await swalService.confirm("¿Deseas eliminar este anuncio?")
+      if (confirm.isConfirmed) {
+        const response = await UserService.delete('ads' , adId);
+        if (response.data.success) {
+          this.ads = this.ads.filter(ad => ad.id !== adId);
+          this.toast.success('Anuncio eliminado con éxito');
+        } else {
+          this.toast.error('No se pudo eliminar el anuncio');
+        }
       }
     } catch (error) {
       console.error('Error al eliminar el anuncio:', error);

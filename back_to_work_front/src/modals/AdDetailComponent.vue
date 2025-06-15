@@ -93,18 +93,14 @@
           <tbody>
             <tr v-if="showNewBidRow" class="border-b">
               <td class="px-2 py-2 w-1/3">
-                <input
-                  v-model="newBid.bid"
-                  type="number"
-                  class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
+                <input v-model="newBid.bid" type="number"
+                  class="w-full px-2 py-2 bg-blue-950/60 text-white placeholder-blue-300 border border-white/10 rounded-md focus:ring focus:ring-blue-500/50 text-sm transition"
                   placeholder="Monto"
                 />
               </td>
               <td class="px-2 py-2 w-1/2">
-                <input
-                  v-model="newBid.description"
-                  type="text"
-                  class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm"
+                <input v-model="newBid.description" type="text"
+                  class="w-full px-2 py-2 bg-blue-950/60 text-white placeholder-blue-300 border border-white/10 rounded-md focus:ring focus:ring-blue-500/50 text-sm transition"
                   placeholder="Descripción"
                 />
               </td>
@@ -423,6 +419,7 @@ import Tooltip from 'primevue/tooltip';
 import AdRatingComponent from './AdRatingComponent.vue';
 import ClaimsFormComponent from './ClaimsFormComponent.vue';
 import UserRatingComponent from '../modals/UserRatingComponent.vue';
+import swalService from '../services/swal.js'
 
 export default {
   components: {
@@ -690,11 +687,15 @@ export default {
 
     async removeBid(bidId) {
       try {
-        const response = await userService.delete('offers', bidId);
-        if (response.data.success) {
-          this.bids = this.bids.filter(bid => bid.id !== bidId);
-          this.toast.success('Puja eliminada con éxito');
+        const confirm = await swalService.confirm("¿Deseas eliminar esta oferta?")
+        if (confirm.isConfirmed) {
+          const response = await userService.delete('offers', bidId);
+          if (response.data.success) {
+            this.bids = this.bids.filter(bid => bid.id !== bidId);
+            this.toast.success('Puja eliminada con éxito');
+          }
         }
+
       } catch (err) {
         console.error("Error al eliminar puja:", err);
       }
