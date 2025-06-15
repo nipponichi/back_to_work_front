@@ -10,6 +10,7 @@ import VerifyEmailComponent from "../components/VerifyEmailComponent.vue";
 import ResetPasswordFormComponent from "../components/ResetPasswordFormComponent.vue";
 import WorksView from "../views/WorksView.vue";
 import AdminView from "../views/AdminView.vue";
+import RatesView from "../views/RatesView.vue";
 import ResetPasswordView from "../views/ResetPasswordView.vue";
 import PaymentSuccess from "../components/PaymentSuccess.vue";
 
@@ -30,7 +31,8 @@ const routes = [
     { path: '/service', component: ServicesView,  name: 'service', meta: { requiresAuth: true }},
     { path: '/work', component:WorksView, name: 'work', meta: { requiresAuth: true }},
     { path: '/admin', component:AdminView, name: 'admin', meta: { requiresAuth: true }},
-    { path: '/payment-success', component:PaymentSuccess, name: 'payment', meta: { requiresAuth: true }}
+    { path: '/payment-success', component:PaymentSuccess, name: 'payment', meta: { requiresAuth: true }},
+    { path: '/professional', component:RatesView, name: 'professional'}
 ]
 
 const router = createRouter({

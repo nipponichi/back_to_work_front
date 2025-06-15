@@ -41,25 +41,28 @@
         </div>
 
         <div class="bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-6 mb-8">
-          <div class="flex flex-col lg:flex-row flex-wrap gap-4">
-          <div class="relative flex-grow lg:max-w-xs">
-            <label class="block text-blue-200 text-sm mb-1">Buscador</label>
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i class="mt-5 pi pi-search text-blue-300 text-lg"></i>
+          <div class="flex flex-wrap gap-4 justify-between">
+            
+            <div class="flex-grow lg:max-w-xs">
+              <label class="block text-sm font-medium text-white mb-1">Buscador</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="pi pi-search text-blue-300 text-lg"></i>
+                </div>
+                <input 
+                  type="text" 
+                  v-model="searchQuery" 
+                  placeholder="Buscar anuncios..."
+                  class="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 text-white placeholder-blue-200 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+                />
+              </div>
             </div>
-            <input 
-              type="text" 
-              v-model="searchQuery" 
-              placeholder="Buscar anuncios..."
-              class="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/20 text-white placeholder-blue-200 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200 shadow-sm hover:border-blue-200"
-            />
-          </div>
 
             <div class="flex-grow lg:max-w-xs">
-              <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Provincia</label>
+              <label class="block text-sm font-medium text-white mb-1">Provincia</label>
               <select 
                 v-model="selectedProvince"
-                class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
+                class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
               >
                 <option value="" class="text-gray-900">Toda España</option>
                 <option 
@@ -74,10 +77,10 @@
             </div>
 
             <div class="flex-grow lg:max-w-xs">
-              <label class="block text-sm font-medium text-white mb-1 sm:mb-2">Categoria</label>
+              <label class="block text-sm font-medium text-white mb-1">Categoría</label>
               <select 
                 v-model="selectedCategory"
-                class="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
+                class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:ring-2 focus:ring-blue-300 outline-none transition-all duration-200"
               >
                 <option value="" class="text-gray-900">Todas las categorías</option>
                 <option 
@@ -92,22 +95,23 @@
             </div>
 
             <div class="flex-grow lg:max-w-xs">
-              <label class="block text-blue-200 text-sm mb-1">Desde</label>
+              <label class="block text-sm font-medium text-white mb-1">Desde</label>
               <input 
                 type="date" 
                 v-model="selectedFromDate"
-                class="w-full px-3 py-3 bg-white/5 border border-white/20 text-white rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+                class="w-full px-4 py-3 bg-white/5 border border-white/20 text-white rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
               />
             </div>
 
             <div class="flex-grow lg:max-w-xs">
-              <label class="block text-blue-200 text-sm mb-1">Hasta</label>
+              <label class="block text-sm font-medium text-white mb-1">Hasta</label>
               <input 
                 type="date" 
                 v-model="selectedToDate"
-                class="w-full px-3 py-3 bg-white/5 border border-white/20 text-white rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
+                class="w-full px-4 py-3 bg-white/5 border border-white/20 text-white rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-300 outline-none transition-all duration-200"
               />
             </div>
+
           </div>
         </div>
 

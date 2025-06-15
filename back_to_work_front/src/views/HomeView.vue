@@ -25,9 +25,12 @@
             <a href="#" class="px-8 py-4 bg-white text-blue-800 font-bold rounded-lg hover:bg-blue-100 transition-all duration-300 transform hover:scale-105 shadow-lg">
               Buscar profesionales
             </a>
-            <a href="#" class="px-8 py-4 bg-transparent text-white font-bold rounded-lg border-2 border-white hover:bg-white/10 transition-all duration-300">
-              Soy profesional
-            </a>
+<RouterLink
+  to="/professional"
+  class="px-8 py-4 bg-transparent text-white font-bold rounded-lg border-2 border-white hover:bg-white/10 transition-all duration-300"
+>
+  Soy profesional
+</RouterLink>
           </div>
           
           <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
