@@ -136,10 +136,36 @@
         class="p-datatable-sm shadow-md rounded-md"
       >
           <Column field="user_name" header="Usuario" :sortable="true">
-            <template #body="{data}">
-              <span :class="{'font-semibold': data.is_paid}">
-                {{ data.user?.name || 'Desconocido' }}
-              </span>
+            <template #body="{ data }">
+              <div class="flex flex-col">
+                <span
+                  class="text-white font-semibold text-base cursor-pointer flex items-center gap-2"
+                  @click.stop="openUserstats(data?.user)"
+                  title="Ver valoraciones"
+                >
+                  {{ data?.user?.user_name }}
+                  <span class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20">
+                    ★ {{ data?.user?.user_stat?.length || 0 }}
+                  </span>
+                </span>
+                <span
+                  v-if="data?.user?.user_stat?.length"
+                  class="text-xs mt-1"
+                  :class="{
+                    'text-red-400': averageRating(data?.user) < 3,
+                    'text-amber-400': averageRating(data?.user) >= 3 && averageRating(data?.user) < 4,
+                    'text-green-400': averageRating(data?.user) >= 4
+                  }"
+                >
+                  Feedback {{ averageRating(data?.user).toFixed(1) }} / 5
+                </span>
+                <span
+                  v-else
+                  class="text-xs text-blue-200 mt-1 italic"
+                >
+                  Aún no tiene valoraciones
+                </span>
+              </div>
             </template>
           </Column>
           
@@ -386,7 +412,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import userService from '../services/api/user.service';
 import { useToast } from 'vue-toastification';
 import ChatComponent from '../components/ChatComponent.vue';
@@ -397,7 +422,6 @@ import Button from 'primevue/button';
 import Tooltip from 'primevue/tooltip';
 import AdRatingComponent from './AdRatingComponent.vue';
 import ClaimsFormComponent from './ClaimsFormComponent.vue';
-import PaymentForm from '../components/PaymentForm.vue'
 import UserRatingComponent from '../modals/UserRatingComponent.vue';
 
 export default {
@@ -410,7 +434,6 @@ export default {
     Tooltip,
     AdRatingComponent,
     ClaimsFormComponent,
-    PaymentForm,
     UserRatingComponent
   },
   props: {
@@ -455,7 +478,6 @@ export default {
     };
   },
   async mounted() {
-    //window.addEventListener('message', this.receiveMessage);
     await this.fetchCategories();
     await this.fetchAdData();
     await this.fetchUser();
@@ -467,10 +489,6 @@ export default {
       console.log('No hay imágenes en este anuncio');
     }
 
-  },
-
-  beforeUnmount() {
-    //window.removeEventListener('message', this.receiveMessage);
   },
 
   methods: {
@@ -573,41 +591,14 @@ export default {
       return category ? category.category : 'Uncategorized';
     },
 
-    async receiveMessage(event) {
-      if (event.origin !== 'http://localhost:5174') return;
-
-      const data = event.data;
-
-      if (data && data.PaymentOK === true && data.bidId) {
-        try {
-          const res = await axios.post(`http://127.0.0.1:8000/api/offers/${data.bidId}/mark-paid`);
-
-          if (res.data.success) {
-            await this.fetchBids();
-            
-          const resAd = await axios.get(`http://127.0.0.1:8000/api/offers/${data.bidId}/ad`);
-          const adId = resAd.data.ad_id;
-          this.$emit('payment-success', { adId });
-          this.$emit('close-ad-detail');
-
-          } else {
-            console.warn('El servidor no confirmó el pago como exitoso.');
-          }
-        } catch (error) {
-          console.error('Error actualizando el estado de pago:', error);
-        } finally {
-          this.isProcessingPayment = false;
-        }
-      }
-    },
-
     async goToPayment(bid) {
       this.isProcessingPayment = true;
 
       try {
         const response = await userService.set('checkout', {
           amount: bid.bid * 100,
-          bid_id: bid.id
+          bid_id: bid.id,
+          user_name: bid?.user?.user_name
         });
 
         window.location.href = response.data.url;
@@ -646,6 +637,7 @@ export default {
         const res = await userService.show('offers/ad', this.id);
         if (res.data.success) {
           this.bids = res.data.data;
+          console.log(this.bids)
           this.bids.forEach(bid => {
             if (bid.is_paid) {
               this.paidbid = bid;

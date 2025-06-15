@@ -412,7 +412,6 @@
                   </div>
                 </div>
               </div>
-
               </div>
             </div>
         </div>
@@ -616,7 +615,7 @@ export default {
     await this.fetchProvinces();
     await this.fetchMyAds(); 
   },
-  
+
   methods: {
     async fetchProvinces() {
       try {

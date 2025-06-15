@@ -746,9 +746,11 @@ async mounted () {
   }
 
 },
+
 beforeUnmount() {
   window.removeEventListener('resize', this.checkMobile);
 },
+
 watch: {
     user: {
       handler(newUser) {
