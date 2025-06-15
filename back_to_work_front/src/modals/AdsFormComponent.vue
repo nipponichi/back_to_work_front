@@ -138,12 +138,17 @@
 
 <script>
 import UserService from '../services/api/user.service';
-import { useToast } from 'vue-toastification';
+import toast from '../services/toast.js'
 
 export default {
+  components() {
+    toast
+  },
+
   props: {
     categories: { type: Array, required: true },
   },
+
   data() {
     return {
       provinces: [],
@@ -153,7 +158,6 @@ export default {
       validImageExtensions: ['image/jpeg', 'image/jpg', 'image/png'],
       validVideoExtensions: ['video/mp4'],
       user: null,
-      toast: useToast(),
       showVerificationDialog: false,
     };
   },
@@ -283,7 +287,7 @@ export default {
         });
 
         if (response.data.success) {
-          this.toast.success('Anuncio creado con éxito!');
+          toast.success('Anuncio creado con éxito!');
 
           this.resetForm();
           this.showVerificationDialog = true;
@@ -296,11 +300,11 @@ export default {
             this.$emit('created', ad);
           }, 7000);
         } else {
-          this.toast.error('Hubo un problema al crear el anuncio');
+          toast.error('Hubo un problema al crear el anuncio');
         }
       } catch (error) {
         console.error('Error al enviar el formulario:', error);
-        this.toast.error('Error al enviar el formulario');
+        toast.error('Error al enviar el formulario');
       }
     },
     resetForm() {

@@ -209,10 +209,13 @@
 <script>
 import UserService from '../services/api/user.service';
 import Select from 'primevue/select';
-import { useToast } from 'vue-toastification';
+import toast from '../services/toast.js'
 
 export default {
-  components: { Select },
+  components: { 
+    Select,
+    toast
+  },
   data() {
     return {
       userImageUrl: '',
@@ -245,7 +248,6 @@ export default {
         "Preferencias",
         "Confirmación"
       ],
-      toast: useToast()
     };
   },
   async mounted() {
@@ -289,7 +291,7 @@ export default {
 
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!validTypes.includes(file.type)) {
-        this.toast.error('Formato no válido. Solo JPG o PNG');
+        toast.error('Formato no válido. Solo JPG o PNG');
         return;
       }
 
@@ -366,14 +368,14 @@ export default {
 
         const response = await UserService.set('user/public', formData);
         if (response.data.success) {
-          this.toast.success("User registered successfully");
+          toast.success("User registered successfully");
           this.$router.push("/login");
         } else {
-          this.toast.error(response.data.message);
+          toast.error(response.data.message);
         }
       } catch (error) {
         console.error('Error saving user:', error);
-        this.toast.error("Error saving user");
+        toast.error("Error saving user");
       }
     },
 

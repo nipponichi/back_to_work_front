@@ -126,9 +126,12 @@
 
 
 <script>
-import { useToast } from 'vue-toastification';
+import toast from '../services/toast.js'
 
 export default {
+  components () {
+    toast
+  },
   data() {
     return {
       form: {
@@ -136,7 +139,6 @@ export default {
         email: '',
         subject: '',
         message: '',
-        toast: useToast()
       },
       isSubmitting: false
     }
@@ -150,7 +152,7 @@ export default {
         
         await new Promise(resolve => setTimeout(resolve, 1500))
         
-        this.toast.success('Mensaje enviado con éxito. Te responderemos pronto.', {
+        toast.success('Mensaje enviado con éxito. Te responderemos pronto.', {
           position: 'top-right',
           duration: 5000
         })

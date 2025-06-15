@@ -131,10 +131,10 @@
 import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { useToast } from 'vue-toastification';
 import UserService from '../services/api/user.service';
 import ProDetailComponent from '../modals/ProDetailComponent.vue';
 import Dialog from 'primevue/dialog';
+import toast from '../services/toast.js'
 
 export default {
   components: {   
@@ -142,7 +142,8 @@ export default {
       DataTable,
       Column,
       ProDetailComponent,
-      Dialog
+      Dialog,
+      toast
   },
   data() {
       return {
@@ -153,7 +154,6 @@ export default {
         sortField: null,
         sortOrder: null,          
         ads: [],
-        toast: useToast()
       };
   },
   computed: {

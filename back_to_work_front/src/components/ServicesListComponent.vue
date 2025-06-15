@@ -645,7 +645,7 @@ import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
-import { useToast } from 'vue-toastification';
+import toast from '../services/toast.js'
 import UserService from '../services/api/user.service';
 import AdRatingComponent from '../modals/AdRatingComponent.vue';
 import UserRatingComponent from '../modals/UserRatingComponent.vue';
@@ -665,6 +665,7 @@ export default {
     Tag,
     Dialog,
     AdRatingComponent,
+    toast,
   },
   data() {
     return {
@@ -698,7 +699,6 @@ export default {
 
 
       statusFilter: null,
-      toast: useToast(),
       selectedId: '',
       user: null,
       adToRate: null,
@@ -831,7 +831,7 @@ methods: {
       this.ads.splice(index, 1, ad);
     } else {
       this.ads.unshift(ad);
-      this.toast.success('Anuncio creado con éxito');
+      toast.success('Anuncio creado con éxito');
     }
     this.openAdDetailModal = false;
   },
@@ -888,14 +888,14 @@ methods: {
         const response = await UserService.delete('ads' , adId);
         if (response.data.success) {
           this.ads = this.ads.filter(ad => ad.id !== adId);
-          this.toast.success('Anuncio eliminado con éxito');
+          toast.success('Anuncio eliminado con éxito');
         } else {
-          this.toast.error('No se pudo eliminar el anuncio');
+          toast.error('No se pudo eliminar el anuncio');
         }
       }
     } catch (error) {
       console.error('Error al eliminar el anuncio:', error);
-      this.toast.error('Error al eliminar el anuncio');
+      toast.error('Error al eliminar el anuncio');
     }
   },
 
@@ -917,7 +917,7 @@ methods: {
     this.openAdDetailModal = false;
     this.adToRate = adId;
     setTimeout(() => {
-      this.toast.success('Pago recibido con éxito');
+      toast.success('Pago recibido con éxito');
     }, 300);
   },
 
@@ -956,7 +956,7 @@ methods: {
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
-      this.toast.error("Error al cargar las categorías");
+      toast.error("Error al cargar las categorías");
     }
   },
 
@@ -970,7 +970,7 @@ methods: {
       }
     } catch (error) {
       console.error("Error fetching ads:", error);
-      this.toast.error("Error al cargar los anuncios");
+      toast.error("Error al cargar los anuncios");
     } finally {
       this.loading = false;
     }
@@ -986,7 +986,7 @@ methods: {
       }
     } catch (error) {
       console.error("Error fetching user ads:", error);
-      this.toast.error("Error al cargar tus anuncios");
+      toast.error("Error al cargar tus anuncios");
     } finally {
       this.loading = false;
     }

@@ -409,7 +409,7 @@
 
 <script>
 import userService from '../services/api/user.service';
-import { useToast } from 'vue-toastification';
+import toast from '../services/toast.js'
 import ChatComponent from '../components/ChatComponent.vue';
 import Dialog from 'primevue/dialog';
 import DataTable from 'primevue/datatable';
@@ -431,7 +431,8 @@ export default {
     Tooltip,
     AdRatingComponent,
     ClaimsFormComponent,
-    UserRatingComponent
+    UserRatingComponent,
+    toast
   },
   props: {
     id: {
@@ -457,7 +458,6 @@ export default {
       showNewBidRow: false,
       showChatModal: false,
       isSubmitting: false,
-      toast: useToast(),
       selectedReceiver: null,
       showPaymentModal: false,
       selectedBid: null,
@@ -530,19 +530,19 @@ export default {
             this.openAdRatingModal = true;
             this.sender = this.user;
             this.receiver = this.adData.user;
-            this.toast.success("Has marcado este trabajo como completado. Esperando confirmación del cliente.");
+            toast.success("Has marcado este trabajo como completado. Esperando confirmación del cliente.");
           } else {
             this.adData.customer_is_done = true;
             this.sender = this.user;
             this.receiver = this.bids.find(bid => bid.ad_id === id)?.user;
             this.openAdRatingModal = true;
-            this.toast.success("Has confirmado la finalización del trabajo.");
+            toast.success("Has confirmado la finalización del trabajo.");
           }
           await this.fetchBids();
         }
       } catch (error) {
         console.error("Error al marcar la puja como completada:", error);
-        this.toast.error("Error al completar la puja");
+        toast.error("Error al completar la puja");
       }
     },
 
@@ -601,7 +601,7 @@ export default {
         window.location.href = response.data.url;
       } catch (error) {
         console.error('Error creando sesión de pago:', error);
-        this.toast.error('Error al iniciar el pago');
+        toast.error('Error al iniciar el pago');
       } finally {
         this.isProcessingPayment = false;
       }
@@ -668,7 +668,7 @@ export default {
 
         if (response.data.success) {
           const newBid = response.data.data;
-          this.toast.success('Puja enviada con éxito');
+          toast.success('Puja enviada con éxito');
           if (!newBid.user) {
             await this.fetchBids();
           } else {
@@ -692,7 +692,7 @@ export default {
           const response = await userService.delete('offers', bidId);
           if (response.data.success) {
             this.bids = this.bids.filter(bid => bid.id !== bidId);
-            this.toast.success('Puja eliminada con éxito');
+            toast.success('Puja eliminada con éxito');
           }
         }
 

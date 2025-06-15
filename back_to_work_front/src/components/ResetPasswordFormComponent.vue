@@ -44,10 +44,13 @@
 </template>
 
 <script>
-import { useToast } from "vue-toastification";
+import toast from '../services/toast.js'
 import userService from "../services/api/user.service";
 
 export default {
+  components() {
+    toast
+  },
   props: {
     token: String,
     email: String
@@ -59,7 +62,6 @@ export default {
       newPasswordConfirmation: '',
       errorMessage: '',
       isLoading: false,
-      toast: useToast()
     };
   },
   methods: {
@@ -67,13 +69,13 @@ export default {
 
       if (this.newPassword !== this.newPasswordConfirmation) {
         this.errorMessage = "Las contraseñas no coinciden";
-        this.toast.error(this.errorMessage);
+        toast.error(this.errorMessage);
         return;
       }
       
       if (this.newPassword.length < 4) {
         this.errorMessage = "La contraseña debe tener al menos 8 caracteres";
-        this.toast.error(this.errorMessage);
+        toast.error(this.errorMessage);
         return;
       }
 
@@ -97,7 +99,7 @@ export default {
           password_confirmation: this.newPasswordConfirmation
         });
 
-        this.toast.success("Contraseña actualizada correctamente");
+        toast.success("Contraseña actualizada correctamente");
         
         setTimeout(() => {
           this.$router.push('/login');
@@ -105,7 +107,7 @@ export default {
 
       } catch (error) {
         this.errorMessage = error.response?.data?.message || error.message || "Error al actualizar la contraseña";
-        this.toast.error(this.errorMessage);
+        toast.error(this.errorMessage);
       } finally {
         this.isLoading = false;
       }

@@ -30,15 +30,17 @@
 </template>
 
 <script>
-import { useToast } from "vue-toastification";
+import toast from '../services/toast.js'
 import userService from "../services/api/user.service";
 
 export default {
+  components() {
+    toast
+  },
   data() {
     return {
       email: "",
       errorMessage: "",
-      toast: useToast(),
     };
   },
   methods: {
@@ -49,11 +51,11 @@ export default {
         });
 
         if (response.data.success) {
-          this.toast.success("Solicitud enviada con éxito");
+          toast.success("Solicitud enviada con éxito");
         }
 
       } catch (error) {        
-        this.toast.error(error.response.data.message);
+        toast.error(error.response.data.message);
       }
     },
   }

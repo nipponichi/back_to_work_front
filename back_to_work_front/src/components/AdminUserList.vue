@@ -228,7 +228,7 @@ export default {
             this.editDialogVisible = true;
         } catch (error) {
             console.error('Error al obtener el usuario:', error);
-            this.toast.error('No se pudo cargar el usuario');
+            toast.error('No se pudo cargar el usuario');
         }
     },
 
@@ -250,7 +250,7 @@ export default {
                 const index = this.users.findIndex(user => user.id === this.selectedUser.id);
                 if (index !== -1) {
                     this.users.unshift(response.data.data)
-                    this.toast.success(response.data.message)
+                    toast.success(response.data.message)
                 }
             }
         }

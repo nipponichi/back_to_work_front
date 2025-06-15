@@ -538,7 +538,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
-import { useToast } from 'vue-toastification';
+import toast from '../services/toast.js'
 import UserService from '../services/api/user.service';
 import AdRatingComponent from '../modals/AdRatingComponent.vue';
 import UserRatingComponent from '../modals/UserRatingComponent.vue';
@@ -553,7 +553,8 @@ export default {
     Tag,
     Dialog,
     AdRatingComponent,
-    UserRatingComponent
+    UserRatingComponent,
+    toast
   },
   data() {
     return {
@@ -572,7 +573,6 @@ export default {
       openAdDetailModal: false,
       selectedCategory: null,
       statusFilter: null,
-      toast: useToast(),
       selectedId: '',
           user: null,
           accessToken: null,
@@ -637,7 +637,7 @@ export default {
         this.ads.splice(index, 1, ad);
       } else {
         this.ads.unshift(ad);
-        this.toast.success('Anuncio creado con éxito');
+        toast.success('Anuncio creado con éxito');
       }
       this.openAdDetailModal = false;
     },
@@ -732,7 +732,7 @@ export default {
         this.openAdDetailModal = false;
         this.adToRate = adId;
       setTimeout(() => {
-          this.toast.success('Pago recibido con éxito');
+          toast.success('Pago recibido con éxito');
       }, 300);
     },
     onRowClick(ad) {

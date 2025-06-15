@@ -60,15 +60,17 @@
 
 <script>
 import AuthService from '../services/api/auth.service'
-import { useToast } from 'vue-toastification';
+import toast from '../services/toast.js'
 
 export default {
+  components() {
+    toast
+  },
   data() {
     return {
       email: '',
       password: '',
       errorMessage: '',
-      toast: useToast()
     }
   },
   methods: {
@@ -76,7 +78,7 @@ export default {
       try {
         const response = await AuthService.login(this.email, this.password);
         if (response.data.success) {
-          this.toast.success("Inicio de sesión exitoso");
+          toast.success("Inicio de sesión exitoso");
           console.log("Login successful:", response.data);
           const tokenExpiration = Date.now() + 2 * 3600 * 1000;
           localStorage.setItem("tokenExpiration", tokenExpiration);
@@ -88,12 +90,12 @@ export default {
           this.$router.push(redirectPath);
         } else {
           this.errorMessage = response.data.message || "Error en el inicio de sesión";
-          this.toast.error(this.errorMessage);
+          toast.error(this.errorMessage);
         }
       } catch (error) {
         const msg = error.response?.data?.message || "Error al iniciar sesión";
         this.errorMessage = msg;
-        this.toast.error(msg);
+        toast.error(msg);
       }
     }
   }

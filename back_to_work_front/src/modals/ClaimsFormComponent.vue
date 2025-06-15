@@ -46,10 +46,14 @@
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import UserService from '../services/api/user.service';
-import { useToast } from 'vue-toastification';
+import toast from '../services/toast.js'
 
 export default {
-  components: { Dialog, Button },
+  components: { 
+    Dialog, 
+    Button,
+    toast
+  },
   props: {
     receiver: { type: Object, required: true },
     ad_id: { type: Number, default: null },
@@ -64,7 +68,6 @@ export default {
       },
       previewUrls: [],
       imageError: '',
-      toast: useToast(),
       sender: null
     };
   },
@@ -97,7 +100,7 @@ export default {
     },
     async submitClaim() {
       if (!this.sender || !this.receiver) {
-        this.toast.error('Faltan datos del usuario o receptor.');
+        toast.error('Faltan datos del usuario o receptor.');
         return;
       }
 
@@ -118,14 +121,14 @@ export default {
         const response = await UserService.set('claims', formData);
 
         if (response.data.success) {
-          this.toast.success('Reclamación enviada correctamente');
+          toast.success('Reclamación enviada correctamente');
           this.closeModal();
           this.$emit('claim-created', response.data.data);
         } else {
-          this.toast.error('Error al enviar la reclamación');
+          toast.error('Error al enviar la reclamación');
         }
       } catch (e) {
-        this.toast.error('Error del servidor');
+        toast.error('Error del servidor');
       }
     },
     resetForm() {

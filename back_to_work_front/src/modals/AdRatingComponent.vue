@@ -118,7 +118,7 @@ export default {
         })
 
         if (response.data.success) {
-          this.user?.is_pro ? this.toast.success('¡Valoración enviada con éxito!') : ''
+          this.user?.is_pro ? toast.success('¡Valoración enviada con éxito!') : ''
           this.$emit('rating-submitted', response.data.data)
           setTimeout(() => this.$emit('close'), 1500)
         }

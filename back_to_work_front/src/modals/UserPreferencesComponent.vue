@@ -126,7 +126,7 @@
   <script>
   import UserService from '../services/api/user.service';
   import Select from 'primevue/select';
-  import { useToast } from 'vue-toastification';
+  import toast from '../services/toast.js'
   
   export default {
     props: {
@@ -136,7 +136,8 @@
       }
     },
     components: {
-      Select
+      Select,
+      toast
     },
     data() {
       return {
@@ -146,7 +147,6 @@
         showBidGrid: false,
         showNewBidRow: false,
         isSubmitting: false,
-        toast: useToast(),
         password2: null,
       };
     },
@@ -195,7 +195,7 @@
 
         const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
         if (!validTypes.includes(file.type)) {
-          this.toast.error('Formato no válido. Solo JPG o PNG');
+          toast.error('Formato no válido. Solo JPG o PNG');
           return;
         }
 
@@ -208,14 +208,14 @@
           const response = await UserService.updateForm('users/updateImage',formData, this.user.id);
           if (response.data.success) {
             this.user.image = response.data.image;
-            this.toast.success('Imagen actualizada correctamente');
+            toast.success('Imagen actualizada correctamente');
             localStorage.setItem('user', JSON.stringify(this.user));
           } else {
-            this.toast.error('Error actualizando la imagen');
+            toast.error('Error actualizando la imagen');
           }
         } catch (error) {
           console.error('Error al subir imagen:', error);
-          this.toast.error('Error al subir la imagen');
+          toast.error('Error al subir la imagen');
         }
       },
 
@@ -225,7 +225,7 @@
           this.provinces = response.data.data;
         } catch (error) {
           console.error('Error fetching provinces:', error);
-          this.toast.error('Error loading provinces');
+          toast.error('Error loading provinces');
         }
       },
 
@@ -239,18 +239,18 @@
       },
       async updateUser() {
         if (!this.user.password || this.user.password.trim() === '') {
-          this.toast.error('La contraseña no puede estar vacía');
+          toast.error('La contraseña no puede estar vacía');
           return;
         }
 
         if (this.user.password !== this.password2) {
-          this.toast.error('Las contraseñas no coinciden');
+          toast.error('Las contraseñas no coinciden');
           return;
         }
 
 
         if (this.user.password.length < 4) {
-          this.toast.error('La contraseña debe tener al menos 4 caracteres');
+          toast.error('La contraseña debe tener al menos 4 caracteres');
           return;
         }
         console.log(this.user);
@@ -258,15 +258,15 @@
           try {
             const response = await UserService.update("users", this.user, this.user.id);
             if (response.data.success) {
-              this.toast.success('User updated successfully');
+              toast.success('User updated successfully');
               localStorage.setItem('user', JSON.stringify(this.user));
               this.$emit('updateUser', this.user);
             } else {
-              this.toast.error('Error updating user');
+              toast.error('Error updating user');
             }
           } catch (error) {
             console.error('Error updating user:', error);
-            this.toast.error('Error updating user');
+            toast.error('Error updating user');
           } finally {
             this.isSubmitting = false;
           }
