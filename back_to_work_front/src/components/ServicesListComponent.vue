@@ -27,7 +27,6 @@
           </button>
         </div>
 
-
         <div v-if="!user?.is_pro || !ads.length === 0" class="bg-white/5 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 sm:p-8 mb-8 flex flex-col sm:flex-row justify-between items-center gap-6">
           <div class="text-center sm:text-left">
             <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Publica un anuncio</h1>
@@ -375,8 +374,7 @@
                     'bg-red-600 hover:bg-red-700': !(hasPaidOffer(ad) || ad?.pro_is_done || ad?.customer_is_done)
                   }"
                 >
-                  <i
-                    class="pi pi-times text-sm"
+                  <i class="pi pi-times text-sm"
                     :class="{
                       'text-gray-300': hasPaidOffer(ad) || ad?.pro_is_done || ad?.customer_is_done,
                       'text-white': !(hasPaidOffer(ad) || ad?.pro_is_done || ad?.customer_is_done)

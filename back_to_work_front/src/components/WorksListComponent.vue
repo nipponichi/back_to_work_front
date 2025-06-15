@@ -154,17 +154,37 @@
                         alt="Usuario"
                         class="w-14 h-14 rounded-full object-cover"
                       />
-                      <div class="flex items-center">
-                        <span class="font-medium cursor-default">
-                          {{ data.user.user_name }}
-                        </span>
-                        <button
+                      <div class="flex flex-col justify-center">
+                        <span
+                          class="text-white font-semibold text-base cursor-pointer flex items-center gap-2"
                           @click.stop="openUserstats(data.user)"
-                          class="text-xs font-bold text-blue-400 bg-transparent cursor-pointer hover:text-blue-300 hover:underline transition"
                           title="Ver valoraciones"
                         >
-                          ({{ data.user.user_stat?.length ?? 0 }})
-                        </button>
+                          {{ data.user?.user_name }}
+                          <span
+                            class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20"
+                          >
+                            ★ {{ data.user?.user_stat?.length || 0 }}
+                          </span>
+                        </span>
+
+                        <span
+                          v-if="data.user?.user_stat?.length"
+                          class="text-xs mt-1"
+                          :class="{
+                            'text-red-400': averageRating(data.user) < 3,
+                            'text-amber-400': averageRating(data.user) >= 3 && averageRating(data.user) < 4,
+                            'text-green-400': averageRating(data.user) >= 4
+                          }"
+                        >
+                          Feedback {{ averageRating(data.user).toFixed(1) }} / 5
+                        </span>
+                        <span
+                          v-else
+                          class="text-xs text-blue-200 mt-1 italic"
+                        >
+                          Aún no tiene valoraciones
+                        </span>
                       </div>
                     </div>
                   </template>
@@ -247,7 +267,6 @@
                 </Column>
 
                 <Column
-                  v-if="!user?.is_pro"
                   header="Estado"
                   sortable
                   headerClass="bg-blue-900/50 text-white font-bold"
@@ -302,10 +321,10 @@
                     :style="{ backgroundImage: `url(${getAdImage(ad.pictures)})` }"
                   ></div>
 
-                <div class="absolute inset-0 bg-black/60 group-hover:bg-black/75 backdrop-blur-sm transition-all duration-300"></div>
+                <div class="absolute inset-0 bg-black/45 group-hover:bg-black/55 backdrop-blur-sm transition-all duration-300"></div>
 
                 <div class="relative z-10">
-                  <div v-if="!user?.is_pro" class="mb-4">
+                  <div class="mb-4">
                     <span
                       :class="[
                         'inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-sm',
@@ -324,20 +343,35 @@
                         alt="Usuario"
                       />
                     </div>
-                    <div class="flex flex-col">
-                      <span
-                        class="text-white font-semibold text-base cursor-pointer flex items-center gap-2"
-                        @click.stop="openUserstats(ad.user)"
-                        title="Ver valoraciones"
-                      >
-                        {{ ad.user.user_name }}
-                        <span
-                          class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20"
-                        >
-                          ★ {{ ad.user.user_stat?.length || 0 }}
-                        </span>
+                  <div class="flex flex-col">
+                    <span
+                      class="text-white font-semibold text-base cursor-pointer flex items-center gap-2"
+                      @click.stop="openUserstats(ad.user)"
+                      title="Ver valoraciones"
+                    >
+                      {{ ad.user?.user_name }}
+                      <span class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20">
+                        ★ {{ ad.user?.user_stat?.length || 0 }}
                       </span>
-                    </div>
+                    </span>
+                    <span
+                      v-if="ad.user?.user_stat?.length"
+                      class="text-xs mt-1"
+                      :class="{
+                        'text-red-400': averageRating(ad.user) < 3,
+                        'text-amber-400': averageRating(ad.user) >= 3 && averageRating(ad.user) < 4,
+                        'text-green-400': averageRating(ad.user) >= 4
+                      }"
+                    >
+                      Feedback {{ averageRating(ad.user).toFixed(1) }} / 5
+                    </span>
+                    <span
+                      v-else
+                      class="text-xs text-blue-200 mt-1 italic"
+                    >
+                      Aún no tiene valoraciones
+                    </span>
+                  </div>
                   </div>
 
                   <div class="flex-grow">
@@ -563,6 +597,46 @@ export default {
       
   },
   methods: {
+    getAdStatusLabel(ad) {
+      if (ad.customer_is_done) {
+        return 'Completado';
+      }
+      if (ad.pro_is_done) {
+        return 'En validación';
+      }
+      if (this.hasPaidOffer(ad)) {
+        return 'En curso';
+      }
+      if (ad.ad_offer && ad.ad_offer.length > 0) {
+        return 'En negociación';
+      }
+      return 'Esperando pujas';
+    },
+
+    getAdStatusClass(ad) {
+      if (ad.customer_is_done) {
+        return 'bg-green-200 text-green-900';
+      }
+      if (ad.pro_is_done) {
+        return 'bg-yellow-200 text-yellow-900';
+      }
+      if (this.hasPaidOffer(ad)) {
+        return 'bg-blue-200 text-blue-900';
+      }
+      if (ad.ad_offer && ad.ad_offer.length > 0) {
+        return 'bg-purple-200 text-purple-900';
+      }
+      return 'bg-amber-100 text-amber-800';
+    },
+
+    hasPaidOffer(ad) {
+      return ad.ad_offer && ad.ad_offer.some(offer => offer.is_paid === 1);
+    },
+    averageRating(user) {
+      if (!user?.user_stat?.length) return 0
+      const total = user?.user_stat.reduce((sum, s) => sum + s.rating, 0)
+      return total / user?.user_stat.length
+    },
     getAdImage(pictures) {
       const fallback = 'https://cdn-icons-png.freepik.com/512/7445/7445622.png';
       if (!pictures || !pictures.length) return fallback;
