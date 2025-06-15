@@ -17,7 +17,7 @@
             :class="message.sender_id === senderId ? 'mr-2 text-right' : 'ml-2 text-left'">
             {{ message?.message }}
           </div>
-          <div class="text-xs text-blue-300 mt-1">{{ formatTime(message?.created_at) }}</div>
+          <div class="text-xs text-blue-300 mt-1">{{ formatTime(message?.created_at || message?.timestamp) }}</div>
         </div>
       </div>
     </div>
@@ -115,6 +115,7 @@ export default {
         roomId: '1234',
         is_read: this.is_read,
         timestamp: new Date().toISOString(),
+        created_at: new Date().toISOString()
       };
 
       try {
