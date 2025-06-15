@@ -591,7 +591,6 @@ export default {
     this.accessToken = localStorage.getItem("token");
     let userStr = localStorage.getItem("user");
     this.user = JSON.parse(userStr);
-    console.log(this.user)
     this.fetchCategories();
     this.fetchMyAds();
       
@@ -645,23 +644,19 @@ export default {
     },
     openUserstats(user) {
       this.selectedUser = user;
-      console.log(this.selectedUser);
       this.openUserstatsModal = true;
     },
     
     getUserImage(user) {
       const fallback = 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
       if (!user || !user.image) return fallback;
-      console.log(user.image);
       return `${import.meta.env.VITE_IMG_URL}/${user.image}`;
     },
     switchToList() {
       this.viewMode = 'list';
-      console.log('Modo cambiado a:', this.viewMode);
     },
     switchToCards() {
       this.viewMode = 'cards';
-      console.log('Modo cambiado a:', this.viewMode);
     },
     isDueSoon(dateString) {
       if (!dateString) return false;
@@ -685,7 +680,6 @@ export default {
       }, 300);
     },
     onRowClick(ad) {
-      console.log(ad)
       this.selectedId = ad.data ? ad.data.id : ad.id
       this.openAdDetailModal = true;
     },
@@ -722,7 +716,6 @@ export default {
           const response = await UserService.get("getAdsWhereIAm");
           if (response.data.success) {
               this.ads = response.data.data;
-              console.log("Ads fetched successfully:", this.ads);
           }
           this.loading = false;
         } catch (error) {

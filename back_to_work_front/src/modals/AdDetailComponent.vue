@@ -455,8 +455,7 @@ export default {
     };
   },
   async mounted() {
-    console.log("AdDetailComponent mounted with id:", this.id);
-    window.addEventListener('message', this.receiveMessage);
+    //window.addEventListener('message', this.receiveMessage);
     await this.fetchCategories();
     await this.fetchAdData();
     await this.fetchUser();
@@ -471,13 +470,12 @@ export default {
   },
 
   beforeUnmount() {
-    window.removeEventListener('message', this.receiveMessage);
+    //window.removeEventListener('message', this.receiveMessage);
   },
 
   methods: {
     openUserstats(user) {
       this.selectedUser = user;
-      console.log(this.selectedUser);
       this.openUserstatsModal = true;
     },
 
@@ -494,17 +492,20 @@ export default {
     },
 
     openClaim(bidId, user) {
-      console.log(user)
-      console.log(bidId)
       this.selectedBidId = bidId
       this.selectedReceiver = user
       this.openClaimModal = true
 
     },
+
     onRatingSubmitted() {
       this.openAdRatingModal = false;
+      this.adData.user.user_data;
+      console.log(this.adData)
+      this.updateUser(this.adData);
       this.updateAd(this.adData);
     },
+    
     async markAsDone(id) {
       try {
         const response = await userService.set("ad/done", {id: id});
@@ -578,8 +579,6 @@ export default {
       const data = event.data;
 
       if (data && data.PaymentOK === true && data.bidId) {
-        console.log(`Pago OK recibido para la puja: ${data.bidId}`);
-
         try {
           const res = await axios.post(`http://127.0.0.1:8000/api/offers/${data.bidId}/mark-paid`);
 
@@ -588,8 +587,6 @@ export default {
             
           const resAd = await axios.get(`http://127.0.0.1:8000/api/offers/${data.bidId}/ad`);
           const adId = resAd.data.ad_id;
-          console.log('El valor de adId es:', adId);
-          console.log('Emitiendo evento payment-success con adId:', adId);
           this.$emit('payment-success', { adId });
           this.$emit('close-ad-detail');
 
@@ -627,7 +624,6 @@ export default {
         const res = await userService.show('ads', this.id);
         if (res.data.success) {
           this.adData = res.data.data;
-          console.log("Ad data:", this.adData);
           this.adData.category_name = this.getCategoryName(this.adData.category_id);
         }
       } catch (err) {
@@ -639,7 +635,6 @@ export default {
       try {
         const userStr = localStorage.getItem("user");
         this.user = JSON.parse(userStr);
-        console.log(this.user)
       } catch (err) {
         console.error("No se pudo obtener el usuario:", err);
       }
@@ -650,11 +645,8 @@ export default {
         const res = await userService.show('offers/ad', this.id);
         if (res.data.success) {
           this.bids = res.data.data;
-          console.log(this.bids);
           this.bids.forEach(bid => {
-            console.log(this.bids);
             if (bid.is_paid) {
-              console.log("Puja pagada:", bid);
               this.paidbid = bid;
             }
           });

@@ -788,7 +788,6 @@ methods: {
 
   openUserstats(user) {
     this.selectedUser = user;
-    console.log(this.selectedUser);
     this.openUserstatsModal = true;
   },
 
@@ -857,7 +856,6 @@ methods: {
       const response = await UserService.delete('ads' , adId);
       if (response.data.success) {
         this.ads = this.ads.filter(ad => ad.id !== adId);
-        console.log(this.ads)
         this.toast.success('Anuncio eliminado con éxito');
       } else {
         this.toast.error('No se pudo eliminar el anuncio');
@@ -869,7 +867,6 @@ methods: {
   },
 
   handleAdCreated(newAd) {
-    console.log(newAd)
     this.ads.unshift(newAd);
     this.openCreateAdModal = false;
   },
@@ -936,7 +933,6 @@ methods: {
       const response = await UserService.get("ads");
       if (response.data.success) {
         this.ads = response.data.data;
-        console.log(this.ads);
       }
     } catch (error) {
       console.error("Error fetching ads:", error);
@@ -952,7 +948,6 @@ methods: {
       const response = await UserService.show("getAdsByUser", this.user?.id);
       if (response.data.success) {
         this.ads = response.data.data;
-        console.log(this.ads)
       }
     } catch (error) {
       console.error("Error fetching user ads:", error);

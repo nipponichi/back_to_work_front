@@ -7,7 +7,6 @@ class UserService {
   }
 
   show(route, data) {
-    console.log(data)
     return api.get(`${route}/${data}`)
   }
 
