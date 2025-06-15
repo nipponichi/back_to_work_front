@@ -52,9 +52,12 @@
 </template>
 <script>
 import userService from '../services/api/user.service'
-import { useToast } from 'vue-toastification';
+import toast from '../services/toast.js'
 
 export default {
+  components() {
+
+  },
   props: {
     adData: {
       type: Object,
@@ -80,7 +83,6 @@ export default {
       rating: 0,
       review: '',
       submitting: false,
-      toast: useToast(),
       user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
     }
   },
@@ -98,13 +100,7 @@ export default {
         day: 'numeric'
       })
     },
-    showSuccessToast(message) {
-      this.toastMessage = message
-      this.showToast = true
-      setTimeout(() => {
-        this.showToast = false
-      }, 3000)
-    },
+
     async submitRating() {
       if (this.isIncomplete || this.submitting) return
       this.submitting = true
