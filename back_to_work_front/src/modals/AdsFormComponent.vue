@@ -268,6 +268,7 @@ export default {
       if (this.ad.due_date) {
         formDataToSend.append('due_date', this.ad.due_date);
       }
+      
       if (this.user) {
         formDataToSend.append('user_id', this.user.id);
       }

@@ -109,16 +109,20 @@ export default {
       if (this.isIncomplete || this.submitting) return
       this.submitting = true
       try {
-        await userService.set('userstats', {
+        const response = await userService.set('userstats', {
           ad_id: this.adData.id,
           rating: this.rating,
           sender_id: this.sender.id,
           receiver_id: this.receiver.id,
           review: this.review,
         })
-        this.user?.is_pro ? this.toast.success('¡Valoración enviada con éxito!') : ''
-        this.$emit('rating-submitted')
-        setTimeout(() => this.$emit('close'), 1500)
+
+        if (response.data.success) {
+          this.user?.is_pro ? this.toast.success('¡Valoración enviada con éxito!') : ''
+          this.$emit('rating-submitted', response.data.data)
+          setTimeout(() => this.$emit('close'), 1500)
+        }
+
       } catch (error) {
         console.error('Error al enviar la valoración:', error)
       } finally {

@@ -518,6 +518,7 @@
               @close-ad-detail="openAdDetailModal = false" 
               @payment-success="handlePaymentSuccess"
               @updateAd="updateAd"
+              @updateUser="updateUser"
             />
           </div>
         </div>
@@ -791,11 +792,19 @@ methods: {
     this.openUserstatsModal = true;
   },
 
+  updateUser(updatedUser) {
+    this.ads = this.ads.map(ad => {
+      if (ad.user && ad.user.id === updatedUser.id) {
+        return { ...ad, user: { ...updatedUser }};
+      }
+      return ad;
+    });
+  },
+
   updateAd(ad) {
     const index = this.ads.findIndex(a => a.id === ad.id);
     if (index !== -1) {
       this.ads.splice(index, 1, ad);
-      this.toast.success('Anuncio actualizado con éxito');
     } else {
       this.ads.unshift(ad);
       this.toast.success('Anuncio creado con éxito');
@@ -933,6 +942,7 @@ methods: {
       const response = await UserService.get("ads");
       if (response.data.success) {
         this.ads = response.data.data;
+        console.log(this.ads)
       }
     } catch (error) {
       console.error("Error fetching ads:", error);
@@ -948,6 +958,7 @@ methods: {
       const response = await UserService.show("getAdsByUser", this.user?.id);
       if (response.data.success) {
         this.ads = response.data.data;
+        console.log(this.ads)
       }
     } catch (error) {
       console.error("Error fetching user ads:", error);

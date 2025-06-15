@@ -445,6 +445,7 @@
             @close-ad-detail="openAdDetailModal = false" 
             @payment-success="handlePaymentSuccess"
             @updateAd="updateAd"
+            @updateUser="updateUser"
           />
         </div>
       </div>
@@ -596,6 +597,27 @@ export default {
       
   },
   methods: {
+    updateAd(ad) {
+      const index = this.ads.findIndex(a => a.id === ad.id);
+      if (index !== -1) {
+        this.ads.splice(index, 1, ad);
+      } else {
+        this.ads.unshift(ad);
+        this.toast.success('Anuncio creado con éxito');
+      }
+      this.openAdDetailModal = false;
+    },
+
+    updateUser(updatedUser) {
+      this.ads = this.ads.map(ad => {
+        if (ad.user && ad.user.id === updatedUser.id) {
+          return { ...ad, user: { ...updatedUser }};
+        }
+        return ad;
+      });
+
+    },
+
     getAdStatusLabel(ad) {
       if (ad.customer_is_done) {
         return 'Completado';
@@ -721,7 +743,7 @@ export default {
         } catch (error) {
             console.error("Error fetching users:", error);
             this.loading = false;
-      }
+        }
     }
   }
 };

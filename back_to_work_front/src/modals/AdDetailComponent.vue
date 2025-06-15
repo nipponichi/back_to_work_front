@@ -498,14 +498,14 @@ export default {
 
     },
 
-    onRatingSubmitted() {
+    onRatingSubmitted(newRating) {
       this.openAdRatingModal = false;
       this.adData.user.user_data;
       console.log(this.adData)
-      this.updateUser(this.adData);
+      this.updateUser(newRating);
       this.updateAd(this.adData);
     },
-    
+
     async markAsDone(id) {
       try {
         const response = await userService.set("ad/done", {id: id});
@@ -624,6 +624,7 @@ export default {
         const res = await userService.show('ads', this.id);
         if (res.data.success) {
           this.adData = res.data.data;
+          console.log(this.adData)
           this.adData.category_name = this.getCategoryName(this.adData.category_id);
         }
       } catch (err) {
@@ -725,6 +726,10 @@ export default {
       this.selectedBid = null;
     },
 
+    updateUser(newRating) {
+      this.adData?.user?.user_stat.push(newRating)
+      this.$emit('updateUser', this.adData?.user);
+    },
     updateAd(adData) {
       this.$emit('updateAd', adData);
     }
