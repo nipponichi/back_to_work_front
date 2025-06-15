@@ -48,7 +48,7 @@
             <div class="relative" ref="userMenuDropdown">
               <button
                 @click="showUserMenu = !showUserMenu"
-                class="text-white hidden md:inline-flex items-center bg-transparent hover:text-blue-300 transition font-semibold text-base rounded-l-md border border-white/20 px-2 py-1 m-0 cursor-pointer"
+                class="text-white hidden md:inline-flex items-center bg-transparent hover:text-gray-500 transition font-semibold text-base rounded-l-md border border-white/20 px-2 py-1 m-0 cursor-pointer"
               >
                 <div class="w-10 h-10 mr-2 rounded-full overflow-hidden">
                   <img :src="userImage" alt="Usuario" class="w-full h-full object-cover" />
@@ -70,12 +70,12 @@
                     v-if="user?.user_stat?.length"
                     class="text-xs mt-1"
                     :class="{
-                      'text-red-400': averageRating < 3,
-                      'text-amber-400': averageRating >= 3 && averageRating < 4,
-                      'text-green-400': averageRating >= 4
+                      'text-red-400': averageRating(user) < 3,
+                      'text-amber-400': averageRating(user) >= 3 && averageRating(user) < 4,
+                      'text-green-400': averageRating(user) >= 4
                     }"
                   >
-                    Feedback {{ averageRating.toFixed(1) }} / 5
+                    Feedback {{ averageRating(user).toFixed(1) }} / 5
                   </span>
                   <span v-else class="text-[0.65rem] text-blue-200 mt-1 italic">
                     Sin valoraciones
@@ -149,71 +149,93 @@
         </RouterLink>
 
         <template v-if="accessToken">
-        <div class="px-4 py-2 rounded transition text-gray-800 font-semibold flex justify-between items-center bg-transparent hover:bg-gray-100">
-          <span><img class="w-6 h-6 inline-block" :src="userImage" alt="Usuario"/> {{ user?.user_name || 'Usuario' }}</span>
-          <button @click="openUserstatsModal = true"
-                  class="text-sm text-blue-600 hover:underline focus:outline-none">
-            {{ user?.user_stat.length }}
+          <div class="px-4 py-2 rounded transition text-gray-800 font-semibold flex justify-between items-center bg-transparent hover:bg-gray-100">
+            <span><img class="w-6 h-6 inline-block" :src="userImage" alt="Usuario"/> {{ user?.user_name || 'Usuario' }}</span>
+            <div class="flex flex-col justify-center">
+              <span class="text-white font-semibold text-base cursor-pointer flex items-center gap-2" @click.stop="openUserstatsModal = true" title="Ver valoraciones">
+                <span class="text-sm text-blue-300 bg-white/10 rounded-full px-2 py-0.5 transition hover:bg-white/20">
+                  ★ {{ user?.user_stat?.length || 0 }}
+                </span>
+              </span>
+              <span v-if="user?.user_stat?.length" class="text-xs mt-1"
+                :class="{
+                  'text-red-400': averageRating(user) < 3,
+                  'text-amber-400': averageRating(user) >= 3 && averageRating(user) < 4,
+                  'text-green-400': averageRating(user) >= 4
+                }"
+              >
+                Feedback {{ averageRating(user).toFixed(1) }} / 5
+              </span>
+              <span v-else class="text-xs text-blue-200 mt-1 italic">
+                Aún no tiene valoraciones
+              </span>
+            </div>
+          </div>
+          <button v-if="user?.is_pro" @click="$router.push('/work')" class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition">
+            Mis trabajos
           </button>
-        </div>
-
+          <button @click="editProfile" class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition">
+            Perfil
+          </button>
+          <button @click="viewIncidences" class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 transition">
+            Incidencias
+          </button>
           <button @click="logout" class="block w-full text-left px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition">
             Cerrar sesión
           </button>
         </template>
         <template v-else>
-          <RouterLink to="/login"
-                      class="block w-full text-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded transition">
+          <RouterLink to="/login" class="block w-full text-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded transition">
             Acceder
           </RouterLink>
         </template>
       </div>
   </nav>
 
-  <div v-if="openUserPreferencesModal" class="fixed z-50 inset-0 overflow-y-auto">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-        <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+    <div v-if="openUserPreferencesModal" class="fixed z-50 inset-0 overflow-y-auto">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+          <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
+            <h3 class="text-lg leading-6 font-semibold text-white">
+              Preferencias de usuario
+            </h3>
+            <button @click="openUserPreferencesModal = false"
+                    class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <div class="p-6">
+            <UserPreferencesComponent :user="user" @deleteUser="deleteUser"/>
+          </div>
+        </div>
       </div>
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-      <div class="inline-block align-bottom bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+    </div>
+
+    <div v-if="openUserstatsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
         <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
           <h3 class="text-lg leading-6 font-semibold text-white">
-            Preferencias de usuario
+            Sobre este usuario
           </h3>
-          <button @click="openUserPreferencesModal = false"
+          <button @click="openUserstatsModal = false"
                   class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
         </div>
-        <div class="p-6">
-          <UserPreferencesComponent :user="user" @deleteUser="deleteUser"/>
+
+        <div class="p-6 max-h-[80vh] overflow-y-auto">
+          <UserRatingComponent :user="user" />
         </div>
       </div>
     </div>
-  </div>
-
-  <div v-if="openUserstatsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-gradient-to-br from-blue-950/90 to-blue-800/90 rounded-xl shadow-xl w-full max-w-3xl mx-4">
-      <div class="flex justify-between items-center px-6 py-4 border-b border-white/20">
-        <h3 class="text-lg leading-6 font-semibold text-white">
-          Sobre este usuario
-        </h3>
-        <button @click="openUserstatsModal = false"
-                class="text-red-500 hover:text-red-700 bg-transparent cursor-pointer focus:outline-none transition">
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="p-6 max-h-[80vh] overflow-y-auto">
-        <UserRatingComponent :user="user" />
-      </div>
-    </div>
-  </div>
 
     <div v-if="openClaimsModal" class="fixed z-50 inset-0 overflow-y-auto">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -289,11 +311,7 @@ export default {
         ? `${import.meta.env.VITE_IMG_URL}/${this.user.image}`
         : 'https://cdn-icons-png.flaticon.com/512/11461/11461171.png';
     },
-    averageRating() {
-      if (!this.user.user_stat.length) return 0
-      const total = this.user.user_stat.reduce((sum, s) => sum + s.rating, 0)
-      return total / this.user.user_stat.length
-    }
+
   },
   watch: {
     '$route'() {
@@ -309,6 +327,12 @@ export default {
   },
 
   methods: {
+    averageRating() {
+      if (!this.user.user_stat.length) return 0
+      const total = this.user.user_stat.reduce((sum, s) => sum + s.rating, 0)
+      return total / this.user.user_stat.length
+    },
+
     handleUserMenuClickOutside(event) {
       const dropdown = this.$refs.userMenuDropdown;
       if (dropdown && !dropdown.contains(event.target)) {
